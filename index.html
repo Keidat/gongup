@@ -182,7 +182,6 @@
     border-radius: 100px;
   }
 
-  /* 진행 바 */
   .progress-bar-wrap {
     height: 4px;
     background: var(--border);
@@ -198,7 +197,6 @@
     transition: width 0.4s ease;
   }
 
-  /* 문제 카드 */
   .question-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -244,7 +242,6 @@
     color: var(--text);
   }
 
-  /* 선택지 */
   .choices {
     display: flex;
     flex-direction: column;
@@ -320,7 +317,6 @@
 
   .choice-btn:disabled { cursor: default; }
 
-  /* 해설 */
   .explanation {
     display: none;
     background: rgba(88,166,255,0.06);
@@ -343,11 +339,16 @@
     text-transform: uppercase;
   }
 
-  /* 단답형 */
   .short-answer-wrap {
     display: flex;
     gap: 0.7rem;
     margin-bottom: 1.4rem;
+    flex-direction: column;
+  }
+
+  .short-input-row {
+    display: flex;
+    gap: 0.7rem;
   }
 
   .short-input {
@@ -384,7 +385,15 @@
   .btn-submit:hover { opacity: 0.85; }
   .btn-submit:disabled { opacity: 0.4; cursor: default; }
 
-  /* 다음 버튼 */
+  .sa-hint {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    padding: 0 0.2rem;
+  }
+
+  .sa-hint.correct-hint { color: var(--accent3); font-weight: 700; }
+  .sa-hint.wrong-hint { color: var(--accent2); }
+
   .btn-next {
     width: 100%;
     background: linear-gradient(135deg, #58a6ff, #388bfd);
@@ -440,15 +449,14 @@
     margin: 1rem 0;
   }
 
-  .result-score .score-num {
-    color: var(--accent);
-  }
+  .result-score .score-num { color: var(--accent); }
 
   .result-detail {
     color: var(--text-muted);
     margin-bottom: 2rem;
     font-size: 0.95rem;
     line-height: 1.7;
+    white-space: pre-line;
   }
 
   .result-bars {
@@ -496,10 +504,7 @@
     transition: width 1s ease;
   }
 
-  .result-bar-count {
-    width: 30px;
-    font-weight: 700;
-  }
+  .result-bar-count { width: 30px; font-weight: 700; }
 
   .result-buttons {
     display: flex;
@@ -617,6 +622,11 @@
 </div>
 
 <script>
+// ─────────────────────────────────────────────
+//  문제 데이터
+//  단답형(sa): answers 배열 — 첫 번째가 대표 정답(해설 표시용),
+//              나머지는 허용 유사 답변
+// ─────────────────────────────────────────────
 const ALL_QUESTIONS = [
   // ── 객관식 ──
   {
@@ -805,37 +815,6 @@ const ALL_QUESTIONS = [
     answer: 2,
     exp: '산업 구조 고도화 순서: 1차 산업(농·임·수산업) → 2차 산업(제조업) → 3차 산업(서비스·지식·정보) 중심으로 발전합니다.'
   },
-  // ── 단답형 ──
-  {
-    type: 'sa',
-    q: '철강 공업에서 용광로에 철광석을 넣어 쇳물을 뽑아내는 첫 번째 공정의 이름을 쓰시오.',
-    answer: '제선',
-    exp: '제선은 용광로에 철광석을 넣어 쇳물을 뽑아내는 단계로, 철강 공업 3대 공정의 첫 번째 단계입니다.'
-  },
-  {
-    type: 'sa',
-    q: '하드웨어(물질적 생산)보다 서비스, 정보, 지식의 가치 비중이 높아지는 현대 산업의 경향을 무엇이라 하는가?',
-    answer: '소프트화',
-    exp: '산업의 소프트화는 하드웨어보다 서비스·정보·지식 등 무형의 가치 비중이 높아지는 현상으로, 현대 산업 사회의 특징입니다.'
-  },
-  {
-    type: 'sa',
-    q: '운송 수단이 바뀌는 지점(예: 항구)에 입지하여 운송비 절감 효과를 극대화하는 입지 유형을 무엇이라 하는가?',
-    answer: '적환지 입지',
-    exp: '적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 원료 수입과 제품 수출의 운송비를 절감하는 입지 유형입니다.'
-  },
-  {
-    type: 'sa',
-    q: '공판 인쇄 방식의 대표적인 활용 예를 한 가지 쓰시오.',
-    answer: '스크린 인쇄',
-    exp: '공판 인쇄는 구멍을 통해 잉크를 통과시키는 방식으로, 스크린 인쇄(티셔츠 프린팅)에 활용됩니다.'
-  },
-  {
-    type: 'sa',
-    q: '6T 기술 중 10억 분의 1 단위의 초미세 기술을 의미하는 기술의 약어를 쓰시오.',
-    answer: 'NT',
-    exp: 'NT(나노 기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자·고성능 필터·초경량 소재 등에 활용됩니다.'
-  },
   {
     type: 'mc',
     q: '중화학 공업의 입지 조건으로 가장 적합한 곳은?',
@@ -867,13 +846,73 @@ const ALL_QUESTIONS = [
     answer: 3,
     exp: '생산재/소비재 산업은 호프만의 분류입니다. 클라크는 1차(농·임·수산업), 2차(제조업), 3차(서비스업)로 산업을 분류했습니다.'
   },
+
+  // ── 단답형 ──
+  // answers[0] = 대표 정답(해설·오답 표시용), 나머지 = 허용 유사답
+  {
+    type: 'sa',
+    q: '철강 공업에서 용광로에 철광석을 넣어 쇳물을 뽑아내는 첫 번째 공정의 이름을 쓰시오.',
+    answers: ['제선'],
+    exp: '제선은 용광로에 철광석을 넣어 쇳물을 뽑아내는 단계로, 철강 공업 3대 공정의 첫 번째 단계입니다.'
+  },
+  {
+    type: 'sa',
+    q: '하드웨어(물질적 생산)보다 서비스, 정보, 지식의 가치 비중이 높아지는 현대 산업의 경향을 무엇이라 하는가?',
+    answers: ['소프트화', '산업의 소프트화', '소프트화 현상'],
+    exp: '산업의 소프트화는 하드웨어보다 서비스·정보·지식 등 무형의 가치 비중이 높아지는 현상으로, 현대 산업 사회의 특징입니다.'
+  },
+  {
+    type: 'sa',
+    q: '운송 수단이 바뀌는 지점(예: 항구)에 입지하여 운송비 절감 효과를 극대화하는 입지 유형을 무엇이라 하는가?',
+    answers: ['적환지 입지', '적환지입지', '적환지'],
+    exp: '적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 원료 수입과 제품 수출의 운송비를 절감하는 입지 유형입니다.'
+  },
+  {
+    type: 'sa',
+    q: '공판 인쇄 방식의 대표적인 활용 예를 한 가지 쓰시오.',
+    answers: ['스크린 인쇄', '실크스크린', '실크 스크린', '티셔츠 인쇄', '티셔츠 프린팅', '의류 인쇄'],
+    exp: '공판 인쇄는 구멍을 통해 잉크를 통과시키는 방식으로, 스크린 인쇄(티셔츠 프린팅)에 활용됩니다.'
+  },
+  {
+    type: 'sa',
+    q: '6T 기술 중 10억 분의 1 단위의 초미세 기술을 의미하는 기술의 약어를 쓰시오.',
+    answers: ['NT', 'nt', 'Nt'],
+    exp: 'NT(나노 기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자·고성능 필터·초경량 소재 등에 활용됩니다.'
+  },
 ];
 
-let selectedQuestions = [];
-let currentIdx = 0;
-let score = 0;
-let answered = false;
+// ─────────────────────────────────────────────
+//  단답형 정답 판정 함수
+//  - 공백 제거 후 허용 답안 목록과 대소문자 무시 비교
+// ─────────────────────────────────────────────
+function checkSAAnswer(input, answers) {
+  const normalize = s => s.replace(/\s/g, '').toLowerCase();
+  const normInput = normalize(input);
+  return answers.some(a => normalize(a) === normInput);
+}
 
+// ─────────────────────────────────────────────
+//  객관식 보기 셔플 유틸
+//  choices 배열과 원래 정답 인덱스를 받아
+//  { shuffledChoices, newAnswerIdx } 반환
+// ─────────────────────────────────────────────
+function shuffleChoices(choices, answerIdx) {
+  // 각 보기에 원래 인덱스를 태그
+  const tagged = choices.map((c, i) => ({ text: c, isAnswer: i === answerIdx }));
+  // Fisher-Yates 셔플
+  for (let i = tagged.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tagged[i], tagged[j]] = [tagged[j], tagged[i]];
+  }
+  return {
+    shuffledChoices: tagged.map(t => t.text),
+    newAnswerIdx: tagged.findIndex(t => t.isAnswer)
+  };
+}
+
+// ─────────────────────────────────────────────
+//  전체 셔플
+// ─────────────────────────────────────────────
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -882,6 +921,11 @@ function shuffle(arr) {
   }
   return a;
 }
+
+let selectedQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let answered = false;
 
 function startQuiz() {
   selectedQuestions = shuffle(ALL_QUESTIONS).slice(0, 20);
@@ -910,76 +954,87 @@ function renderQuestion() {
   area.innerHTML = '';
 
   if (q.type === 'mc') {
+    // 보기를 렌더링마다 셔플
+    const { shuffledChoices, newAnswerIdx } = shuffleChoices(q.choices, q.answer);
+
     const div = document.createElement('div');
     div.className = 'choices';
     const labels = ['①', '②', '③', '④'];
-    q.choices.forEach((c, i) => {
+    shuffledChoices.forEach((c, i) => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
       btn.innerHTML = `<span class="choice-num">${labels[i]}</span><span>${c}</span>`;
-      btn.onclick = () => handleMC(i, btn, div, q);
+      btn.onclick = () => handleMC(i, btn, div, newAnswerIdx);
       div.appendChild(btn);
     });
     area.appendChild(div);
+
   } else {
+    // 단답형
     const wrap = document.createElement('div');
     wrap.className = 'short-answer-wrap';
+
+    const row = document.createElement('div');
+    row.className = 'short-input-row';
+
     const inp = document.createElement('input');
     inp.className = 'short-input';
     inp.type = 'text';
     inp.placeholder = '정답을 입력하세요';
-    inp.id = 'short-input';
-    inp.onkeydown = (e) => { if (e.key === 'Enter') submitSA(inp, q); };
-    const btn = document.createElement('button');
-    btn.className = 'btn-submit';
-    btn.textContent = '제출';
-    btn.onclick = () => submitSA(inp, q);
-    wrap.appendChild(inp);
-    wrap.appendChild(btn);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'btn-submit';
+    submitBtn.textContent = '제출';
+
+    const hint = document.createElement('div');
+    hint.className = 'sa-hint';
+
+    // 제출 로직 (클로저로 참조)
+    const doSubmit = () => submitSA(inp, submitBtn, hint, q);
+    inp.onkeydown = (e) => { if (e.key === 'Enter') doSubmit(); };
+    submitBtn.onclick = doSubmit;
+
+    row.appendChild(inp);
+    row.appendChild(submitBtn);
+    wrap.appendChild(row);
+    wrap.appendChild(hint);
     area.appendChild(wrap);
     setTimeout(() => inp.focus(), 100);
   }
 }
 
-function handleMC(idx, btn, div, q) {
+function handleMC(idx, btn, div, correctIdx) {
   if (answered) return;
   answered = true;
   const btns = div.querySelectorAll('.choice-btn');
   btns.forEach(b => b.disabled = true);
-  const isCorrect = idx === q.answer;
-  btns[q.answer].classList.add('correct');
+  const isCorrect = idx === correctIdx;
+  btns[correctIdx].classList.add('correct');
   if (!isCorrect) btn.classList.add('wrong');
   if (isCorrect) score++;
   document.getElementById('live-score').textContent = score;
-  showExp(q.exp);
+  showExp(selectedQuestions[currentIdx].exp);
 }
 
-function submitSA(inp, q) {
+function submitSA(inp, submitBtn, hint, q) {
   if (answered) return;
   const val = inp.value.trim();
   if (!val) return;
   answered = true;
   inp.disabled = true;
-  const submitBtn = inp.nextSibling;
-  if (submitBtn) submitBtn.disabled = true;
+  submitBtn.disabled = true;
 
-  // 유연한 정답 체크 (일부 포함 여부)
-  const correct = q.answer;
-  const isCorrect = val === correct ||
-    val.replace(/\s/g,'') === correct.replace(/\s/g,'') ||
-    correct.includes(val) ||
-    val.includes(correct);
+  const isCorrect = checkSAAnswer(val, q.answers);
 
   if (isCorrect) {
     inp.classList.add('correct');
+    hint.className = 'sa-hint correct-hint';
+    hint.textContent = '✅ 정답입니다!';
     score++;
   } else {
     inp.classList.add('wrong');
-    // 정답 표시
-    const hint = document.createElement('div');
-    hint.style.cssText = 'margin-top:0.5rem;font-size:0.85rem;color:var(--accent3);';
-    hint.textContent = `정답: ${correct}`;
-    inp.parentNode.appendChild(hint);
+    hint.className = 'sa-hint wrong-hint';
+    hint.textContent = `❌ 오답 — 정답: ${q.answers[0]}`;
   }
   document.getElementById('live-score').textContent = score;
   showExp(q.exp);
@@ -992,6 +1047,7 @@ function showExp(text) {
   const nextBtn = document.getElementById('btn-next');
   nextBtn.style.display = 'block';
   nextBtn.textContent = currentIdx < selectedQuestions.length - 1 ? '다음 문제 →' : '결과 보기 🏁';
+  nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function nextQuestion() {
