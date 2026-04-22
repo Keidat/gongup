@@ -214,25 +214,44 @@
 // 유틸
 // ════════════════════════════════════════════════
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
-function pickMC(choices,answerIdx){
-  const correct=choices[answerIdx];
-  const wrong=shuffle(choices.filter((_,i)=>i!==answerIdx)).slice(0,3);
-  const pool=shuffle([correct,...wrong]);
-  return{shuffledChoices:pool,newAnswerIdx:pool.indexOf(correct)};
+
+/**
+ * [핵심 수정] pickMC
+ * - noShuffle=true: 선택지 순서 고정, answer 인덱스 그대로 유지 (수능형 조합 선택지용)
+ * - 선택지가 5개 이상이면 모두 표시 (기존 4개 고정 제거)
+ * - 4개 이하 & noShuffle=false: 기존처럼 정답1+오답3 셔플
+ */
+function pickMC(choices, answerIdx, noShuffle) {
+  if (noShuffle) {
+    // 순서 고정: 그대로 반환
+    return { shuffledChoices: choices, newAnswerIdx: answerIdx };
+  }
+  if (choices.length <= 4) {
+    // 기존 로직: 정답1 + 오답3 셔플
+    const correct = choices[answerIdx];
+    const wrong = shuffle(choices.filter((_, i) => i !== answerIdx)).slice(0, 3);
+    const pool = shuffle([correct, ...wrong]);
+    return { shuffledChoices: pool, newAnswerIdx: pool.indexOf(correct) };
+  }
+  // 5개 이상: 모두 표시, 순서 유지
+  return { shuffledChoices: choices, newAnswerIdx: answerIdx };
 }
+
 function checkSA(input,answers){
   const norm=s=>s.replace(/\s/g,'').toLowerCase();
   return answers.some(a=>norm(a)===norm(input));
 }
 
+// 선택지 라벨: 4개 이하는 원형 기호, 5개는 번호
+const CHOICE_LABELS_4 = ['①','②','③','④'];
+const CHOICE_LABELS_5 = ['①','②','③','④','⑤'];
+
 // ════════════════════════════════════════════════
-// 동적 문제 생성기 (매 렌더링마다 변형)
+// 동적 문제 생성기
 // ════════════════════════════════════════════════
 
-// 대화 오류 찾기 문제 - 매번 다른 사람이 틀림
 function makeDynDialogQ() {
   const SPEAKERS = ['민준','서연','지호','하은','태양'];
-  // 각 화자별: {correct: 맞는 문장, wrong: 틀린 문장, note: 왜 틀렸는지}
   const STATEMENTS = [
     {
       name:'민준',
@@ -266,9 +285,7 @@ function makeDynDialogQ() {
     }
   ];
 
-  // 랜덤으로 틀린 화자 결정
   const wrongIdx = Math.floor(Math.random() * STATEMENTS.length);
-
   const lines = STATEMENTS.map((s, i) => {
     const isWrong = (i === wrongIdx);
     return `<strong>${s.name}:</strong> "${isWrong ? s.wrong : s.correct}"`;
@@ -276,8 +293,6 @@ function makeDynDialogQ() {
 
   const wrongName = STATEMENTS[wrongIdx].name;
   const note = STATEMENTS[wrongIdx].note;
-
-  // 보기: 5개 이름 중 틀린 사람 1명
   const choices = STATEMENTS.map(s => s.name);
 
   return {
@@ -287,13 +302,12 @@ function makeDynDialogQ() {
     htmlContent: `<div class="hq-box"><strong>주제: 6T 기술과 신소재</strong><br><br>${lines}</div>`,
     choices: choices,
     answer: wrongIdx,
+    noShuffle: true,
     exp: `${wrongName}이(가) 틀렸습니다. ${note}`
   };
 }
 
-// 글 속 오류 찾기 - 밑줄 위치 매번 변경
 function makeDynTextErrorQ() {
-  // 각 버전: 어떤 문장이 틀림 (랜덤 선택)
   const VERSIONS = [
     {
       html: `<div class="hq-box">공업의 입지 조건은 크게 경제적 조건과 자연적 조건으로 나뉜다. 경제적 입지 조건에는 <span class="hq-underline">①시장, 교통, 원료</span>가 포함되며, <span class="hq-underline">②기후와 지형</span>은 자연적 입지 조건에 해당한다. 베버(Weber)는 <span class="hq-underline">③운송비, 노동비, 집적 이익</span>을 종합 고려하여 최소 비용 지점이 최적 입지라고 보았다. 한편 <span class="hq-underline">④시장 지향형 공업의 대표 사례는 얼음 제조, 제과, 음료 공업</span>이며, <span class="hq-underline">⑤중화학 공업은 풍부한 노동력이 있는 내륙 지역</span>에 입지하는 것이 가장 유리하다.</div>`,
@@ -329,11 +343,11 @@ function makeDynTextErrorQ() {
     htmlContent: v.html,
     choices: v.choices,
     answer: v.answer,
+    noShuffle: true,
     exp: v.exp
   };
 }
 
-// 표 옳고 그름 판단 - 옳지 않은 항목이 매번 바뀜
 function makeDynTableErrorQ() {
   const ROWS = [
     { label:'기초 공업', desc:'자동차·조선 등 다른 공업의 바탕이 되는 원료·자재 생산', correct: true },
@@ -345,34 +359,27 @@ function makeDynTableErrorQ() {
     { label:'조선 공업', desc:'표준화된 대량 생산 방식으로 2~3만 개의 부품을 조립하는 산업', correct: false, fix:'표준화 대량 생산은 자동차 공업의 특징입니다. 조선 공업은 주문 생산 방식이 주류입니다.' },
   ];
 
-  // 항상 3개 정답 + 1개 오답이 나오도록 구성
   const wrongRows = ROWS.filter(r => !r.correct);
   const correctRows = ROWS.filter(r => r.correct);
-
   const pickedWrong = shuffle(wrongRows)[0];
   const pickedCorrect = shuffle(correctRows).slice(0, 3);
-
   const allRows = shuffle([pickedWrong, ...pickedCorrect]);
-  const labels = ['㉠','㉡','㉢','㉣','㉤'];
+  const labels = ['㉠','㉡','㉢','㉣'];
 
   const wrongLabel = labels[allRows.indexOf(pickedWrong)];
-
   const tableRows = allRows.map((r, i) =>
     `<tr><td>${labels[i]}</td><td>${r.label}</td><td>${r.desc}</td></tr>`
   ).join('');
-
-  const correctLabels = allRows
-    .map((r, i) => r.correct ? labels[i] : null)
-    .filter(Boolean)
-    .join(', ');
+  const correctLabels = allRows.map((r, i) => r.correct ? labels[i] : null).filter(Boolean).join(', ');
 
   return {
     type: 'mc_hard',
     fmt: '표 오류 찾기',
     q: '다음 표에서 설명이 옳지 않은 항목은?',
     htmlContent: `<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th></th><th>개념</th><th>설명</th></tr></thead><tbody>${tableRows}</tbody></table></div>`,
-    choices: labels.slice(0, 4),
+    choices: labels,
     answer: allRows.indexOf(pickedWrong),
+    noShuffle: true,
     exp: `${wrongLabel}이 틀렸습니다. ${pickedWrong.fix} 옳은 항목: ${correctLabels}`
   };
 }
@@ -407,7 +414,6 @@ const NORMAL_QUESTIONS = [
   {type:'mc',q:'6T 기술 중 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하는 기술은?',choices:['ET(환경기술)','IT(정보통신기술)','BT(생명공학기술)','NT(나노기술)','ST(우주항공기술)','CT(문화콘텐츠기술)'],answer:0,exp:'ET(환경기술)는 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하며 태양광 발전, 폐기물 재활용, 스마트 그리드 등에 활용됩니다.'},
   {type:'mc',q:'공영 공업의 특징으로 옳은 것은?',choices:['국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업이다','민간 기업이 이윤 극대화를 목적으로 운영하는 공업이다','소규모 자본으로 시작 가능한 경공업의 일종이다','외국 자본을 유치하여 수출 위주로 운영하는 공업이다','노동 집약적 방식으로 저임금 노동자를 활용하는 공업이다','소비자 협동조합이 운영하는 공업 형태이다'],answer:0,exp:'공영 공업은 국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업으로, 주로 공공의 이익과 직결되거나 막대한 자본이 필요한 분야에서 운영됩니다.'},
   {type:'mc',q:'기계 공업의 역할로 가장 옳은 것은?',choices:['다른 산업에 생산 설비(기계)를 공급하는 기초 산업이다','소비자에게 직접 완제품을 판매하는 최종 소비재 산업이다','천연자원을 채굴하여 공급하는 1차 산업의 일부이다','정보통신 기술을 기반으로 하는 첨단 서비스 산업이다','농산물 가공을 위한 식품 공업의 하위 분류이다','에너지 절약을 목적으로 하는 환경 친화적 산업이다'],answer:0,exp:'기계 공업은 다른 산업에 생산 설비(기계)를 공급하는 기초 산업의 핵심으로, 자동차·조선·전자 등 다양한 제조업의 토대가 됩니다.'},
-  // 제품 분류 문제
   {type:'mc',q:'제품을 내구성에 따라 분류할 때, 비내구재에 해당하는 것은?',choices:['식료품, 의류, 화장품, 의약품','가전제품, 자동차, 가구, 기계류','생산 장비, 실험 장비, 반도체','농산물, 수산물, 천연자원','사무 용품, 청소 용품','자본재에 해당하는 기계'],answer:0,exp:'비내구재는 한 번 또는 단기간 사용 후 소비되는 제품으로, 식료품·의류·화장품·의약품 등이 해당합니다.'},
   {type:'mc',q:'내구재의 예로 가장 옳은 것은?',choices:['가전제품, 자동차, 가구, 기계류','식료품, 의류, 화장품','사무 용품, 청소 용품, 소모품','농산물, 수산물, 천연자원','의약품, 세제, 식품','인터넷 서비스, 소프트웨어'],answer:0,exp:'내구재는 오랜 기간 반복 사용이 가능한 제품으로, 가전제품·자동차·가구·기계류 등이 해당합니다.'},
   {type:'mc',q:'소비재를 사용 목적에 따라 세 가지로 분류할 때, 해당하지 않는 것은?',choices:['자본재','편의품','선매품','전문품','일상용품','고급품'],answer:0,exp:'소비재는 사용 목적에 따라 편의품, 선매품, 전문품으로 분류됩니다. 자본재는 생산 활동에 사용되는 별도의 분류입니다.'},
@@ -418,13 +424,11 @@ const NORMAL_QUESTIONS = [
   {type:'mc',q:'생산재 중 소모품의 예로 가장 적절한 것은?',choices:['사무 용품, 청소 용품, 설비 보수 용품','생산 장비, 실험 장비, 기계류','농산물, 수산물, 천연자원','가전제품, 자동차, 가구','의약품, 화장품, 식료품','카메라, 음향 기기, 자동차'],answer:0,exp:'소모품은 생산 과정에서 소비되는 용품으로, 사무 용품·청소 용품·설비 보수 용품 등이 해당합니다.'},
   {type:'mc',q:'재료 및 부품에 해당하는 예로 옳은 것은?',choices:['농산물, 수산물, 천연자원, 옷감, 강판 등','생산 장비, 실험 장비, 반도체, 기계류','사무 용품, 청소 용품, 설비 보수 용품','가전제품, 자동차, 가구','식료품, 의류, 화장품','카메라, 음향 기기, 전문 의료 기기'],answer:0,exp:'재료 및 부품은 다른 제품 생산에 투입되는 원자재로, 농산물·수산물·천연자원·옷감·강판 등이 해당합니다.'},
   {type:'mc',q:'다음 중 제품을 "내구성에 따른 분류"와 "사용 목적에 따른 분류" 두 기준 모두에 속할 수 있는 것은?',choices:['자동차 (내구재이자 선매품)','식료품 (내구재이자 편의품)','사무 용품 (비내구재이자 자본재)','신문 (내구재이자 전문품)','화장품 (내구재이자 전문품)','생산 장비 (비내구재이자 편의품)'],answer:0,exp:'자동차는 내구성에 따른 분류에서는 내구재, 사용 목적에 따른 분류에서는 소비자가 비교 구매하는 선매품이자 특정 브랜드를 선호하는 전문품적 성격도 가집니다.'},
-  // 단답형
   {type:'sa',q:'철강 공업에서 용광로에 철광석을 넣어 쇳물을 뽑아내는 첫 번째 공정의 이름을 쓰시오.',answers:['제선'],exp:'제선은 용광로에 철광석을 넣어 쇳물을 뽑아내는 단계로, 철강 공업 3대 공정의 첫 번째 단계입니다.'},
   {type:'sa',q:'하드웨어(물질적 생산)보다 서비스, 정보, 지식의 가치 비중이 높아지는 현대 산업의 경향을 무엇이라 하는가?',answers:['소프트화','산업의 소프트화','소프트화 현상'],exp:'산업의 소프트화는 하드웨어보다 서비스·정보·지식 등 무형의 가치 비중이 높아지는 현상으로, 현대 산업 사회의 특징입니다.'},
   {type:'sa',q:'운송 수단이 바뀌는 지점(예: 항구)에 입지하여 운송비 절감 효과를 극대화하는 입지 유형을 무엇이라 하는가?',answers:['적환지 입지','적환지입지','적환지'],exp:'적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 원료 수입과 제품 수출의 운송비를 절감하는 입지 유형입니다.'},
   {type:'sa',q:'공판 인쇄 방식의 대표적인 활용 예를 한 가지 쓰시오.',answers:['스크린 인쇄','실크스크린','실크 스크린','티셔츠 인쇄','티셔츠 프린팅','의류 인쇄'],exp:'공판 인쇄는 구멍을 통해 잉크를 통과시키는 방식으로, 스크린 인쇄(티셔츠 프린팅)에 활용됩니다.'},
   {type:'sa',q:'6T 기술 중 10억 분의 1 단위의 초미세 기술을 의미하는 기술의 약어를 쓰시오.',answers:['NT','nt','Nt'],exp:'NT(나노 기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자·고성능 필터·초경량 소재 등에 활용됩니다.'},
-  // 추가 객관식
   {type:'mc',q:'정밀 화학 공업의 주요 생산품으로 가장 적절한 것은?',choices:['의약품, 화장품, 염료','에틸렌, 프로필렌','강판, 봉강','반도체, 나노 소자','인공위성 부품','합성섬유, 나일론'],answer:0,exp:'정밀 화학 공업은 석유 화학에서 나온 기초 원료를 바탕으로 의약품·화장품·염료 등 고부가가치 제품을 생산합니다.'},
   {type:'mc',q:'6T 기술 중 CT(문화콘텐츠기술)의 특징으로 옳은 것은?',choices:['공학, 인문학, 예술, 디자인의 융합 기술이다','10억 분의 1 단위 초미세 기술이다','오염 방지와 재생 에너지를 핵심으로 한다','생명체 현상을 이용한 바이오 기술이다','우주 및 항공기 개발 기술이다','정보의 생성과 전달을 핵심으로 한다'],answer:0,exp:'CT(문화콘텐츠기술)는 공학+인문학+예술+디자인의 융합 기술로, 게임·애니메이션·디지털 영상 처리 등에 활용됩니다.'},
   {type:'mc',q:'형상 기억 합금의 특징으로 옳은 것은?',choices:['변형 후 특정 온도에서 원래 모양으로 돌아오는 합금이다','특정 저온에서 전기 저항이 0이 되는 소재이다','고온·부식에 강한 세라믹 계열 소재이다','나노 단위로 설계된 초경량 소재이다','빛을 전기로 변환하는 반도체 소재이다','탄소 섬유로 만들어진 복합 재료이다'],answer:0,exp:'형상 기억 합금은 변형 후 특정 온도가 되면 원래 형태로 복원되는 특성이 있는 소재입니다.'},
@@ -448,14 +452,29 @@ const HARD_QUESTIONS_STATIC = [
   {type:'mc_hard',fmt:'인과 관계 분석형',q:'다음 현상의 원인으로 가장 적절한 것은?',htmlContent:`<div class="hq-box"><div class="hq-box-title">현상</div>우리나라의 포항, 광양, 울산, 거제 등의 도시에는 철강 공업, 자동차 공업, 조선 공업 등 중화학 공업 단지가 주로 해안가에 집중되어 있다.</div>`,choices:['해안 지역은 기후가 온화하여 근로자 생활에 유리하기 때문이다','원료를 수입하고 완성품을 수출하기 위한 운송 비용 절감이 유리하기 때문이다','해안 지역의 토지 가격이 내륙보다 저렴하기 때문이다','해안 지역에 풍부한 노동력이 집중되어 있기 때문이다','정부의 해안 개발 정책에 따른 강제적 배치 때문이다'],answer:1,exp:'중화학 공업은 원자재 수입과 제품 수출의 비중이 크기 때문에 항구(임해 지역)에 위치해야 운송비를 최소화할 수 있습니다.'},
   {type:'mc_hard',fmt:'개념 비교형',q:'석유 화학 공업과 정밀 화학 공업을 비교한 내용으로 옳은 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>석유 화학 공업</th><th>정밀 화학 공업</th></tr></thead><tbody><tr><td>원료</td><td>?</td><td>석유 화학 제품</td></tr><tr><td>주요 생산품</td><td>에틸렌, 프로필렌 등</td><td>?</td></tr><tr><td>성격</td><td>기초 원료 공급</td><td>고부가가치 최종 제품</td></tr></tbody></table></div>`,choices:['석유 화학 원료는 천연가스이며, 정밀 화학 생산품은 강철이다','석유 화학 원료는 나프타(석유)이며, 정밀 화학 생산품은 의약품·화장품·염료 등이다','석유 화학 원료는 철광석이며, 정밀 화학 생산품은 합성섬유이다','석유 화학 원료는 나프타이며, 정밀 화학 생산품은 에틸렌·프로필렌이다','석유 화학 원료는 석탄이며, 정밀 화학 생산품은 나프타이다'],answer:1,exp:'석유 화학 공업의 원료는 나프타(석유)이며, 이를 가공한 제품을 원료로 받아 의약품·화장품·염료 등을 만드는 것이 정밀 화학 공업입니다.'},
   {type:'mc_hard',fmt:'시대적 흐름 파악형',q:'다음 우리나라 산업 발달의 흐름에서 ㉠, ㉡에 들어갈 내용이 바르게 연결된 것은?',htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-box">1960년대<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉠ ) 중심<br>수출 주도 성장</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">1970년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉡ ) 중심<br>산업 고도화</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">1990년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">전자·반도체<br>고부가가치 산업</span></div></div>`,choices:['㉠ 중화학 공업 — ㉡ 경공업','㉠ 경공업 — ㉡ 중화학 공업','㉠ 첨단 공업 — ㉡ 경공업','㉠ 경공업 — ㉡ 첨단 공업','㉠ 농업 — ㉡ 경공업'],answer:1,exp:'1960년대 경공업(섬유·신발) → 1970년대 이후 중화학 공업(철강·자동차·조선) → 1990년대 이후 전자·반도체 순으로 산업이 고도화되었습니다.'},
-  {type:'mc_hard',fmt:'신소재 적용형',q:'다음 각 신소재와 그 특징·활용이 바르게 연결되지 않은 것은?',htmlContent:`<div class="hq-box">① 초전도 재료 — 특정 저온에서 전기 저항 0, 강력한 자기장 형성 가능<br>② 형상 기억 합금 — 변형 후 특정 온도에서 원래 형태로 복원<br>③ 파인 세라믹스 — 고온·부식·충격에 강한 세라믹 소재<br>④ 나노 소재 — 10억 분의 1미터 단위 초미세 구조로 고성능 특성 부여<br>⑤ 합성 섬유 — 고온에서 전기 저항이 0이 되는 특성을 가진 소재</div>`,choices:['①','②','③','④','⑤'],answer:4,exp:'⑤가 틀렸습니다. 합성 섬유(나일론, 폴리에스테르)는 강도가 높고 구김이 적은 섬유 소재이며, 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다.'},
+  {type:'mc_hard',fmt:'신소재 적용형',q:'다음 각 신소재와 그 특징·활용이 바르게 연결되지 않은 것은?',
+  htmlContent:`<div class="hq-box">① 초전도 재료 — 특정 저온에서 전기 저항 0, 강력한 자기장 형성 가능<br>② 형상 기억 합금 — 변형 후 특정 온도에서 원래 형태로 복원<br>③ 파인 세라믹스 — 고온·부식·충격에 강한 세라믹 소재<br>④ 나노 소재 — 10억 분의 1미터 단위 초미세 구조로 고성능 특성 부여<br>⑤ 합성 섬유 — 고온에서 전기 저항이 0이 되는 특성을 가진 소재</div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:4,
+  noShuffle:true,
+  exp:'⑤가 틀렸습니다. 합성 섬유(나일론, 폴리에스테르)는 강도가 높고 구김이 적은 섬유 소재이며, 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다.'},
   {type:'mc_hard',fmt:'6T 적용 판단형',q:'다음 각 사례에 해당하는 6T 기술이 바르게 연결된 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>사례</th><th>해당 기술</th></tr></thead><tbody><tr><td>A. 유전자 편집으로 신약 개발</td><td>(가)</td></tr><tr><td>B. 인공위성을 통한 재해 예측</td><td>(나)</td></tr><tr><td>C. 게임·애니메이션·디지털 영상 제작</td><td>(다)</td></tr><tr><td>D. 태양광 발전 및 폐기물 재활용 기술</td><td>(라)</td></tr></tbody></table></div>`,choices:['A-IT, B-ST, C-CT, D-ET','A-BT, B-ST, C-CT, D-ET','A-BT, B-NT, C-IT, D-ET','A-NT, B-ST, C-BT, D-CT','A-BT, B-IT, C-CT, D-NT'],answer:1,exp:'A(유전자 편집·신약)=BT, B(인공위성·재해 예측)=ST, C(게임·영상)=CT, D(태양광·재활용)=ET'},
   {type:'mc_hard',fmt:'인쇄 방식 종합 판단형',q:'다음 인쇄 방식에 대한 설명 중 옳은 것끼리 묶인 것은?',htmlContent:`<div class="hq-box">ㄱ. 볼록판 인쇄는 판의 높은 부분에 잉크를 묻혀 도장·활판 인쇄 등에 활용된다.<br>ㄴ. 오목판(그라비어) 인쇄는 물과 기름의 반발 원리를 이용한다.<br>ㄷ. 평판 인쇄(오프셋)는 신문·잡지·교과서 인쇄에 가장 널리 활용된다.<br>ㄹ. 공판 인쇄는 판의 구멍을 통해 잉크를 통과시키는 방식으로 티셔츠 프린팅에 활용된다.</div>`,choices:['ㄱ, ㄴ, ㄷ, ㄹ 모두','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄴ','ㄷ, ㄹ'],answer:1,exp:'ㄴ이 틀렸습니다. 물과 기름의 반발 원리는 평판 인쇄(오프셋)의 특징입니다. 오목판은 홈에 잉크를 채우는 방식입니다. ㄱ, ㄷ, ㄹ은 옳습니다.'},
-  {type:'mc_hard',fmt:'분류 체계 판단형',q:'다음 제품 분류 기준과 그 설명이 바르게 짝지어진 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류 기준</th><th>설명</th></tr></thead><tbody><tr><td>㉠ 내구성에 따른 분류</td><td>?</td></tr><tr><td>㉡ 사용 목적에 따른 분류</td><td>?</td></tr></tbody></table></div><div class="hq-box" style="margin-top:8px;">A. 소비재와 생산재로 나뉜다<br>B. 내구재와 비내구재로 나뉜다</div>`,choices:['㉠-A, ㉡-B','㉠-B, ㉡-A','㉠-A, ㉡-A','㉠-B, ㉡-B','두 기준 모두 동일하다'],answer:1,exp:'내구성에 따른 분류는 내구재/비내구재(B), 사용 목적에 따른 분류는 소비재/생산재(A)로 나뉩니다.'},
+  {type:'mc_hard',fmt:'분류 체계 판단형',q:'다음 표의 ㉠, ㉡에 들어갈 내용이 바르게 짝지어진 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류 기준</th><th>설명</th></tr></thead><tbody><tr><td>㉠ 내구성에 따른 분류</td><td>?</td></tr><tr><td>㉡ 사용 목적에 따른 분류</td><td>?</td></tr></tbody></table></div><div class="hq-box" style="margin-top:8px;">A. 소비재와 생산재로 나뉜다<br>B. 내구재와 비내구재로 나뉜다</div>`,choices:['㉠-A, ㉡-B','㉠-B, ㉡-A','㉠-A, ㉡-A','㉠-B, ㉡-B','두 기준 모두 동일하다'],answer:1,exp:'내구성에 따른 분류는 내구재/비내구재(B), 사용 목적에 따른 분류는 소비재/생산재(A)로 나뉩니다.'},
   {type:'mc_hard',fmt:'사례 분류형',q:'다음 A~D 제품을 제품 분류표에 바르게 배치한 것은?',htmlContent:`<div class="hq-box">A. 카메라 (특정 브랜드 고집, 비교적 비쌈)<br>B. 신문 (매일 구매, 저렴, 비교 없이 구입)<br>C. 냉장고 (여러 브랜드 비교 후 구입)<br>D. 생산 공장의 선반 기계 (생산에 사용)</div>`,choices:['A-전문품, B-편의품, C-선매품, D-자본재','A-선매품, B-전문품, C-편의품, D-소모품','A-전문품, B-선매품, C-편의품, D-소모품','A-편의품, B-선매품, C-전문품, D-자본재','A-선매품, B-편의품, C-전문품, D-재료및부품'],answer:0,exp:'A카메라=전문품(특정 브랜드 고집), B신문=편의품(일상적 구매), C냉장고=선매품(비교 구매), D선반기계=자본재(생산용 기계)'},
-  {type:'mc_hard',fmt:'종합 판단형',q:'다음 표의 ㉠~㉤ 중 옳지 않은 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류</th><th>설명</th><th>예시</th></tr></thead><tbody><tr><td>㉠ 편의품</td><td>구매 쉽고 자주 구입</td><td>식료품, 신문</td></tr><tr><td>㉡ 선매품</td><td>여러 제품 비교 후 구입</td><td>가구, 의류, 가전제품</td></tr><tr><td>㉢ 전문품</td><td>특정 브랜드 위해 특별한 노력</td><td>카메라, 음향 기기</td></tr><tr><td>㉣ 자본재</td><td>생산용 기계·장비, 비내구재</td><td>생산 장비, 기계류</td></tr><tr><td>㉤ 소모품</td><td>생산 과정에서 소비되는 용품</td><td>사무 용품, 청소 용품</td></tr></tbody></table></div>`,choices:['㉠','㉡','㉢','㉣','㉤'],answer:3,exp:'㉣이 틀렸습니다. 자본재는 생산용 기계·장비로 내구재에 속합니다. "비내구재"라고 설명한 것이 오류입니다.'},
+  {type:'mc_hard',fmt:'종합 판단형',q:'다음 표의 ㉠~㉤ 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류</th><th>설명</th><th>예시</th></tr></thead><tbody><tr><td>㉠ 편의품</td><td>구매 쉽고 자주 구입</td><td>식료품, 신문</td></tr><tr><td>㉡ 선매품</td><td>여러 제품 비교 후 구입</td><td>가구, 의류, 가전제품</td></tr><tr><td>㉢ 전문품</td><td>특정 브랜드 위해 특별한 노력</td><td>카메라, 음향 기기</td></tr><tr><td>㉣ 자본재</td><td>생산용 기계·장비, 비내구재</td><td>생산 장비, 기계류</td></tr><tr><td>㉤ 소모품</td><td>생산 과정에서 소비되는 용품</td><td>사무 용품, 청소 용품</td></tr></tbody></table></div>`,
+  choices:['㉠','㉡','㉢','㉣','㉤'],
+  answer:3,
+  noShuffle:true,
+  exp:'㉣이 틀렸습니다. 자본재는 생산용 기계·장비로 내구재에 속합니다. "비내구재"라고 설명한 것이 오류입니다.'},
   {type:'mc_hard',fmt:'추론형',q:'다음 조건을 모두 만족하는 제품 분류로 가장 적절한 것은?',htmlContent:`<div class="hq-box"><strong>조건 1.</strong> 사용 목적에 따른 분류에서 생산재에 속한다.<br><strong>조건 2.</strong> 내구성에 따른 분류에서 내구재에 속한다.<br><strong>조건 3.</strong> 다른 제품을 만드는 데 사용하는 기계·장비이다.</div>`,choices:['편의품','선매품','자본재','소모품','비내구재'],answer:2,exp:'자본재는 생산재이면서 내구재에 속하고, 다른 제품을 만드는 데 사용하는 기계·장비류입니다. 세 조건을 모두 만족합니다.'},
-  {type:'mc_hard',fmt:'오류 찾기형',q:'다음 제품 분류에 대한 설명 중 옳지 않은 것은?',htmlContent:`<div class="hq-box">① 비내구재는 소비가 빠르고 단기간에 사용되는 제품이다.<br>② 내구재는 오래 사용할 수 있는 제품으로 가전제품, 자동차, 가구 등이 포함된다.<br>③ 전문품은 소비자가 여러 제품을 비교 분석하여 구입하는 제품이다.<br>④ 편의품은 구매가 쉽고 일상적으로 자주 구입하는 제품이다.<br>⑤ 자본재는 생산을 위한 기계·장비이며 동시에 내구재에도 속한다.</div>`,choices:['①','②','③','④','⑤'],answer:2,exp:'③이 틀렸습니다. 여러 제품을 비교 분석하여 구입하는 것은 선매품의 특징입니다. 전문품은 특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품입니다.'},
+  {type:'mc_hard',fmt:'오류 찾기형',q:'다음 제품 분류에 대한 설명 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-box">① 비내구재는 소비가 빠르고 단기간에 사용되는 제품이다.<br>② 내구재는 오래 사용할 수 있는 제품으로 가전제품, 자동차, 가구 등이 포함된다.<br>③ 전문품은 소비자가 여러 제품을 비교 분석하여 구입하는 제품이다.<br>④ 편의품은 구매가 쉽고 일상적으로 자주 구입하는 제품이다.<br>⑤ 자본재는 생산을 위한 기계·장비이며 동시에 내구재에도 속한다.</div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:2,
+  noShuffle:true,
+  exp:'③이 틀렸습니다. 여러 제품을 비교 분석하여 구입하는 것은 선매품의 특징입니다. 전문품은 특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품입니다.'},
   {type:'mc_hard',fmt:'공통점 찾기형',q:'다음 중 소비재와 생산재의 공통점으로 가장 적절한 것은?',htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">소비재</div>편의품, 선매품, 전문품<br>(최종 소비 목적)</div><div class="hq-col-card"><div class="hq-col-label">생산재</div>재료·부품, 자본재, 소모품<br>(생산 활동 목적)</div></div>`,choices:['둘 다 비내구재에만 속한다','둘 다 제품의 사용 목적에 따른 분류에 포함된다','둘 다 편의품의 하위 분류이다','둘 다 내구재에만 속한다','둘 다 클라크의 산업 분류에서 2차 산업에 해당한다'],answer:1,exp:'소비재와 생산재는 모두 제품을 사용 목적에 따라 분류할 때 나타나는 두 가지 대분류입니다.'},
   {type:'mc_hard',fmt:'적용 판단형',q:'다음 A씨의 구매 상황에서 A씨가 구입한 제품의 분류로 가장 옳은 것은?',htmlContent:`<div class="hq-box"><div class="hq-box-title">상황</div>A씨는 평소 좋아하는 특정 브랜드의 카메라를 구입하기 위해 3개월 동안 돈을 모으고, 멀리 있는 전문 매장까지 방문하였다.</div>`,choices:['편의품','선매품','전문품','비내구재','소모품'],answer:2,exp:'특정 브랜드를 위해 특별한 노력(돈 모으기, 전문 매장 방문)을 들여 구입하는 제품은 전문품입니다.'},
   {type:'mc_hard',fmt:'경제적 역할 분석형',q:'다음 중 자동차 공업의 전후방 연쇄 효과에 해당하지 않는 것은?',htmlContent:`<div class="hq-box">자동차 공업은 약 2~3만 개의 부품이 필요한 종합 조립 산업으로, 관련 산업에 미치는 파급 효과가 매우 크다.</div>`,choices:['자동차 생산을 위해 철강·유리·고무 산업이 함께 성장한다','자동차 보급으로 주유소·정비소·보험업 등 서비스 산업이 발달한다','자동차 공장 건설로 지역 고용이 증가하고 지역 경제가 활성화된다','자동차 수출 증가로 국가 외화 수입이 늘어난다','자동차 공업이 발달하면 조선 공업의 주문 생산 방식이 표준화된다'],answer:4,exp:'조선 공업의 주문 생산 방식은 자동차 공업과 무관합니다. 자동차 공업의 전후방 연쇄 효과는 철강·유리·고무(후방)와 정비·보험·주유(전방)에 나타납니다.'},
@@ -467,11 +486,9 @@ const HARD_QUESTIONS_STATIC = [
 ];
 
 // ════════════════════════════════════════════════
-// 익스퍼트 문제 - 수능 실제 유형 기반 (20문항)
-// 실제 수능 공업 관련 문항 스타일 + 고교 산업지리 범위
+// 익스퍼트 문제 20문항 — noShuffle:true 추가
 // ════════════════════════════════════════════════
 const EXPERT_QUESTIONS_STATIC = [
-  // [수능형 1] 자료 분석 - 산업별 특성 비교표
   {type:'mc_hard',fmt:'수능형 자료 분석',q:'표는 우리나라 주요 공업의 특성을 나타낸 것이다. (가)~(다)에 해당하는 공업을 바르게 연결한 것은?',
   htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>(가)</th><th>(나)</th><th>(다)</th></tr></thead><tbody>
   <tr><td>생산 방식</td><td>주문 생산 중심</td><td>표준화 대량 생산</td><td>연속 공정(장치)</td></tr>
@@ -480,61 +497,61 @@ const EXPERT_QUESTIONS_STATIC = [
   <tr><td>부품 수</td><td>매우 많음</td><td>약 2~3만 개</td><td>해당 없음</td></tr>
   </tbody></table></div>`,
   choices:['(가) 자동차 — (나) 조선 — (다) 석유화학','(가) 조선 — (나) 자동차 — (다) 석유화학','(가) 석유화학 — (나) 조선 — (다) 자동차','(가) 조선 — (나) 석유화학 — (다) 자동차','(가) 자동차 — (나) 석유화학 — (다) 조선'],
-  answer:1,exp:'(가) 조선: 주문 생산, 임해, 많은 부품 / (나) 자동차: 표준화 대량 생산, 2~3만 부품, 전후방 연쇄 매우 강함 / (다) 석유화학: 연속 장치 공정, 임해 입지, 부품 개수 해당 없음'},
+  answer:1, noShuffle:true,
+  exp:'(가) 조선: 주문 생산, 임해, 많은 부품 / (나) 자동차: 표준화 대량 생산, 2~3만 부품 / (다) 석유화학: 연속 장치 공정, 임해, 부품 개수 해당 없음'},
 
-  // [수능형 2] 빈칸 완성 - 고난도 개념 통합
   {type:'mc_hard',fmt:'수능형 빈칸 완성',q:'다음 글의 (ㄱ)~(ㄷ)에 들어갈 용어가 바르게 연결된 것은?',
   htmlContent:`<div class="hq-box">공업의 최적 입지를 결정하는 이론은 다양하다. ( ㄱ )의 최소 비용 이론에 따르면, 운송비·노동비·집적 이익을 종합 고려한 생산비 최소 지점이 최적 입지이다. 원료 수입과 제품 수출이 많은 공업은 운송 수단이 전환되는 지점인 ( ㄴ ) 입지가 유리하다. 한편 제품이 변질되거나 무거워져 소비자 근처에서 생산해야 하는 공업은 ( ㄷ ) 지향형 입지를 선택한다.</div>`,
   choices:['ㄱ 클라크 — ㄴ 적환지 — ㄷ 원료','ㄱ 베버 — ㄴ 적환지 — ㄷ 시장','ㄱ 호프만 — ㄴ 시장 — ㄷ 원료','ㄱ 베버 — ㄴ 원료 — ㄷ 시장','ㄱ 클라크 — ㄴ 시장 — ㄷ 원료'],
-  answer:1,exp:'ㄱ=베버(최소비용이론), ㄴ=적환지(항구 등 운송 전환 지점), ㄷ=시장(변질·중량 증가 제품은 소비자 근처에 입지).'},
+  answer:1, noShuffle:true,
+  exp:'ㄱ=베버(최소비용이론), ㄴ=적환지(항구 등 운송 전환 지점), ㄷ=시장(변질·중량 증가 제품은 소비자 근처에 입지).'},
 
-  // [수능형 3] 그래프 해석형 - 산업 구조 변화
-  {type:'mc_hard',fmt:'수능형 그래프 해석',q:'그래프는 우리나라 제조업 수출 구조의 변화를 나타낸 것이다. 이에 대한 해석으로 옳지 않은 것은?',
+  {type:'mc_hard',fmt:'수능형 그래프 해석',q:'표는 우리나라 제조업 수출 구조의 변화를 나타낸 것이다. 이에 대한 해석으로 옳지 않은 것은?',
   htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>시기</th><th>경공업 비중</th><th>중화학공업 비중</th><th>주력 품목</th></tr></thead><tbody>
   <tr><td>1960년대</td><td>높음 ↑</td><td>낮음</td><td>섬유, 신발</td></tr>
   <tr><td>1970~80년대</td><td>감소 ↓</td><td>급증 ↑↑</td><td>철강, 자동차, 조선</td></tr>
   <tr><td>1990년대~현재</td><td>낮음</td><td>유지</td><td>반도체, 전자</td></tr>
   </tbody></table></div>`,
   choices:['1960년대 경공업 성장의 핵심 요인은 풍부하고 저렴한 노동력이었다','1970~80년대 중화학 공업화는 정부의 적극적 육성 정책과 연관이 깊다','1990년대 이후 반도체는 지식 집약적·고부가가치 산업으로 새로운 주력 품목이 되었다','경공업 비중 감소는 중화학 공업이 경공업을 완전히 대체했기 때문이다','산업 구조 변화는 클라크의 1→2→3차 산업 고도화와 같은 흐름이다'],
-  answer:3,exp:'경공업 비중 감소는 중화학 공업 성장 + 개도국의 경공업 부상 + 산업 고도화 등 복합 원인 때문입니다. "완전 대체"는 사실과 다릅니다.'},
+  answer:3, noShuffle:true,
+  exp:'경공업 비중 감소는 중화학 공업 성장 + 개도국의 경공업 부상 + 산업 고도화 등 복합 원인 때문입니다. "완전 대체"는 사실과 다릅니다.'},
 
-  // [수능형 4] 선지 판단형 - 공업 분류 통합
   {type:'mc_hard',fmt:'수능형 선지 판단',q:'다음 중 옳은 설명끼리 묶인 것은?',
   htmlContent:`<div class="hq-box">ㄱ. 클라크(Clark)는 산업을 1·2·3차 산업으로 분류하였으며, 이는 산업 구조 고도화 흐름 설명에 활용된다.<br>ㄴ. 호프만(Hoffmann)은 산업을 생산재 산업과 소비재 산업으로 분류하였다.<br>ㄷ. 베버(Weber)의 최소 비용 이론에서 집적 이익은 고려 대상이 아니다.<br>ㄹ. 적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 운송비를 절감하는 입지 유형이다.<br>ㅁ. 공영 공업은 민간 기업이 이윤 극대화를 목적으로 운영하는 공업이다.</div>`,
   choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄴ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄷ, ㅁ','ㄴ, ㄹ, ㅁ'],
-  answer:1,exp:'ㄷ 틀림(베버 이론에서 집적이익도 고려), ㅁ 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영). 옳은 것: ㄱ(클라크), ㄴ(호프만), ㄹ(적환지 입지).'},
+  answer:1, noShuffle:true,
+  exp:'ㄷ 틀림(베버 이론에서 집적이익도 고려), ㅁ 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영). 옳은 것: ㄱ(클라크), ㄴ(호프만), ㄹ(적환지 입지).'},
 
-  // [수능형 5] 제시문 오류 찾기 (수능 밑줄형)
   {type:'mc_hard',fmt:'수능형 밑줄 오류',q:'다음 글에서 밑줄 친 ①~⑤ 중 옳지 않은 것은?',
-  htmlContent:`<div class="hq-box">철강 공업은 중화학 공업의 대표 사례로, ①제선 → 제강 → 압연의 3단계 공정을 거쳐 강판·봉강 등을 생산한다. 철강 제품은 ②자동차·조선·건설 등 다양한 산업의 기초 소재로 사용되어 기초 공업의 성격을 가진다. 우리나라 철강 공업의 주요 입지는 ③포항, 광양 등 임해 지역으로, 철광석 수입과 제품 수출에 유리하다. 전자 공업은 ④노동 집약적이며 고에너지 소비형 산업으로, 1990년대 이후 우리나라 수출의 핵심이 되었다. 조선 공업은 ⑤고객 요구에 따른 주문 생산 방식이 특징이며, 거제·울산 등 해안가에 주로 분포한다.</div>`,
+  htmlContent:`<div class="hq-box">철강 공업은 중화학 공업의 대표 사례로, <span class="hq-underline">①제선 → 제강 → 압연</span>의 3단계 공정을 거쳐 강판·봉강 등을 생산한다. 철강 제품은 <span class="hq-underline">②자동차·조선·건설 등 다양한 산업의 기초 소재</span>로 사용되어 기초 공업의 성격을 가진다. 우리나라 철강 공업의 주요 입지는 <span class="hq-underline">③포항, 광양 등 임해 지역</span>으로, 철광석 수입과 제품 수출에 유리하다. 전자 공업은 <span class="hq-underline">④노동 집약적이며 고에너지 소비형 산업</span>으로, 1990년대 이후 우리나라 수출의 핵심이 되었다. 조선 공업은 <span class="hq-underline">⑤고객 요구에 따른 주문 생산 방식</span>이 특징이며, 거제·울산 등 해안가에 주로 분포한다.</div>`,
   choices:['①','②','③','④','⑤'],
-  answer:3,exp:'④가 틀렸습니다. 전자 공업(반도체 포함)은 지식 집약적, 고부가가치, 저자원·저에너지 소비형 산업입니다. "노동 집약적, 고에너지 소비형"은 오류입니다.'},
+  answer:3, noShuffle:true,
+  exp:'④가 틀렸습니다. 전자 공업(반도체 포함)은 지식 집약적, 고부가가치, 저자원·저에너지 소비형 산업입니다. "노동 집약적, 고에너지 소비형"은 오류입니다.'},
 
-  // [수능형 6] 조건 추론형 - 산업 특성 찾기
   {type:'mc_hard',fmt:'수능형 조건 추론',q:'다음 조건을 모두 만족하는 공업에 대한 설명으로 옳은 것은?',
   htmlContent:`<div class="hq-box"><strong>조건 1.</strong> 중화학 공업의 한 종류이다.<br><strong>조건 2.</strong> 석유(나프타)를 원료로 한다.<br><strong>조건 3.</strong> 에틸렌, 프로필렌 등 기초 원료를 생산한다.<br><strong>조건 4.</strong> 거대한 설비와 대규모 자본이 요구되는 장치 공업이다.<br><strong>조건 5.</strong> 임해 지역에 주로 입지한다.</div>`,
   choices:['철강 공업으로, 제선·제강·압연 공정을 거쳐 강판을 생산한다','석유 화학 공업으로, 정밀 화학 공업의 원료가 되는 기초 물질을 생산한다','전자 공업으로, 지식 집약적·고부가가치 산업이다','자동차 공업으로, 2~3만 개 부품을 조립하는 종합 산업이다','조선 공업으로, 주문 생산 방식이 특징이다'],
-  answer:1,exp:'나프타→에틸렌·프로필렌 생산, 장치 공업, 임해 입지의 조건을 모두 만족하는 것은 석유 화학 공업입니다. 이 제품들은 정밀 화학 공업(의약품·화장품 등)의 원료가 됩니다.'},
+  answer:1, noShuffle:true,
+  exp:'나프타→에틸렌·프로필렌 생산, 장치 공업, 임해 입지의 조건을 모두 만족하는 것은 석유 화학 공업입니다.'},
 
-  // [수능형 7] 사례 적용형 - 6T 기술 통합
   {type:'mc_hard',fmt:'수능형 사례 적용',q:'다음 (가)~(라)의 기술 사례를 6T로 분류할 때, 바르게 연결된 것은?',
   htmlContent:`<div class="hq-box"><strong>(가)</strong> 줄기세포 배양 기술로 척수 손상 환자 치료 연구<br><strong>(나)</strong> 10나노미터 반도체 공정으로 초소형·초고성능 칩 생산<br><strong>(다)</strong> 폐플라스틱을 원료로 재활용하는 순환 경제 기술<br><strong>(라)</strong> 인공지능 기반 디지털 영화 제작 및 가상현실 콘텐츠</div>`,
   choices:['(가)ST-(나)IT-(다)ET-(라)CT','(가)BT-(나)NT-(다)ET-(라)CT','(가)BT-(나)IT-(다)NT-(라)CT','(가)NT-(나)BT-(다)ET-(라)IT','(가)BT-(나)NT-(다)IT-(라)ET'],
-  answer:1,exp:'(가)줄기세포=BT(생명공학), (나)10나노 반도체=NT(나노기술), (다)폐플라스틱 재활용=ET(환경기술), (라)AI영화·VR=CT(문화콘텐츠기술)'},
+  answer:1, noShuffle:true,
+  exp:'(가)줄기세포=BT(생명공학), (나)10나노 반도체=NT(나노기술), (다)폐플라스틱 재활용=ET(환경기술), (라)AI영화·VR=CT(문화콘텐츠기술)'},
 
-  // [수능형 8] 두 지역 비교 분석
   {type:'mc_hard',fmt:'수능형 지역 비교',q:'표는 우리나라 두 지역의 공업 특성을 나타낸 것이다. 이에 대한 설명으로 옳은 것은?',
   htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">A 지역 (울산·광양권)</div>• 철광석·원유 수입항 인근<br>• 용광로·제철소·석유화학단지<br>• 초대형 장치 설비 밀집<br>• 강판, 나프타 계열 제품 생산</div><div class="hq-col-card"><div class="hq-col-label">B 지역 (수도권·내륙)</div>• 소비자 밀집 지역<br>• 중소 규모 공장 다수<br>• 식료품, 의류, 화장품 등 생산<br>• 노동력 의존도 높음</div></div>`,
   choices:['A 지역은 경공업, B 지역은 중화학 공업 중심이다','A 지역은 자본 집약적 장치 공업, B 지역은 노동 집약적 경공업 중심이다','A와 B 지역 모두 시장 지향형 입지 특성을 가진다','A 지역 공업은 소비자 인접이 입지의 핵심 요인이다','B 지역은 원료 수입에 유리한 적환지 입지이다'],
-  answer:1,exp:'A는 항구 인근 대형 장치 공업(철강·석유화학) = 자본 집약적. B는 소비자 근처 소규모 노동집약 경공업 중심. 각각의 입지 특성이 다릅니다.'},
+  answer:1, noShuffle:true,
+  exp:'A는 항구 인근 대형 장치 공업(철강·석유화학) = 자본 집약적. B는 소비자 근처 소규모 노동집약 경공업 중심.'},
 
-  // [수능형 9] 복합 선지 판단
   {type:'mc_hard',fmt:'수능형 복합 판단',q:'다음 ㉠~㉤에 대한 설명 중 옳은 것만 고른 것은?',
   htmlContent:`<div class="hq-box">㉠ 편의품은 소비자가 여러 제품을 비교 후 구입하는 제품으로, 가전제품이 대표적이다.<br>㉡ 자본재는 생산 활동에 투입되는 기계·장비로, 내구재에 해당한다.<br>㉢ 전문품은 특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품이다.<br>㉣ 소모품은 생산 과정에서 소비되는 소재로, 사무 용품·청소 용품이 해당한다.<br>㉤ 선매품은 구매가 쉽고 자주 구입하는 식료품·신문이 대표적이다.</div>`,
   choices:['㉠, ㉡, ㉢, ㉣, ㉤ 모두','㉡, ㉢, ㉣','㉠, ㉢, ㉤','㉡, ㉣, ㉤','㉠, ㉡, ㉤'],
-  answer:1,exp:'㉠ 틀림(여러 제품 비교는 선매품), ㉤ 틀림(자주 구입하는 식료품·신문은 편의품). 옳은 것: ㉡(자본재=생산용 기계=내구재), ㉢(전문품), ㉣(소모품).'},
+  answer:1, noShuffle:true,
+  exp:'㉠ 틀림(여러 제품 비교는 선매품), ㉤ 틀림(식료품·신문은 편의품). 옳은 것: ㉡(자본재=생산용 기계=내구재), ㉢(전문품), ㉣(소모품).'},
 
-  // [수능형 10] 최고난도 통합 - 표+개념
   {type:'mc_hard',fmt:'수능형 최고난도',q:'다음 자료를 보고 A~C에 해당하는 내용을 바르게 연결한 것은?',
   htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>산업</th><th>원료/특징</th><th>주요 생산품</th><th>핵심 개념</th></tr></thead><tbody>
   <tr><td>철강 공업</td><td>철광석, 코크스</td><td>A</td><td>기초 공업</td></tr>
@@ -542,33 +559,33 @@ const EXPERT_QUESTIONS_STATIC = [
   <tr><td>전자 공업</td><td>실리콘 등</td><td>반도체</td><td>C</td></tr>
   </tbody></table></div>`,
   choices:['A-나프타, B-강판·봉강, C-노동집약형','A-강판·봉강, B-나프타, C-지식집약·고부가가치','A-에틸렌, B-철광석, C-자본집약형','A-강판·봉강, B-실리콘, C-지식집약형','A-반도체, B-나프타, C-장치공업형'],
-  answer:1,exp:'A: 철강 공업의 생산품=강판·봉강(슬래브) / B: 석유 화학 공업의 원료=나프타(석유) / C: 전자 공업(반도체)의 핵심 특성=지식 집약적, 고부가가치, 저자원·저에너지'},
+  answer:1, noShuffle:true,
+  exp:'A: 철강 공업의 생산품=강판·봉강 / B: 석유 화학 공업의 원료=나프타(석유) / C: 전자 공업(반도체)의 핵심 특성=지식 집약적, 고부가가치, 저자원·저에너지'},
 
-  // [수능형 11] 실제 수능 유형 - 공업 입지 변화
   {type:'mc_hard',fmt:'수능형 입지 분석',q:'다음 글의 내용이 맞으면 ○, 틀리면 ×일 때, 바르게 표시한 것은?',
   htmlContent:`<div class="hq-box">ㄱ. 시장 지향형 공업은 제품이 무겁거나 변질되기 쉬울 때 소비자 근처에 입지한다. (  )<br>ㄴ. 원료 지향형 공업은 원료 생산지 근처에 입지하는 것이 운송비 절감에 유리하다. (  )<br>ㄷ. 베버의 이론에 따르면 노동비 절감만을 고려하여 최적 입지를 결정한다. (  )<br>ㄹ. 중화학 공업은 원료 수입과 제품 수출 비중이 커 임해 지역이 유리하다. (  )</div>`,
   choices:['ㄱ○ ㄴ○ ㄷ○ ㄹ○','ㄱ○ ㄴ○ ㄷ× ㄹ○','ㄱ× ㄴ○ ㄷ○ ㄹ×','ㄱ○ ㄴ× ㄷ× ㄹ○','ㄱ× ㄴ× ㄷ○ ㄹ○'],
-  answer:1,exp:'ㄱ○(시장 지향형 정의 옳음), ㄴ○(원료 지향형 정의 옳음), ㄷ×(베버는 운송비+노동비+집적이익 세 가지 모두 고려), ㄹ○(중화학 공업의 임해 입지 옳음)'},
+  answer:1, noShuffle:true,
+  exp:'ㄱ○(시장 지향형 정의 옳음), ㄴ○(원료 지향형 정의 옳음), ㄷ×(베버는 운송비+노동비+집적이익 세 가지 모두 고려), ㄹ○(중화학 공업의 임해 입지 옳음)'},
 
-  // [수능형 12] 수능 경제지리형 - 제조업 특성
   {type:'mc_hard',fmt:'수능형 종합 판단',q:'다음 중 옳은 것을 〈보기〉에서 모두 고른 것은?',
   htmlContent:`<div class="hq-box"><strong>〈보기〉</strong><br>ㄱ. 자동차 공업은 전후방 연쇄 효과가 매우 크며, 미래 키워드는 전기차·자율주행·수소차이다.<br>ㄴ. 경공업은 자본 집약적 성격이 강하며 대규모 설비가 필수적이다.<br>ㄷ. 섬유 공업의 합성섬유는 천연섬유보다 강도가 높고 해충에 강하다.<br>ㄹ. 식품 공업에서 HACCP은 생산성 향상을 위한 생산 속도 관리 기준이다.</div>`,
   choices:['ㄱ, ㄴ, ㄷ, ㄹ 모두','ㄱ, ㄷ','ㄴ, ㄹ','ㄱ, ㄴ, ㄷ','ㄷ, ㄹ'],
-  answer:1,exp:'ㄴ 틀림(경공업은 노동 집약적), ㄹ 틀림(HACCP은 위해요소 차단 기준이지 생산성 기준이 아님). 옳은 것: ㄱ(자동차 공업), ㄷ(합성섬유 특징).'},
+  answer:1, noShuffle:true,
+  exp:'ㄴ 틀림(경공업은 노동 집약적), ㄹ 틀림(HACCP은 위해요소 차단 기준이지 생산성 기준이 아님). 옳은 것: ㄱ(자동차 공업), ㄷ(합성섬유 특징).'},
 
-  // [수능형 13] 실제 수능 패턴 - 그래프 + 서술
   {type:'mc_hard',fmt:'수능형 자료+서술',q:'다음은 산업 역사 흐름도이다. ㉠~㉢에 대한 설명으로 옳지 않은 것은?',
   htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-box">㉠ 고대 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">가내 수공업</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">㉡ 중세 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">길드 제도</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">㉢ 근대 산업 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">공장제도</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">현대 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">소프트화</span></div></div>`,
   choices:['㉠은 자급자족 중심의 경제체제로 소규모 생산이 이루어졌다','㉡의 길드는 장인이 직인과 도제를 두고 생산을 주도하는 조합이었다','㉢에서는 증기기관 보급과 공장제도 확립으로 대량 생산이 가능해졌다','㉢에서는 3차 산업(서비스업)의 비중이 급격히 증가하였다','현대 사회의 소프트화는 무형의 지식·서비스 가치가 증가하는 현상이다'],
-  answer:3,exp:'3차 산업 비중 급증은 현대 사회의 특징입니다. ㉢ 근대 산업 사회(산업혁명)에서는 2차 산업(제조업)의 비중이 급격히 증가하였습니다.'},
+  answer:3, noShuffle:true,
+  exp:'3차 산업 비중 급증은 현대 사회의 특징입니다. ㉢ 근대 산업 사회(산업혁명)에서는 2차 산업(제조업)의 비중이 급격히 증가하였습니다.'},
 
-  // [수능형 14] 수능 신유형 - 탐구 보고서 오류
   {type:'mc_hard',fmt:'수능형 보고서 오류',q:'다음은 어느 학생이 작성한 탐구 보고서의 일부이다. 밑줄 친 부분 중 수정이 필요한 것은?',
-  htmlContent:`<div class="hq-box"><strong>주제: 우리나라 공업 발달과 신소재</strong><br><br>우리나라 공업은 ①1960년대 경공업 중심으로 시작하여, ②1970년대 이후 중화학 공업으로 고도화되었다. 현재는 ③반도체·전자 등 첨단 산업이 주력 수출 품목이다.<br><br>첨단 신소재 중 ④파인 세라믹스는 특정 저온에서 전기 저항이 0이 되는 성질이 있어 강력한 자기장 형성에 활용된다. 또한 ⑤형상 기억 합금은 변형 후 특정 온도에서 원래 형태로 되돌아오는 특성이 있다.</div>`,
+  htmlContent:`<div class="hq-box"><strong>주제: 우리나라 공업 발달과 신소재</strong><br><br>우리나라 공업은 <span class="hq-underline">①1960년대 경공업 중심으로 시작</span>하여, <span class="hq-underline">②1970년대 이후 중화학 공업으로 고도화</span>되었다. 현재는 <span class="hq-underline">③반도체·전자 등 첨단 산업이 주력 수출 품목</span>이다.<br><br>첨단 신소재 중 <span class="hq-underline">④파인 세라믹스는 특정 저온에서 전기 저항이 0이 되는 성질</span>이 있어 강력한 자기장 형성에 활용된다. 또한 <span class="hq-underline">⑤형상 기억 합금은 변형 후 특정 온도에서 원래 형태로 되돌아오는 특성</span>이 있다.</div>`,
   choices:['①','②','③','④','⑤'],
-  answer:3,exp:'④가 틀렸습니다. 특정 저온에서 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다. 파인 세라믹스는 고온·부식에 강한 세라믹 소재입니다.'},
+  answer:3, noShuffle:true,
+  exp:'④가 틀렸습니다. 특정 저온에서 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다. 파인 세라믹스는 고온·부식에 강한 세라믹 소재입니다.'},
 
-  // [수능형 15] 수능 자료해석 - 제품 분류 적용
   {type:'mc_hard',fmt:'수능형 제품분류 적용',q:'다음 표의 A~D 제품을 제품 분류 기준에 따라 바르게 분류한 것은?',
   htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>제품</th><th>구매 빈도</th><th>사용 목적</th><th>내구성</th></tr></thead><tbody>
   <tr><td>A. 크루아상(빵)</td><td>매우 자주</td><td>개인 소비</td><td>낮음</td></tr>
@@ -577,33 +594,33 @@ const EXPERT_QUESTIONS_STATIC = [
   <tr><td>D. 공장 청소 세제</td><td>자주</td><td>생산 보조</td><td>낮음</td></tr>
   </tbody></table></div>`,
   choices:['A-편의품, B-소모품, C-전문품, D-자본재','A-편의품, B-자본재, C-전문품, D-소모품','A-선매품, B-자본재, C-편의품, D-소모품','A-전문품, B-자본재, C-편의품, D-재료및부품','A-편의품, B-재료및부품, C-선매품, D-자본재'],
-  answer:1,exp:'A 크루아상=편의품(자주, 소비재, 비내구재) / B 프레스기=자본재(생산재, 내구재) / C 명품 핸드백=전문품(특정 브랜드, 소비재, 내구재) / D 공장 세제=소모품(생산 보조, 비내구재)'},
+  answer:1, noShuffle:true,
+  exp:'A 빵=편의품 / B 프레스기=자본재(생산재, 내구재) / C 명품 핸드백=전문품(특정 브랜드, 소비재) / D 공장 세제=소모품(생산 보조, 비내구재)'},
 
-  // [수능형 16] 수능 신유형 - 대화 판단
   {type:'mc_hard',fmt:'수능형 대화 판단',q:'공업의 분류에 관한 다음 대화에서 옳은 내용을 말한 학생만 고른 것은?',
   htmlContent:`<div class="hq-box"><strong>A:</strong> "기초 공업은 철강처럼 다른 공업에 원료·자재를 공급하는 공업이야."<br><br><strong>B:</strong> "공영 공업은 민간 기업이 이윤을 목적으로 경영하는 공업이야."<br><br><strong>C:</strong> "장치 공업은 석유화학·제철처럼 거대한 설비와 자본이 필요한 자본 집약적 공업이야."<br><br><strong>D:</strong> "경공업은 대규모 설비와 막대한 자본이 필요한 자본 집약적 산업이야."<br><br><strong>E:</strong> "클라크는 산업을 1·2·3차로 분류했고, 호프만은 생산재·소비재로 분류했어."</div>`,
   choices:['A, B, C, D, E 모두','A, C, E','B, C, D','A, B, E','C, D, E'],
-  answer:1,exp:'B 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영), D 틀림(대규모 설비·자본은 장치 공업·중화학 공업의 특징, 경공업은 노동 집약적). 옳은 것: A(기초 공업), C(장치 공업), E(클라크·호프만 분류).'},
+  answer:1, noShuffle:true,
+  exp:'B 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영), D 틀림(경공업은 노동 집약적). 옳은 것: A(기초 공업), C(장치 공업), E(클라크·호프만 분류).'},
 
-  // [수능형 17] 수능 유형 - 빈칸 2개 조합
   {type:'mc_hard',fmt:'수능형 빈칸 조합',q:'다음 글의 (A)와 (B)에 들어갈 내용이 바르게 짝지어진 것은?',
   htmlContent:`<div class="hq-box">제품의 분류에서 소비재는 편의품, 선매품, 전문품으로 나뉜다. 이 중 ( A )은(는) 소비자가 여러 제품을 놓고 가격·품질·디자인 등을 꼼꼼히 비교 분석하여 구입하는 제품으로, 가구·의류·냉장고 등이 대표적이다. 반면 ( B )은(는) 소비자가 특정 브랜드나 제품을 얻기 위해 특별한 시간·비용·노력을 기울이는 제품으로, 고급 카메라·명품 자동차·전문 음향 기기 등이 해당한다.</div>`,
   choices:['A 편의품 — B 선매품','A 선매품 — B 전문품','A 전문품 — B 편의품','A 선매품 — B 편의품','A 전문품 — B 선매품'],
-  answer:1,exp:'A=선매품(여러 제품 비교 분석, 가구·의류·가전 등), B=전문품(특정 브랜드를 위한 특별 노력, 고급 카메라·명품 등).'},
+  answer:1, noShuffle:true,
+  exp:'A=선매품(여러 제품 비교 분석), B=전문품(특정 브랜드를 위한 특별 노력).'},
 
-  // [수능형 18] 통합형 - 공업+제품 연결
   {type:'mc_hard',fmt:'수능형 통합',q:'공업 생산물과 제품 분류의 연결이 바르지 않은 것은?',
-  htmlContent:`<div class="hq-box">① 철강 공업 → 강판·봉강: 생산재(재료 및 부품)에 해당한다.<br>② 전자 공업 → 가정용 냉장고: 소비재(선매품)이자 내구재에 해당한다.<br>③ 섬유 공업 → 의류: 소비재이며 편의품에 해당한다.<br>④ 석유 화학 공업 → 나프타 열분해 기초 원료: 다른 공업의 재료 및 부품이 된다.<br>⑤ 식품 공업 → 빵·음료: 소비재 중 편의품이며 비내구재에 해당한다.</div>`,
+  htmlContent:`<div class="hq-box"><span class="hq-underline">① 철강 공업 → 강판·봉강: 생산재(재료 및 부품)에 해당한다.</span><br><span class="hq-underline">② 전자 공업 → 가정용 냉장고: 소비재(선매품)이자 내구재에 해당한다.</span><br><span class="hq-underline">③ 섬유 공업 → 의류: 소비재이며 편의품에 해당한다.</span><br><span class="hq-underline">④ 석유 화학 공업 → 나프타 열분해 기초 원료: 다른 공업의 재료 및 부품이 된다.</span><br><span class="hq-underline">⑤ 식품 공업 → 빵·음료: 소비재 중 편의품이며 비내구재에 해당한다.</span></div>`,
   choices:['①','②','③','④','⑤'],
-  answer:2,exp:'③이 틀렸습니다. 의류는 소비재이지만 편의품이 아닙니다. 의류는 여러 제품을 비교 분석하여 구입하는 선매품에 해당합니다.'},
+  answer:2, noShuffle:true,
+  exp:'③이 틀렸습니다. 의류는 소비재이지만 편의품이 아닙니다. 의류는 여러 제품을 비교 분석하여 구입하는 선매품에 해당합니다.'},
 
-  // [수능형 19] 수능형 - 신소재 통합
   {type:'mc_hard',fmt:'수능형 신소재 통합',q:'다음 〈보기〉에서 신소재와 그 특징이 바르게 연결된 것만 고른 것은?',
   htmlContent:`<div class="hq-box"><strong>〈보기〉</strong><br>ㄱ. 초전도 재료 — 특정 저온에서 전기 저항이 0이 됨 → 강력한 자기장 형성<br>ㄴ. 형상 기억 합금 — 고온·부식에 강하며 세라믹 계열 소재<br>ㄷ. 파인 세라믹스 — 고온·부식에 강하고 내마모성이 뛰어난 소재<br>ㄹ. 나노 소재 — 10억 분의 1미터 단위로 초소형 구조, 고성능 특성<br>ㅁ. 합성 섬유 — 특정 저온에서 전기 저항이 0이 되는 특성</div>`,
   choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄴ, ㅁ','ㄷ, ㄹ, ㅁ'],
-  answer:1,exp:'ㄴ 틀림(형상 기억 합금은 변형 후 원래 형태로 복원되는 합금), ㅁ 틀림(초전도 특성은 합성 섬유가 아닌 초전도 재료의 것). 옳은 것: ㄱ(초전도), ㄷ(파인 세라믹스), ㄹ(나노 소재).'},
+  answer:1, noShuffle:true,
+  exp:'ㄴ 틀림(형상 기억 합금은 변형 후 원래 형태 복원), ㅁ 틀림(초전도 특성은 합성 섬유가 아닌 초전도 재료). 옳은 것: ㄱ(초전도), ㄷ(파인 세라믹스), ㄹ(나노 소재).'},
 
-  // [수능형 20] 수능 최고난도 통합형
   {type:'mc_hard',fmt:'수능형 최고난도 종합',q:'다음 자료에서 (가)~(마)에 해당하는 내용이 모두 바르게 짝지어진 것은?',
   htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody>
   <tr><td>(가) 클라크 분류</td><td>1차: 농·임·수산업 / 2차: ___A___ / 3차: 서비스업</td></tr>
@@ -612,15 +629,15 @@ const EXPERT_QUESTIONS_STATIC = [
   <tr><td>(라) 석유화학</td><td>원료: ___D___ → 에틸렌·프로필렌 생산</td></tr>
   <tr><td>(마) 전자공업</td><td>특성: 지식 집약적, ___E___, 저자원 소비형</td></tr>
   </tbody></table></div>`,
-  choices:['A제조업-B클라크-C제강-D나프타-E고부가가치','A서비스업-B베버-C제강-D철광석-E저부가가치','A제조업-B클라크-C제선-D나프타-E고에너지소비형','A제조업-B호프만-C제강-D나프타-E고부가가치','A서비스업-B베버-C압연-D실리콘-E고부가가치'],
-  answer:0,exp:'A=제조업(2차 산업), B=베버(최소비용이론), C=제강(제선→제강→압연), D=나프타(석유화학 원료), E=고부가가치(전자공업 3대 특성).'},
+  choices:['A제조업-B베버-C제강-D나프타-E고부가가치','A서비스업-B베버-C제강-D철광석-E저부가가치','A제조업-B클라크-C제선-D나프타-E고에너지소비형','A제조업-B호프만-C제강-D나프타-E고부가가치','A서비스업-B베버-C압연-D실리콘-E고부가가치'],
+  answer:0, noShuffle:true,
+  exp:'A=제조업(2차 산업), B=베버(최소비용이론), C=제강(제선→제강→압연), D=나프타(석유화학 원료), E=고부가가치(전자공업 3대 특성).'},
 ];
 
 // ════════════════════════════════════════════════
 // 동적 문제 배열 생성 함수
 // ════════════════════════════════════════════════
 function getHardQuestions() {
-  // 정적 문제 + 동적 변형 문제 합체
   const dynamic = [
     makeDynDialogQ(),
     makeDynTextErrorQ(),
@@ -705,13 +722,18 @@ function renderQuestion(){
   area.innerHTML='';
 
   if(q.type==='mc'||q.type==='mc_hard'){
-    const{shuffledChoices,newAnswerIdx}=pickMC(q.choices,q.answer);
-    const div=document.createElement('div');div.className='choices';
-    ['①','②','③','④'].forEach((lbl,i)=>{
-      if(i>=shuffledChoices.length)return;
-      const btn=document.createElement('button');btn.className='choice-btn';
-      btn.innerHTML=`<span class="choice-num">${lbl}</span><span>${shuffledChoices[i]}</span>`;
-      btn.onclick=()=>handleMC(i,btn,div,newAnswerIdx,q);div.appendChild(btn);
+    // [수정] noShuffle 플래그 전달
+    const {shuffledChoices, newAnswerIdx} = pickMC(q.choices, q.answer, q.noShuffle || false);
+
+    // 선택지 수에 따라 라벨 결정
+    const labels = shuffledChoices.length >= 5 ? CHOICE_LABELS_5 : CHOICE_LABELS_4;
+
+    const div=document.createElement('div'); div.className='choices';
+    shuffledChoices.forEach((choiceText, i) => {
+      const btn=document.createElement('button'); btn.className='choice-btn';
+      btn.innerHTML=`<span class="choice-num">${labels[i]}</span><span>${choiceText}</span>`;
+      btn.onclick=()=>handleMC(i, btn, div, newAnswerIdx, q);
+      div.appendChild(btn);
     });
     area.appendChild(div);
   } else {
