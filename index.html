@@ -7,631 +7,122 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --card: #1c2230;
-    --border: #30363d;
-    --accent: #58a6ff;
-    --accent2: #f78166;
-    --accent3: #56d364;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --correct: #1a4731;
-    --correct-border: #56d364;
-    --wrong: #4a1c1c;
-    --wrong-border: #f85149;
-    --yellow: #e3b341;
-    --hard: #c678dd;
-    --hard-bg: rgba(198,120,221,0.12);
-    --hard-border: rgba(198,120,221,0.35);
+    --bg: #0d1117; --surface: #161b22; --card: #1c2230; --border: #30363d;
+    --accent: #58a6ff; --accent2: #f78166; --accent3: #56d364; --text: #e6edf3;
+    --text-muted: #8b949e; --correct: #1a4731; --correct-border: #56d364;
+    --wrong: #4a1c1c; --wrong-border: #f85149; --yellow: #e3b341;
+    --hard: #c678dd; --hard-bg: rgba(198,120,221,0.12); --hard-border: rgba(198,120,221,0.35);
+    --expert: #f0b429; --expert-bg: rgba(240,180,41,0.12); --expert-border: rgba(240,180,41,0.4);
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* ── 시작 화면 ── */
-  #start-screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  #start-screen::before {
-    content: '';
-    position: absolute;
-    top: -200px; left: -200px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(88,166,255,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  #start-screen::after {
-    content: '';
-    position: absolute;
-    bottom: -150px; right: -100px;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(247,129,102,0.10) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .start-badge {
-    background: rgba(88,166,255,0.15);
-    border: 1px solid rgba(88,166,255,0.35);
-    color: var(--accent);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    padding: 0.35rem 1rem;
-    border-radius: 100px;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-  }
-
-  .start-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: clamp(2.4rem, 6vw, 4rem);
-    text-align: center;
-    line-height: 1.15;
-    margin-bottom: 0.8rem;
-    background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .start-sub {
-    color: var(--text-muted);
-    font-size: 1rem;
-    text-align: center;
-    margin-bottom: 2.5rem;
-    line-height: 1.7;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-    width: 100%;
-    max-width: 480px;
-  }
-
-  .info-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .info-card .num {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: var(--accent);
-    display: block;
-  }
-
-  .info-card .lbl {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 0.2rem;
-  }
-
-  /* 난이도 선택 */
-  .diff-select-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.8rem;
-    text-align: center;
-  }
-
-  .diff-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    width: 100%;
-    max-width: 480px;
-  }
-
-  .diff-btn {
-    flex: 1;
-    padding: 0.9rem 1rem;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    background: var(--card);
-    color: var(--text-muted);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .diff-btn .diff-icon { font-size: 1.5rem; }
-  .diff-btn .diff-name { font-size: 1rem; }
-  .diff-btn .diff-desc { font-size: 0.72rem; font-weight: 400; }
-
-  .diff-btn.selected-normal {
-    border-color: var(--accent);
-    background: rgba(88,166,255,0.1);
-    color: var(--accent);
-  }
-
-  .diff-btn.selected-hard {
-    border-color: var(--hard);
-    background: var(--hard-bg);
-    color: var(--hard);
-  }
-
-  .btn-start {
-    background: linear-gradient(135deg, #58a6ff, #388bfd);
-    color: #fff;
-    border: none;
-    padding: 1rem 3rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-    box-shadow: 0 4px 24px rgba(88,166,255,0.3);
-  }
-
-  .btn-start:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(88,166,255,0.45);
-  }
-
-  .btn-start.hard-mode {
-    background: linear-gradient(135deg, #c678dd, #9b59b6);
-    box-shadow: 0 4px 24px rgba(198,120,221,0.3);
-  }
-
-  .btn-start.hard-mode:hover {
-    box-shadow: 0 8px 32px rgba(198,120,221,0.45);
-  }
-
-  /* ── 퀴즈 화면 (노말 스타일) ── */
-  #quiz-screen {
-    display: none;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 5rem;
-  }
-
-  .quiz-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .quiz-counter {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+  #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; position: relative; overflow: hidden; }
+  #start-screen::before { content: ''; position: absolute; top: -200px; left: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(88,166,255,0.12) 0%, transparent 70%); pointer-events: none; }
+  #start-screen::after { content: ''; position: absolute; bottom: -150px; right: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(247,129,102,0.10) 0%, transparent 70%); pointer-events: none; }
+  .start-badge { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; text-transform: uppercase; }
+  .start-title { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2.4rem, 6vw, 4rem); text-align: center; line-height: 1.15; margin-bottom: 0.8rem; background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .start-sub { color: var(--text-muted); font-size: 1rem; text-align: center; margin-bottom: 2.5rem; line-height: 1.7; }
+  .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; width: 100%; max-width: 480px; }
+  .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
+  .info-card .num { font-size: 1.8rem; font-weight: 900; color: var(--accent); display: block; }
+  .info-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .diff-select-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; text-align: center; }
+  .diff-buttons { display: flex; gap: 0.8rem; margin-bottom: 2rem; width: 100%; max-width: 540px; flex-wrap: wrap; justify-content: center; }
+  .diff-btn { flex: 1; min-width: 140px; padding: 0.85rem 0.8rem; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
+  .diff-btn .diff-icon { font-size: 1.4rem; } .diff-btn .diff-name { font-size: 0.95rem; } .diff-btn .diff-desc { font-size: 0.68rem; font-weight: 400; opacity: 0.7; }
+  .diff-btn.selected-normal { border-color: var(--accent); background: rgba(88,166,255,0.1); color: var(--accent); }
+  .diff-btn.selected-hard { border-color: var(--hard); background: var(--hard-bg); color: var(--hard); }
+  .diff-btn.selected-expert { border-color: var(--expert); background: var(--expert-bg); color: var(--expert); }
+  .btn-start { background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; border: none; padding: 1rem 3rem; font-size: 1.1rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; border-radius: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 24px rgba(88,166,255,0.3); }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(88,166,255,0.45); }
+  .btn-start.hard-mode { background: linear-gradient(135deg, #c678dd, #9b59b6); box-shadow: 0 4px 24px rgba(198,120,221,0.3); }
+  .btn-start.hard-mode:hover { box-shadow: 0 8px 32px rgba(198,120,221,0.45); }
+  .btn-start.expert-mode { background: linear-gradient(135deg, #f0b429, #d97706); box-shadow: 0 4px 24px rgba(240,180,41,0.3); }
+  .btn-start.expert-mode:hover { box-shadow: 0 8px 32px rgba(240,180,41,0.45); }
+  #quiz-screen { display: none; max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .quiz-counter { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; }
   .quiz-counter span { color: var(--accent); font-size: 1.1rem; }
-
-  .score-badge {
-    background: rgba(86,211,100,0.15);
-    border: 1px solid rgba(86,211,100,0.3);
-    color: var(--accent3);
-    font-size: 0.8rem;
-    font-weight: 700;
-    padding: 0.3rem 0.8rem;
-    border-radius: 100px;
-  }
-
-  .progress-bar-wrap {
-    height: 4px;
-    background: var(--border);
-    border-radius: 99px;
-    margin-bottom: 2rem;
-    overflow: hidden;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #58a6ff, #56d364);
-    border-radius: 99px;
-    transition: width 0.4s ease;
-  }
-
-  .progress-bar-fill.hard-fill {
-    background: linear-gradient(90deg, #c678dd, #f78166);
-  }
-
-  .question-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 1.8rem;
-    margin-bottom: 1.4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .question-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #58a6ff, #388bfd);
-  }
-
-  .question-card.hard-card::before {
-    background: linear-gradient(90deg, #c678dd, #f78166);
-  }
-
-  .question-type {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-  }
-
-  .question-type::before {
-    content: '';
-    display: inline-block;
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-  }
-
+  .score-badge { background: rgba(86,211,100,0.15); border: 1px solid rgba(86,211,100,0.3); color: var(--accent3); font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 100px; }
+  .progress-bar-wrap { height: 4px; background: var(--border); border-radius: 99px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #58a6ff, #56d364); border-radius: 99px; transition: width 0.4s ease; }
+  .progress-bar-fill.hard-fill { background: linear-gradient(90deg, #c678dd, #f78166); }
+  .progress-bar-fill.expert-fill { background: linear-gradient(90deg, #f0b429, #f85149); }
+  .question-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; margin-bottom: 1.4rem; position: relative; overflow: hidden; }
+  .question-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #58a6ff, #388bfd); }
+  .question-card.hard-card::before { background: linear-gradient(90deg, #c678dd, #f78166); }
+  .question-card.expert-card::before { background: linear-gradient(90deg, #f0b429, #f85149); }
+  .question-type { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+  .question-type::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
   .question-card.hard-card .question-type { color: var(--hard); }
   .question-card.hard-card .question-type::before { background: var(--hard); }
-
-  .hard-badge-inline {
-    background: var(--hard-bg);
-    border: 1px solid var(--hard-border);
-    color: var(--hard);
-    font-size: 0.68rem;
-    padding: 0.1rem 0.5rem;
-    border-radius: 100px;
-    font-weight: 700;
-  }
-
-  .fmt-tag {
-    background: rgba(88,166,255,0.12);
-    border: 1px solid rgba(88,166,255,0.25);
-    color: var(--accent);
-    font-size: 0.68rem;
-    padding: 0.1rem 0.5rem;
-    border-radius: 100px;
-    font-weight: 700;
-  }
-
-  .question-card.hard-card .fmt-tag {
-    background: var(--hard-bg);
-    border-color: var(--hard-border);
-    color: var(--hard);
-  }
-
-  .question-text {
-    font-size: 1.05rem;
-    font-weight: 500;
-    line-height: 1.7;
-    color: var(--text);
-    margin-top: 0.3rem;
-  }
-
-  /* 하드 문제 내부 박스 스타일 */
-  .hq-box {
-    background: rgba(255,255,255,0.03);
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin: 10px 0;
-    font-size: 0.88rem;
-    color: var(--text);
-    line-height: 1.8;
-  }
-
-  .hq-box-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .hq-underline {
-    display: inline;
-    border-bottom: 2px solid #f85149;
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  .hq-arrow-flow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin: 10px 0;
-    font-size: 0.85rem;
-  }
-
-  .hq-flow-box {
-    background: rgba(255,255,255,0.05);
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 12px;
-    color: var(--text);
-    white-space: nowrap;
-    font-size: 0.82rem;
-    line-height: 1.4;
-    text-align: center;
-  }
-
-  .hq-flow-blank {
-    background: rgba(198,120,221,0.12);
-    border: 0.5px solid rgba(198,120,221,0.4);
-    border-radius: 8px;
-    padding: 6px 14px;
-    color: var(--hard);
-    font-weight: 700;
-    white-space: nowrap;
-    font-size: 0.82rem;
-  }
-
+  .question-card.expert-card .question-type { color: var(--expert); }
+  .question-card.expert-card .question-type::before { background: var(--expert); }
+  .hard-badge-inline { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 700; }
+  .expert-badge-inline { background: var(--expert-bg); border: 1px solid var(--expert-border); color: var(--expert); font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 700; }
+  .fmt-tag { background: rgba(88,166,255,0.12); border: 1px solid rgba(88,166,255,0.25); color: var(--accent); font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 700; }
+  .question-card.hard-card .fmt-tag { background: var(--hard-bg); border-color: var(--hard-border); color: var(--hard); }
+  .question-card.expert-card .fmt-tag { background: var(--expert-bg); border-color: var(--expert-border); color: var(--expert); }
+  .question-text { font-size: 1.05rem; font-weight: 500; line-height: 1.7; color: var(--text); margin-top: 0.3rem; }
+  .hq-box { background: rgba(255,255,255,0.03); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 0.88rem; color: var(--text); line-height: 1.8; }
+  .hq-box-title { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .hq-underline { display: inline; border-bottom: 2px solid #f85149; color: var(--text); font-weight: 600; }
+  .hq-arrow-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; font-size: 0.85rem; }
+  .hq-flow-box { background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text); white-space: nowrap; font-size: 0.82rem; line-height: 1.4; text-align: center; }
+  .hq-flow-blank { background: rgba(198,120,221,0.12); border: 0.5px solid rgba(198,120,221,0.4); border-radius: 8px; padding: 6px 14px; color: var(--hard); font-weight: 700; white-space: nowrap; font-size: 0.82rem; }
+  .hq-flow-blank-expert { background: var(--expert-bg); border: 0.5px solid var(--expert-border); border-radius: 8px; padding: 6px 14px; color: var(--expert); font-weight: 700; white-space: nowrap; font-size: 0.82rem; }
   .hq-flow-arrow { color: var(--text-muted); font-size: 1rem; }
-
-  .hq-two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin: 10px 0;
-  }
-
-  .hq-col-card {
-    background: rgba(255,255,255,0.03);
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 0.82rem;
-    color: var(--text);
-    line-height: 1.7;
-  }
-
-  .hq-col-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-  }
-
+  .hq-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .hq-col-card { background: rgba(255,255,255,0.03); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; color: var(--text); line-height: 1.7; }
+  .hq-col-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
   .hq-table-wrap { overflow-x: auto; margin: 10px 0; }
   .hq-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  .hq-table th {
-    background: rgba(255,255,255,0.04);
-    color: var(--text-muted);
-    font-weight: 600;
-    padding: 7px 10px;
-    text-align: left;
-    border-bottom: 0.5px solid var(--border);
-  }
-  .hq-table td {
-    padding: 7px 10px;
-    border-bottom: 0.5px solid rgba(255,255,255,0.05);
-    color: var(--text);
-    vertical-align: top;
-    line-height: 1.5;
-  }
-
-  /* 보기 공통 */
-  .choices {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.4rem;
-  }
-
-  .choice-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    padding: 0.9rem 1.2rem;
-    border-radius: 10px;
-    text-align: left;
-    font-size: 0.93rem;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    line-height: 1.5;
-  }
-
-  .choice-btn:hover:not(:disabled) {
-    border-color: var(--accent);
-    background: rgba(88,166,255,0.08);
-    transform: translateX(3px);
-  }
-
-  .hard-mode-active .choice-btn:hover:not(:disabled) {
-    border-color: var(--hard);
-    background: var(--hard-bg);
-  }
-
-  .choice-btn .choice-num {
-    min-width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    background: var(--border);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: all 0.15s;
-  }
-
+  .hq-table th { background: rgba(255,255,255,0.04); color: var(--text-muted); font-weight: 600; padding: 7px 10px; text-align: left; border-bottom: 0.5px solid var(--border); }
+  .hq-table td { padding: 7px 10px; border-bottom: 0.5px solid rgba(255,255,255,0.05); color: var(--text); vertical-align: top; line-height: 1.5; }
+  .choices { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.4rem; }
+  .choice-btn { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.9rem 1.2rem; border-radius: 10px; text-align: left; font-size: 0.93rem; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 0.8rem; line-height: 1.5; }
+  .choice-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(88,166,255,0.08); transform: translateX(3px); }
+  .hard-mode-active .choice-btn:hover:not(:disabled) { border-color: var(--hard); background: var(--hard-bg); }
+  .expert-mode-active .choice-btn:hover:not(:disabled) { border-color: var(--expert); background: var(--expert-bg); }
+  .choice-btn .choice-num { min-width: 24px; height: 24px; border-radius: 6px; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
   .choice-btn:hover:not(:disabled) .choice-num { background: var(--accent); color: #fff; }
   .hard-mode-active .choice-btn:hover:not(:disabled) .choice-num { background: var(--hard); color: #fff; }
-
+  .expert-mode-active .choice-btn:hover:not(:disabled) .choice-num { background: var(--expert); color: #000; }
   .choice-btn.correct { background: var(--correct); border-color: var(--correct-border); color: #fff; }
   .choice-btn.correct .choice-num { background: var(--correct-border); color: #fff; }
   .choice-btn.wrong { background: var(--wrong); border-color: var(--wrong-border); color: #fff; }
   .choice-btn.wrong .choice-num { background: var(--wrong-border); color: #fff; }
   .choice-btn:disabled { cursor: default; }
-
-  .explanation {
-    display: none;
-    background: rgba(88,166,255,0.06);
-    border: 1px solid rgba(88,166,255,0.2);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    font-size: 0.88rem;
-    color: #a8c9f7;
-    line-height: 1.7;
-    margin-bottom: 1.4rem;
-  }
-
-  .explanation .ex-label {
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 0.3rem;
-    display: block;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  /* 단답형 */
-  .short-answer-wrap {
-    display: flex;
-    gap: 0.7rem;
-    margin-bottom: 1.4rem;
-    flex-direction: column;
-  }
-
+  .explanation { display: none; background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.2); border-radius: 10px; padding: 1rem 1.2rem; font-size: 0.88rem; color: #a8c9f7; line-height: 1.7; margin-bottom: 1.4rem; }
+  .explanation .ex-label { font-weight: 700; color: var(--accent); margin-bottom: 0.3rem; display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .short-answer-wrap { display: flex; gap: 0.7rem; margin-bottom: 1.4rem; flex-direction: column; }
   .short-input-row { display: flex; gap: 0.7rem; }
-
-  .short-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    padding: 0.85rem 1rem;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    font-family: 'Noto Sans KR', sans-serif;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
+  .short-input { flex: 1; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.95rem; font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border-color 0.15s; }
   .short-input:focus { border-color: var(--accent); }
   .short-input.correct { border-color: var(--correct-border); background: var(--correct); }
   .short-input.wrong { border-color: var(--wrong-border); background: var(--wrong); }
-
-  .btn-submit {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 0.85rem 1.4rem;
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-submit:hover { opacity: 0.85; }
-  .btn-submit:disabled { opacity: 0.4; cursor: default; }
-
+  .btn-submit { background: var(--accent); color: #fff; border: none; padding: 0.85rem 1.4rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .btn-submit:hover { opacity: 0.85; } .btn-submit:disabled { opacity: 0.4; cursor: default; }
   .sa-hint { font-size: 0.82rem; color: var(--text-muted); padding: 0 0.2rem; }
   .sa-hint.correct-hint { color: var(--accent3); font-weight: 700; }
   .sa-hint.wrong-hint { color: var(--accent2); }
-
-  .btn-next {
-    width: 100%;
-    background: linear-gradient(135deg, #58a6ff, #388bfd);
-    color: #fff;
-    border: none;
-    padding: 1rem;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-    display: none;
-  }
-
+  .btn-next { width: 100%; background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: transform 0.15s, opacity 0.15s; display: none; }
   .btn-next.hard-next { background: linear-gradient(135deg, #c678dd, #9b59b6); }
+  .btn-next.expert-next { background: linear-gradient(135deg, #f0b429, #d97706); color: #000; }
   .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
-
-  /* ── 결과 화면 ── */
-  #result-screen {
-    display: none;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 3rem 1.5rem;
-    text-align: center;
-    min-height: 100vh;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-  }
-
+  #result-screen { display: none; max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; min-height: 100vh; justify-content: center; flex-direction: column; align-items: center; }
   .result-emoji { font-size: 5rem; margin-bottom: 1rem; display: block; animation: bounce 0.5s ease; }
-
-  @keyframes bounce {
-    0% { transform: scale(0.5); opacity: 0; }
-    70% { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-
+  @keyframes bounce { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
   .result-title { font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem; margin-bottom: 0.5rem; }
   .result-score { font-size: 3.5rem; font-weight: 900; margin: 1rem 0; }
   .result-score .score-num { color: var(--accent); }
   .result-score .score-num.hard-score { color: var(--hard); }
-
-  .result-diff-badge {
-    display: inline-block;
-    padding: 0.3rem 1rem;
-    border-radius: 100px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
+  .result-score .score-num.expert-score { color: var(--expert); }
+  .result-diff-badge { display: inline-block; padding: 0.3rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; }
   .result-diff-badge.normal { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.3); color: var(--accent); }
   .result-diff-badge.hard { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); }
-
+  .result-diff-badge.expert { background: var(--expert-bg); border: 1px solid var(--expert-border); color: var(--expert); }
   .result-detail { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.7; white-space: pre-line; }
-
   .result-bars { width: 100%; max-width: 400px; margin: 0 auto 2rem; display: flex; flex-direction: column; gap: 0.8rem; }
   .result-bar-row { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; }
   .result-bar-label { width: 50px; text-align: right; color: var(--text-muted); flex-shrink: 0; }
@@ -639,131 +130,59 @@
   .result-bar-fill-correct { height: 100%; background: var(--accent3); border-radius: 99px; transition: width 1s ease; }
   .result-bar-fill-wrong { height: 100%; background: var(--accent2); border-radius: 99px; transition: width 1s ease; }
   .result-bar-count { width: 30px; font-weight: 700; }
-
-  .result-buttons { display: flex; gap: 0.8rem; width: 100%; max-width: 400px; flex-wrap: wrap; }
-
-  .btn-retry {
-    flex: 1;
-    min-width: 120px;
-    background: linear-gradient(135deg, #58a6ff, #388bfd);
-    color: #fff;
-    border: none;
-    padding: 0.95rem;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .btn-retry:hover { opacity: 0.85; }
-
-  .btn-retry-hard {
-    flex: 1;
-    min-width: 120px;
-    background: linear-gradient(135deg, #c678dd, #9b59b6);
-    color: #fff;
-    border: none;
-    padding: 0.95rem;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .btn-retry-hard:hover { opacity: 0.85; }
-
-  .btn-review {
-    flex: 1;
-    min-width: 120px;
-    background: var(--card);
-    color: var(--text);
-    border: 1.5px solid var(--border);
-    padding: 0.95rem;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    font-family: 'Noto Sans KR', sans-serif;
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-
-  .btn-review:hover { border-color: var(--accent); }
-
-  @media (max-width: 600px) {
-    .info-grid { grid-template-columns: repeat(3,1fr); gap: 0.6rem; }
-    .question-text { font-size: 0.95rem; }
-    .choice-btn { font-size: 0.85rem; padding: 0.75rem 0.9rem; }
-    .hq-two-col { grid-template-columns: 1fr; }
-    .diff-buttons { flex-direction: column; }
-  }
+  .result-buttons { display: flex; gap: 0.7rem; width: 100%; max-width: 480px; flex-wrap: wrap; }
+  .btn-r { flex: 1; min-width: 100px; border: none; padding: 0.85rem 0.5rem; border-radius: 12px; font-size: 0.88rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+  .btn-r:hover { opacity: 0.85; }
+  .btn-r.normal { background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; }
+  .btn-r.hard-btn { background: linear-gradient(135deg, #c678dd, #9b59b6); color: #fff; }
+  .btn-r.expert-btn { background: linear-gradient(135deg, #f0b429, #d97706); color: #000; }
+  .btn-r.home { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-r.home:hover { border-color: var(--accent); }
+  @media(max-width:600px){ .info-grid{grid-template-columns:repeat(3,1fr);gap:0.6rem} .question-text{font-size:0.95rem} .choice-btn{font-size:0.85rem;padding:0.75rem 0.9rem} .hq-two-col{grid-template-columns:1fr} .diff-buttons{flex-direction:column} }
 </style>
 </head>
 <body>
 
-<!-- 시작 화면 -->
 <div id="start-screen">
   <div class="start-badge">📚 시험 대비 퀴즈</div>
   <h1 class="start-title">공업 단원<br>실력 점검</h1>
   <p class="start-sub">경공업 · 중화학공업 · 첨단공업<br>핵심 개념 총정리 퀴즈</p>
   <div class="info-grid">
-    <div class="info-card">
-      <span class="num">20</span>
-      <div class="lbl">문제 수</div>
-    </div>
-    <div class="info-card">
-      <span class="num" style="color:var(--yellow)">랜덤</span>
-      <div class="lbl">출제 방식</div>
-    </div>
-    <div class="info-card">
-      <span class="num" style="color:var(--accent3)">즉시</span>
-      <div class="lbl">해설 제공</div>
-    </div>
+    <div class="info-card"><span class="num">20</span><div class="lbl">문제 수</div></div>
+    <div class="info-card"><span class="num" style="color:var(--yellow)">랜덤</span><div class="lbl">출제 방식</div></div>
+    <div class="info-card"><span class="num" style="color:var(--accent3)">즉시</span><div class="lbl">해설 제공</div></div>
   </div>
-
   <p class="diff-select-label">난이도를 선택하세요</p>
   <div class="diff-buttons">
     <button class="diff-btn selected-normal" id="btn-diff-normal" onclick="selectDiff('normal')">
-      <span class="diff-icon">📖</span>
-      <span class="diff-name">노말</span>
-      <span class="diff-desc">핵심 개념 객관식 + 단답형</span>
+      <span class="diff-icon">📖</span><span class="diff-name">노말</span><span class="diff-desc">핵심 개념 (50문항 풀)</span>
     </button>
     <button class="diff-btn" id="btn-diff-hard" onclick="selectDiff('hard')">
-      <span class="diff-icon">🔥</span>
-      <span class="diff-name">하드</span>
-      <span class="diff-desc">신유형 고난도 추론 문제</span>
+      <span class="diff-icon">🔥</span><span class="diff-name">하드</span><span class="diff-desc">신유형 고난도 (50문항 풀)</span>
+    </button>
+    <button class="diff-btn" id="btn-diff-expert" onclick="selectDiff('expert')">
+      <span class="diff-icon">⚡</span><span class="diff-name">익스퍼트</span><span class="diff-desc">수능형 최고난도 (20문항)</span>
     </button>
   </div>
-
-  <button class="btn-start" id="btn-start-main" onclick="startQuiz()">시험 시작하기 →</button>
+  <button class="btn-start" id="btn-start-main" onclick="startQuiz()">노말 시작하기 →</button>
 </div>
 
-<!-- 퀴즈 화면 -->
 <div id="quiz-screen">
   <div class="quiz-header">
     <div class="quiz-counter">문제 <span id="cur-q">1</span> / 20</div>
     <div class="score-badge">점수: <span id="live-score">0</span>점</div>
   </div>
-  <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" id="progress-fill" style="width:5%"></div>
-  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:5%"></div></div>
   <div class="question-card" id="q-card">
     <div class="question-type" id="q-type">객관식</div>
     <div class="question-text" id="q-text"></div>
     <div id="q-html-content"></div>
   </div>
   <div id="choices-area"></div>
-  <div class="explanation" id="explanation">
-    <span class="ex-label">💡 해설</span>
-    <span id="exp-text"></span>
-  </div>
+  <div class="explanation" id="explanation"><span class="ex-label">💡 해설</span><span id="exp-text"></span></div>
   <button class="btn-next" id="btn-next" onclick="nextQuestion()">다음 문제 →</button>
 </div>
 
-<!-- 결과 화면 -->
 <div id="result-screen">
   <span class="result-emoji" id="result-emoji">🎉</span>
   <div class="result-diff-badge normal" id="result-diff-badge">노말 모드</div>
@@ -783,1140 +202,597 @@
     </div>
   </div>
   <div class="result-buttons">
-    <button class="btn-retry" onclick="startQuiz()">노말 다시풀기 🔄</button>
-    <button class="btn-retry-hard" onclick="startHardRetry()">하드 도전 🔥</button>
-    <button class="btn-review" onclick="goHome()">처음으로 🏠</button>
+    <button class="btn-r normal" onclick="startQuiz('normal')">📖 노말</button>
+    <button class="btn-r hard-btn" onclick="startQuiz('hard')">🔥 하드</button>
+    <button class="btn-r expert-btn" onclick="startQuiz('expert')">⚡ 익스퍼트</button>
+    <button class="btn-r home" onclick="goHome()">🏠 처음</button>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-//  노말 문제 데이터 (객관식: 정답1 + 오답5 → 4개 랜덤 추출)
-// ══════════════════════════════════════════
-const NORMAL_QUESTIONS = [
-  {
-    type: 'mc',
-    q: '공업의 정의로 가장 올바른 것은?',
-    choices: [
-      '자연의 생산물을 가공하여 중간재나 최종 생산물을 창출하고 부가가치를 높이는 산업활동',
-      '자연환경을 보호하며 생태계를 관리하는 산업활동',
-      '1차 산업에서 생산된 농산물을 유통하는 활동',
-      '지식과 정보를 기반으로 서비스를 제공하는 활동',
-      '토지를 개간하고 작물을 재배하는 농업 활동',
-      '원자재를 수입하여 타국에 판매하는 무역 활동'
-    ],
-    answer: 0,
-    exp: '공업은 자연의 생산물을 가공하는 제조 과정을 통해 중간재나 최종 생산물을 창출하여 부가가치를 높이는 산업활동입니다.'
-  },
-  {
-    type: 'mc',
-    q: '공업 발달을 위한 인적 자원에 해당하지 않는 것은?',
-    choices: [
-      '넓은 평야',
-      '노동력',
-      '기술 및 능력',
-      '창의적 생각',
-      '협동심',
-      '전문 교육을 받은 기술자'
-    ],
-    answer: 0,
-    exp: '넓은 평야는 자연적 조건이지 인적자원이 아닙니다. 인적자원에는 노동력, 기술 및 능력, 창의적 생각, 협동심이 포함됩니다.'
-  },
-  {
-    type: 'mc',
-    q: '시장 지향형 공업의 대표적인 예로 가장 적절한 것은?',
-    choices: [
-      '얼음 제조 공업',
-      '철강 공업',
-      '조선 공업',
-      '석유 화학 공업',
-      '자동차 공업',
-      '시멘트 공업'
-    ],
-    answer: 0,
-    exp: '얼음 제조 공업은 제품이 무겁고 부피가 크며 변질되기 쉬워 소비자와 가까운 시장 주변에 입지하는 시장 지향형 공업의 대표 예입니다.'
-  },
-  {
-    type: 'mc',
-    q: '중세 길드(guild) 제도에 대한 설명으로 옳은 것은?',
-    choices: [
-      '중세 상공업자들의 상호 부조적 동업 조합이다',
-      '대량 생산 체제를 갖춘 현대식 공장 제도이다',
-      '국가가 자본을 출자하여 경영하는 공영 공업이다',
-      '소비자 중심의 서비스 산업 조합이다',
-      '산업혁명 이후 생겨난 노동자 보호 조합이다',
-      '원료 수급을 위해 만들어진 국제 무역 연합이다'
-    ],
-    answer: 0,
-    exp: '길드(guild)는 중세 상공업자들이 만든 상호 부조적 동업 조합으로, 장인(숙련된 기술자)들이 직인과 도제를 두고 생산 활동을 주도했습니다.'
-  },
-  {
-    type: 'mc',
-    q: '근대 산업 사회(산업혁명)의 특징으로 가장 거리가 먼 것은?',
-    choices: [
-      '지식 정보 중심 사회로 전환',
-      '공장 제도의 확립',
-      '대량 생산 체제 구축',
-      '2차 산업의 비중 급격히 증가',
-      '증기 기관의 발명과 보급',
-      '면직물 공업의 급속한 발달'
-    ],
-    answer: 0,
-    exp: '지식 정보 중심 사회는 현대 사회의 특징입니다. 근대 산업 사회(산업혁명)는 공장 제도 확립, 대량 생산 체제, 2차 산업(제조업) 비중 급증이 핵심 특징입니다.'
-  },
-  {
-    type: 'mc',
-    q: '베버(Weber)의 최소 비용 이론에서 최적의 공업 입지로 보는 지점은?',
-    choices: [
-      '운송비, 노동비, 집적 이익을 종합적으로 고려하여 생산비를 최소화할 수 있는 지점',
-      '소비자와 가장 가까운 지점',
-      '원료 산지에 가장 가까운 지점',
-      '항구와 가장 인접한 임해 지역',
-      '토지 가격이 가장 낮은 농촌 지역',
-      '정부 산업단지가 조성된 지역'
-    ],
-    answer: 0,
-    exp: '베버의 최소 비용 이론은 운송비, 노동비, 집적 이익을 종합적으로 고려하여 생산비가 가장 최소화되는 지점이 최적의 공업 입지라는 이론입니다.'
-  },
-  {
-    type: 'mc',
-    q: '장치 공업의 특징으로 옳지 않은 것은?',
-    choices: [
-      '노동집약적 성격이 강하다',
-      '거대한 설비가 필수적이다',
-      '고도의 자동화 시스템이 필요하다',
-      '대규모 자본 투자가 요구된다',
-      '자본 집약적 산업으로 분류된다',
-      '석유 화학, 제철이 대표적인 예이다'
-    ],
-    answer: 0,
-    exp: '장치 공업은 자본 집약적 산업으로 거대한 설비와 고도의 자동화, 대규모 자본이 필요합니다. 노동집약적 성격은 경공업의 특징입니다.'
-  },
-  {
-    type: 'mc',
-    q: '1960년대 우리나라 산업 발달의 특징으로 옳은 것은?',
-    choices: [
-      '경공업 중심의 수출 주도형 성장 정책',
-      '중화학 공업 중심의 내수 지향형 성장',
-      '첨단 기술 산업 중심의 산업 구조',
-      '서비스업 중심의 3차 산업 비중 증가',
-      '반도체 수출을 통한 고부가가치 성장',
-      '자동차 공업을 바탕으로 한 조립 산업 육성'
-    ],
-    answer: 0,
-    exp: '1960년대 우리나라는 섬유, 신발 등 경공업 중심으로 풍부한 노동력을 바탕으로 한 수출 주도형 성장 정책을 추진했습니다.'
-  },
-  {
-    type: 'mc',
-    q: '철강 공업의 3대 공정을 순서대로 바르게 나열한 것은?',
-    choices: [
-      '제선 → 제강 → 압연',
-      '제강 → 제선 → 압연',
-      '압연 → 제선 → 제강',
-      '제선 → 압연 → 제강',
-      '압연 → 제강 → 제선',
-      '제강 → 압연 → 제선'
-    ],
-    answer: 0,
-    exp: '철강 공업의 순서는 제선(용광로에서 쇳물 생산) → 제강(불순물 제거, 강철 생산) → 압연(롤러로 판/봉 형태로 성형) 입니다.'
-  },
-  {
-    type: 'mc',
-    q: '전자 공업의 3대 특성으로 모두 맞는 것은?',
-    choices: [
-      '지식 집약적, 고부가가치, 저자원·저에너지 소비형',
-      '노동 집약적, 저부가가치, 고자원 소비형',
-      '자본 집약적, 고부가가치, 고에너지 소비형',
-      '기술 집약적, 저부가가치, 저자원 소비형',
-      '노동 집약적, 고부가가치, 저에너지 소비형',
-      '자본 집약적, 저부가가치, 고자원 소비형'
-    ],
-    answer: 0,
-    exp: '전자 공업(반도체 포함)은 지식 집약적, 고부가가치, 저자원·저에너지 소비형 산업이 3대 특성입니다.'
-  },
-  {
-    type: 'mc',
-    q: '섬유 공업의 생산 공정을 순서대로 바르게 나열한 것은?',
-    choices: [
-      '제사·방적 → 제직·편성 → 염색·가공 → 봉제',
-      '염색·가공 → 제직·편성 → 제사·방적 → 봉제',
-      '봉제 → 제사·방적 → 제직·편성 → 염색·가공',
-      '제직·편성 → 제사·방적 → 봉제 → 염색·가공',
-      '봉제 → 염색·가공 → 제사·방적 → 제직·편성',
-      '염색·가공 → 봉제 → 제직·편성 → 제사·방적'
-    ],
-    answer: 0,
-    exp: '섬유 공업의 생산 공정 순서: 제사·방적(실 뽑기) → 제직·편성(옷감 짜기) → 염색·가공(색 입히기) → 봉제(완제품 제작)'
-  },
-  {
-    type: 'mc',
-    q: '인쇄 방식 중 지폐, 증권 등 정밀 인쇄에 사용되는 방식은?',
-    choices: [
-      '오목판 인쇄',
-      '볼록판 인쇄',
-      '평판 인쇄',
-      '공판 인쇄',
-      '디지털 인쇄',
-      '잉크젯 인쇄'
-    ],
-    answer: 0,
-    exp: '오목판(그라비어) 인쇄는 판의 낮은 홈에 잉크를 채우는 방식으로, 지폐·증권·정밀 인쇄에 사용됩니다.'
-  },
-  {
-    type: 'mc',
-    q: 'HACCP에 대한 설명으로 옳은 것은?',
-    choices: [
-      '식품의 원재료부터 최종 소비까지 위해요소를 차단하는 위해도 중점관리기준',
-      '식품의 맛과 영양 성분을 분석하는 기준',
-      '식품의 유통기한을 연장하는 특수 가공 기술',
-      '식품 수출을 위한 국제 인증 시스템',
-      '식품의 가격을 안정시키는 정부 규제 제도',
-      '식품 첨가물의 허용량을 정하는 국제 기준'
-    ],
-    answer: 0,
-    exp: 'HACCP은 식품의 원재료부터 최종 소비에 이르기까지 모든 단계에서 위해요소를 차단하는 위해도 중점관리기준입니다.'
-  },
-  {
-    type: 'mc',
-    q: '화학 공업에서 석유(나프타)를 원료로 에틸렌, 프로필렌 등 기초 원료를 생산하는 공업은?',
-    choices: [
-      '석유 화학 공업',
-      '정밀 화학 공업',
-      '바이오 화학 공업',
-      '고분자 화학 공업',
-      '무기 화학 공업',
-      '천연가스 화학 공업'
-    ],
-    answer: 0,
-    exp: '석유 화학 공업은 석유(나프타)를 원료로 에틸렌, 프로필렌 등 기초 화학 원료를 생산합니다. 정밀 화학 공업은 이를 바탕으로 의약품, 화장품 등을 생산합니다.'
-  },
-  {
-    type: 'mc',
-    q: '6T 첨단 기술 중 생명체 현상을 이용하며 윤리적 문제(복제)가 존재하는 기술은?',
-    choices: [
-      'BT(생명공학기술)',
-      'IT(정보통신기술)',
-      'NT(나노기술)',
-      'ST(우주항공기술)',
-      'ET(환경기술)',
-      'CT(문화콘텐츠기술)'
-    ],
-    answer: 0,
-    exp: 'BT(생명공학기술)는 생명체 현상을 이용한 기술로 유전자 치료, 신약 개발, 바이오 에너지 등에 활용되며, 복제 등 윤리적 문제가 존재합니다.'
-  },
-  {
-    type: 'mc',
-    q: '초전도 재료의 특징으로 옳은 것은?',
-    choices: [
-      '특정 온도 이하에서 전기 저항이 0이 되는 소재',
-      '고온에서도 형태를 유지하는 소재',
-      '원래 모양을 기억하는 합금',
-      '고온·부식에 강한 세라믹 소재',
-      '빛을 전기로 변환하는 반도체 소재',
-      '충격에 강한 탄소 섬유 복합 소재'
-    ],
-    answer: 0,
-    exp: '초전도 재료는 특정 온도 이하에서 전기 저항이 0이 되는 현상을 이용한 소재로, 강력한 자기장 형성이 가능합니다.'
-  },
-  {
-    type: 'mc',
-    q: '조선 공업의 특징으로 가장 옳은 것은?',
-    choices: [
-      '주문 생산 방식이며 노동 집약적 성격이 강하다',
-      '표준화된 완전 자동화 방식으로 대량 생산',
-      '2~3만 개의 부품이 들어가는 종합 조립 산업',
-      '자본 집약적이며 소규모 설비로 생산 가능하다',
-      '소비재 생산 중심으로 시장 지향형 입지가 유리하다',
-      '고부가가치 전자 부품을 주로 생산한다'
-    ],
-    answer: 0,
-    exp: '조선 공업은 거대한 배를 만드는 산업으로 표준화된 자동화보다는 주문 생산 방식을 취하며, 노동 집약적 성격이 강합니다.'
-  },
-  {
-    type: 'mc',
-    q: '산업 구조 고도화의 일반적인 발전 순서로 옳은 것은?',
-    choices: [
-      '1차 산업 → 2차 산업 → 3차 산업',
-      '3차 산업 → 1차 산업 → 2차 산업',
-      '2차 산업 → 1차 산업 → 3차 산업',
-      '1차 산업 → 3차 산업 → 2차 산업',
-      '2차 산업 → 3차 산업 → 1차 산업',
-      '3차 산업 → 2차 산업 → 1차 산업'
-    ],
-    answer: 0,
-    exp: '산업 구조 고도화 순서: 1차 산업(농·임·수산업) → 2차 산업(제조업) → 3차 산업(서비스·지식·정보) 중심으로 발전합니다.'
-  },
-  {
-    type: 'mc',
-    q: '중화학 공업의 입지 조건으로 가장 적합한 곳은?',
-    choices: [
-      '원료 수입과 제품 수출이 편리한 임해 지역(항구)',
-      '풍부한 노동력이 있는 내륙 대도시',
-      '소비자와 가까운 대형 쇼핑몰 주변',
-      '자연환경이 우수한 산간 지역',
-      '정부 행정 기관과 인접한 수도권 지역',
-      '대학 연구 기관이 집중된 학술 도시'
-    ],
-    answer: 0,
-    exp: '중화학 공업은 원료 수입과 제품 수출 비중이 크기 때문에 원료와 제품의 운반이 편리한 임해 지역(항구)에 입지하는 것이 가장 유리합니다.'
-  },
-  {
-    type: 'mc',
-    q: '자동차 공업에 대한 설명으로 옳지 않은 것은?',
-    choices: [
-      '주문 생산 방식이 주류이며 표준화가 어렵다',
-      '약 2~3만 개의 부품이 들어가는 종합 조립 산업이다',
-      '전후방 연쇄 효과가 매우 크다',
-      '미래 키워드는 전기차, 자율주행, 수소차 등이다',
-      '관련 산업(철강, 유리, 고무 등)에 미치는 파급 효과가 크다',
-      '대량 생산 체제와 표준화된 공정을 갖추고 있다'
-    ],
-    answer: 0,
-    exp: '주문 생산 방식과 노동 집약적 성격은 조선 공업의 특징입니다. 자동차 공업은 표준화된 대량 생산 방식의 종합 조립 산업입니다.'
-  },
-  {
-    type: 'mc',
-    q: '다음 중 클라크(Clark)의 산업 분류에 해당하지 않는 것은?',
-    choices: [
-      '생산재 산업',
-      '1차 산업',
-      '2차 산업',
-      '3차 산업',
-      '농·임·수산업(1차)',
-      '서비스업(3차)'
-    ],
-    answer: 0,
-    exp: '생산재/소비재 산업은 호프만의 분류입니다. 클라크는 1차(농·임·수산업), 2차(제조업), 3차(서비스업)로 산업을 분류했습니다.'
-  },
-  {
-    type: 'mc',
-    q: '합성 섬유의 특징으로 옳지 않은 것은?',
-    choices: [
-      '해충에 약하고 구김이 잘 생긴다',
-      '강도가 높다',
-      '대량 생산이 용이하다',
-      '나일론, 폴리에스테르 등이 대표적이다',
-      '구김이 적다',
-      '해충에 강하다'
-    ],
-    answer: 0,
-    exp: '합성섬유(나일론, 폴리에스테르 등)는 강도가 높고 대량 생산이 용이하며, 해충에 강하고 구김이 적은 것이 특징입니다.'
-  },
-  {
-    type: 'mc',
-    q: '인쇄 방식 중 신문, 잡지, 교과서 인쇄에 주로 사용되는 방식은?',
-    choices: [
-      '평판 인쇄(오프셋)',
-      '볼록판 인쇄',
-      '오목판 인쇄',
-      '공판 인쇄',
-      '그라비어 인쇄',
-      '디지털 잉크젯 인쇄'
-    ],
-    answer: 0,
-    exp: '평판 인쇄(오프셋)는 물과 기름의 반발 원리를 이용한 방식으로, 신문·잡지·교과서 인쇄에 가장 널리 사용됩니다.'
-  },
-  {
-    type: 'mc',
-    q: '6T 기술 중 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하는 기술은?',
-    choices: [
-      'ET(환경기술)',
-      'IT(정보통신기술)',
-      'BT(생명공학기술)',
-      'NT(나노기술)',
-      'ST(우주항공기술)',
-      'CT(문화콘텐츠기술)'
-    ],
-    answer: 0,
-    exp: 'ET(환경기술)는 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하며 태양광 발전, 폐기물 재활용, 스마트 그리드 등에 활용됩니다.'
-  },
-  {
-    type: 'mc',
-    q: '공영 공업의 특징으로 옳은 것은?',
-    choices: [
-      '국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업이다',
-      '민간 기업이 이윤 극대화를 목적으로 운영하는 공업이다',
-      '소규모 자본으로 시작 가능한 경공업의 일종이다',
-      '외국 자본을 유치하여 수출 위주로 운영하는 공업이다',
-      '노동 집약적 방식으로 저임금 노동자를 활용하는 공업이다',
-      '소비자 협동조합이 운영하는 공업 형태이다'
-    ],
-    answer: 0,
-    exp: '공영 공업은 국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업으로, 주로 공공의 이익과 직결되거나 막대한 자본이 필요한 분야에서 운영됩니다.'
-  },
-  {
-    type: 'mc',
-    q: '기계 공업의 역할로 가장 옳은 것은?',
-    choices: [
-      '다른 산업에 생산 설비(기계)를 공급하는 기초 산업이다',
-      '소비자에게 직접 완제품을 판매하는 최종 소비재 산업이다',
-      '천연자원을 채굴하여 공급하는 1차 산업의 일부이다',
-      '정보통신 기술을 기반으로 하는 첨단 서비스 산업이다',
-      '농산물 가공을 위한 식품 공업의 하위 분류이다',
-      '에너지 절약을 목적으로 하는 환경 친화적 산업이다'
-    ],
-    answer: 0,
-    exp: '기계 공업은 다른 산업에 생산 설비(기계)를 공급하는 기초 산업의 핵심으로, 자동차·조선·전자 등 다양한 제조업의 토대가 됩니다.'
-  },
-  // ── 노말 단답형 ──
-  {
-    type: 'sa',
-    q: '철강 공업에서 용광로에 철광석을 넣어 쇳물을 뽑아내는 첫 번째 공정의 이름을 쓰시오.',
-    answers: ['제선'],
-    exp: '제선은 용광로에 철광석을 넣어 쇳물을 뽑아내는 단계로, 철강 공업 3대 공정의 첫 번째 단계입니다.'
-  },
-  {
-    type: 'sa',
-    q: '하드웨어(물질적 생산)보다 서비스, 정보, 지식의 가치 비중이 높아지는 현대 산업의 경향을 무엇이라 하는가?',
-    answers: ['소프트화', '산업의 소프트화', '소프트화 현상'],
-    exp: '산업의 소프트화는 하드웨어보다 서비스·정보·지식 등 무형의 가치 비중이 높아지는 현상으로, 현대 산업 사회의 특징입니다.'
-  },
-  {
-    type: 'sa',
-    q: '운송 수단이 바뀌는 지점(예: 항구)에 입지하여 운송비 절감 효과를 극대화하는 입지 유형을 무엇이라 하는가?',
-    answers: ['적환지 입지', '적환지입지', '적환지'],
-    exp: '적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 원료 수입과 제품 수출의 운송비를 절감하는 입지 유형입니다.'
-  },
-  {
-    type: 'sa',
-    q: '공판 인쇄 방식의 대표적인 활용 예를 한 가지 쓰시오.',
-    answers: ['스크린 인쇄', '실크스크린', '실크 스크린', '티셔츠 인쇄', '티셔츠 프린팅', '의류 인쇄'],
-    exp: '공판 인쇄는 구멍을 통해 잉크를 통과시키는 방식으로, 스크린 인쇄(티셔츠 프린팅)에 활용됩니다.'
-  },
-  {
-    type: 'sa',
-    q: '6T 기술 중 10억 분의 1 단위의 초미세 기술을 의미하는 기술의 약어를 쓰시오.',
-    answers: ['NT', 'nt', 'Nt'],
-    exp: 'NT(나노 기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자·고성능 필터·초경량 소재 등에 활용됩니다.'
-  },
-];
+// ════════════════════════════════════════════════
+// 유틸
+// ════════════════════════════════════════════════
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+function pickMC(choices,answerIdx){
+  const correct=choices[answerIdx];
+  const wrong=shuffle(choices.filter((_,i)=>i!==answerIdx)).slice(0,3);
+  const pool=shuffle([correct,...wrong]);
+  return{shuffledChoices:pool,newAnswerIdx:pool.indexOf(correct)};
+}
+function checkSA(input,answers){
+  const norm=s=>s.replace(/\s/g,'').toLowerCase();
+  return answers.some(a=>norm(a)===norm(input));
+}
 
-// ══════════════════════════════════════════
-//  하드 문제 데이터 (친구 코드 기반 신유형)
-//  각 문제: type:'mc_hard', 보기 5~6개, answer는 정답 인덱스
-//  → 정답 1개 + 오답 4개 중 랜덤 3개 = 총 4개 보기로 렌더링
-// ══════════════════════════════════════════
-const HARD_QUESTIONS = [
-  {
-    type: 'mc_hard',
-    fmt: '글 속 오류 찾기',
-    q: '다음 글에서 밑줄 친 부분 중 옳지 않은 것은?',
-    htmlContent: `<div class="hq-box">
-      공업의 입지 조건은 크게 경제적 조건과 자연적 조건으로 나뉜다. 경제적 입지 조건에는 <span class="hq-underline">①시장, 교통, 원료</span>가 포함되며, <span class="hq-underline">②기후와 지형</span>은 자연적 입지 조건에 해당한다. 베버(Weber)는 <span class="hq-underline">③운송비, 노동비, 집적 이익</span>을 종합 고려하여 최소 비용 지점이 최적 입지라고 보았다. 한편 <span class="hq-underline">④시장 지향형 공업의 대표 사례는 얼음 제조, 제과, 음료 공업</span>이며, <span class="hq-underline">⑤중화학 공업은 풍부한 노동력이 있는 내륙 지역</span>에 입지하는 것이 가장 유리하다.
-    </div>`,
-    choices: ['①', '②', '③', '④', '⑤'],
-    answer: 4,
-    exp: '중화학 공업은 제품이 무겁고 원료 수입·제품 수출이 중요하므로 임해 지역(항구)에 입지하는 것이 유리합니다. 내륙 지역이 유리하다는 ⑤가 오답입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '공통 개념 찾기',
-    q: '다음 (가)~(다)의 공통점을 가장 잘 설명한 것은?',
-    htmlContent: `<div class="hq-two-col">
-      <div class="hq-col-card"><div class="hq-col-label">(가)</div>석유 화학 공업<br>제철 공업</div>
-      <div class="hq-col-card"><div class="hq-col-label">(나)</div>거대한 설비 필수<br>고도의 자동화 시스템</div>
-    </div>
-    <div class="hq-box"><div class="hq-box-title">(다)</div>대규모 자본 투자 요구, 자본 집약적 성격 강함</div>`,
-    choices: [
-      '(가)~(다)는 모두 경공업의 특징을 설명한다',
-      '(가)~(다)는 모두 장치 공업의 특징에 해당한다',
-      '(가)~(다)는 모두 노동 집약적 산업의 특징이다',
-      '(가)는 기초 공업, (나)(다)는 공영 공업을 설명한다',
-      '(가)~(다)는 모두 시장 지향형 공업의 사례이다'
-    ],
-    answer: 1,
-    exp: '석유 화학·제철 공업은 장치 공업의 대표 사례이며, 거대 설비·고도 자동화·대규모 자본 투자는 모두 장치 공업의 핵심 특징입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '흐름도 완성형',
-    q: '다음 철강 공업의 생산 흐름도에서 ㉠, ㉡에 들어갈 내용이 바르게 짝지어진 것은?',
-    htmlContent: `<div class="hq-arrow-flow">
-      <div class="hq-flow-blank">( ㉠ )</div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-box">제강<br><span style="font-size:0.72rem;color:var(--text-muted);">불순물 제거, 강철 생산</span></div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-blank">( ㉡ )</div>
-    </div>
-    <div class="hq-box" style="margin-top:8px;">
-      ㉠의 결과물: 쇳물(선철)<br>
-      ㉡의 결과물: 강판(슬래브), 봉강 등
-    </div>`,
-    choices: [
-      '㉠ 압연 — ㉡ 제선',
-      '㉠ 제선 — ㉡ 압연',
-      '㉠ 제강 — ㉡ 제선',
-      '㉠ 압연 — ㉡ 제강',
-      '㉠ 제선 — ㉡ 제강'
-    ],
-    answer: 1,
-    exp: '제선(용광로→쇳물) → 제강(불순물 제거→강철) → 압연(롤러로 형태 성형→강판·봉강). ㉠=제선, ㉡=압연입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '분류 판단형',
-    q: '다음 A~E를 경공업과 중화학 공업으로 분류할 때, 같은 그룹으로 묶인 것은?',
-    htmlContent: `<div class="hq-table-wrap"><table class="hq-table">
-      <thead><tr><th>산업</th><th>주요 특징</th></tr></thead>
-      <tbody>
-        <tr><td>A. 섬유 공업</td><td>노동 집약적, 소비재 생산</td></tr>
-        <tr><td>B. 조선 공업</td><td>주문 생산, 노동 집약적, 대형 선박 제조</td></tr>
-        <tr><td>C. 식품 공업</td><td>농업과 연계, 소비재 생산</td></tr>
-        <tr><td>D. 자동차 공업</td><td>종합 조립 산업, 전후방 연쇄효과 큼</td></tr>
-        <tr><td>E. 인쇄 공업</td><td>다양한 판 방식, 출판·포장 등에 활용</td></tr>
-      </tbody>
-    </table></div>`,
-    choices: [
-      '경공업: A, B, C / 중화학: D, E',
-      '경공업: A, C, E / 중화학: B, D',
-      '경공업: A, B, E / 중화학: C, D',
-      '경공업: C, D, E / 중화학: A, B',
-      '경공업: A, D / 중화학: B, C, E'
-    ],
-    answer: 1,
-    exp: '경공업: 섬유(A), 식품(C), 인쇄(E) — 부피 작고 노동 집약적 소비재 산업. 중화학 공업: 조선(B), 자동차(D) — 무겁고 대규모 자본이 필요한 산업.'
-  },
-  {
+// ════════════════════════════════════════════════
+// 동적 문제 생성기 (매 렌더링마다 변형)
+// ════════════════════════════════════════════════
+
+// 대화 오류 찾기 문제 - 매번 다른 사람이 틀림
+function makeDynDialogQ() {
+  const SPEAKERS = ['민준','서연','지호','하은','태양'];
+  // 각 화자별: {correct: 맞는 문장, wrong: 틀린 문장, note: 왜 틀렸는지}
+  const STATEMENTS = [
+    {
+      name:'민준',
+      correct:'NT(나노기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자나 초경량 소재 개발에 활용돼.',
+      wrong:'NT(나노기술)는 100만 분의 1 단위의 초미세 기술로, 나노 소자나 초경량 소재 개발에 활용돼.',
+      note:'NT(나노기술)는 10억 분의 1(나노미터) 단위의 기술입니다. 100만 분의 1이 아닙니다.'
+    },
+    {
+      name:'서연',
+      correct:'BT(생명공학기술)는 유전자 치료, 신약 개발 등에 쓰이지만 복제 관련 윤리 문제도 있어.',
+      wrong:'BT(생명공학기술)는 오염 방지와 재생에너지를 핵심으로 하며, 복제 관련 윤리 문제도 있어.',
+      note:'오염 방지·재생에너지는 ET(환경기술)의 핵심입니다. BT는 유전자 치료·신약 개발이 핵심입니다.'
+    },
+    {
+      name:'지호',
+      correct:'초전도 재료는 특정 저온에서 전기 저항이 0이 되는 특성을 가지고 있어.',
+      wrong:'초전도 재료는 고온에서 전기 저항이 0이 되는 특성을 가지고 있어.',
+      note:'초전도 재료는 특정 온도 이하(저온)에서 전기 저항이 0이 됩니다. 고온이 아닙니다.'
+    },
+    {
+      name:'하은',
+      correct:'ET(환경기술)는 태양광 발전, 폐기물 재활용 등 오염 방지와 자원 효율을 높이는 기술이야.',
+      wrong:'ET(환경기술)는 게임, 애니메이션, 디지털 영상 처리 등 문화 산업에 적용되는 기술이야.',
+      note:'게임·애니메이션은 CT(문화콘텐츠기술)입니다. ET는 오염 방지·재생에너지가 핵심입니다.'
+    },
+    {
+      name:'태양',
+      correct:'형상 기억 합금은 변형 후 특정 온도가 되면 원래 모양으로 돌아오는 특성이 있어.',
+      wrong:'형상 기억 합금은 특정 저온에서 전기 저항이 0이 되는 특성을 가진 소재야.',
+      note:'전기 저항이 0이 되는 것은 초전도 재료의 특징입니다. 형상 기억 합금은 원래 모양으로 복원되는 소재입니다.'
+    }
+  ];
+
+  // 랜덤으로 틀린 화자 결정
+  const wrongIdx = Math.floor(Math.random() * STATEMENTS.length);
+
+  const lines = STATEMENTS.map((s, i) => {
+    const isWrong = (i === wrongIdx);
+    return `<strong>${s.name}:</strong> "${isWrong ? s.wrong : s.correct}"`;
+  }).join('<br><br>');
+
+  const wrongName = STATEMENTS[wrongIdx].name;
+  const note = STATEMENTS[wrongIdx].note;
+
+  // 보기: 5개 이름 중 틀린 사람 1명
+  const choices = STATEMENTS.map(s => s.name);
+
+  return {
     type: 'mc_hard',
     fmt: '대화 오류 찾기',
     q: '다음 대화에서 틀린 내용을 말한 학생만 고른 것은?',
-    htmlContent: `<div class="hq-box">
-      <strong>주제: 6T 기술과 신소재</strong><br><br>
-      <strong>민준:</strong> "NT(나노기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자나 초경량 소재 개발에 활용돼."<br><br>
-      <strong>서연:</strong> "BT(생명공학기술)는 유전자 치료, 신약 개발 등에 쓰이지만 복제 관련 윤리 문제도 있어."<br><br>
-      <strong>지호:</strong> "초전도 재료는 고온에서 전기 저항이 0이 되는 특성을 가지고 있어."<br><br>
-      <strong>하은:</strong> "ET(환경기술)는 태양광 발전, 폐기물 재활용 등 오염 방지와 자원 효율을 높이는 기술이야."<br><br>
-      <strong>태양:</strong> "형상 기억 합금은 변형 후 원래 모양으로 돌아오는 특성이 있어."
-    </div>`,
-    choices: ['민준', '서연', '지호', '하은', '태양'],
-    answer: 2,
-    exp: '지호가 틀렸습니다. 초전도 재료는 특정 온도 이하(저온)에서 전기 저항이 0이 됩니다. 고온이 아닙니다.'
-  },
-  {
+    htmlContent: `<div class="hq-box"><strong>주제: 6T 기술과 신소재</strong><br><br>${lines}</div>`,
+    choices: choices,
+    answer: wrongIdx,
+    exp: `${wrongName}이(가) 틀렸습니다. ${note}`
+  };
+}
+
+// 글 속 오류 찾기 - 밑줄 위치 매번 변경
+function makeDynTextErrorQ() {
+  // 각 버전: 어떤 문장이 틀림 (랜덤 선택)
+  const VERSIONS = [
+    {
+      html: `<div class="hq-box">공업의 입지 조건은 크게 경제적 조건과 자연적 조건으로 나뉜다. 경제적 입지 조건에는 <span class="hq-underline">①시장, 교통, 원료</span>가 포함되며, <span class="hq-underline">②기후와 지형</span>은 자연적 입지 조건에 해당한다. 베버(Weber)는 <span class="hq-underline">③운송비, 노동비, 집적 이익</span>을 종합 고려하여 최소 비용 지점이 최적 입지라고 보았다. 한편 <span class="hq-underline">④시장 지향형 공업의 대표 사례는 얼음 제조, 제과, 음료 공업</span>이며, <span class="hq-underline">⑤중화학 공업은 풍부한 노동력이 있는 내륙 지역</span>에 입지하는 것이 가장 유리하다.</div>`,
+      choices: ['①','②','③','④','⑤'],
+      answer: 4,
+      exp: '중화학 공업은 원료 수입·제품 수출이 중요하므로 임해 지역(항구)에 입지하는 것이 유리합니다. 내륙 지역이 유리하다는 ⑤가 오답입니다.'
+    },
+    {
+      html: `<div class="hq-box">산업 구조 고도화는 <span class="hq-underline">①1차 산업 → 2차 산업 → 3차 산업</span> 순으로 발전한다. 우리나라는 <span class="hq-underline">②1960년대 경공업 중심의 수출 주도형 성장</span>을 추진했고, <span class="hq-underline">③1970년대 이후 중화학 공업으로 산업이 고도화</span>되었다. 철강 공업의 생산 공정은 <span class="hq-underline">④제선 → 제강 → 압연</span> 순이며, 섬유 공업의 생산 공정은 <span class="hq-underline">⑤제직·편성 → 제사·방적 → 염색·가공 → 봉제</span> 순이다.</div>`,
+      choices: ['①','②','③','④','⑤'],
+      answer: 4,
+      exp: '섬유 공업의 올바른 순서는 제사·방적 → 제직·편성 → 염색·가공 → 봉제입니다. ⑤는 제사·방적과 제직·편성의 순서가 뒤바뀌어 틀렸습니다.'
+    },
+    {
+      html: `<div class="hq-box">공업은 생산 단계에 따라 분류할 수 있다. <span class="hq-underline">①기초 공업</span>은 다른 공업의 바탕이 되는 원료나 자재를 생산하는 공업으로 철강 공업이 대표적이다. <span class="hq-underline">②공영 공업</span>은 국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업이다. <span class="hq-underline">③경공업</span>은 부피가 작고 가벼운 제품을 주로 만드는 노동 집약적 공업이다. <span class="hq-underline">④장치 공업</span>은 석유 화학, 제철처럼 거대한 설비와 대규모 자본이 필요한 공업이다. <span class="hq-underline">⑤조선 공업</span>은 표준화된 대량 생산 방식이 주류를 이루는 산업이다.</div>`,
+      choices: ['①','②','③','④','⑤'],
+      answer: 4,
+      exp: '조선 공업은 고객 주문에 따라 각기 다른 선박을 제작하는 주문 생산 방식이 주류입니다. 표준화된 대량 생산은 자동차 공업의 특징입니다. ⑤가 오답입니다.'
+    },
+    {
+      html: `<div class="hq-box">6T 기술에 대한 설명이다. <span class="hq-underline">①IT(정보통신기술)</span>은 정보의 생성, 가공, 전달을 핵심으로 하며 시공간 제약 없이 정보 교환을 가능하게 한다. <span class="hq-underline">②BT(생명공학기술)</span>은 유전자 치료, 신약 개발에 활용되며 윤리적 논쟁도 존재한다. <span class="hq-underline">③NT(나노기술)</span>은 10억 분의 1 단위의 초미세 기술이다. <span class="hq-underline">④ST(우주항공기술)</span>은 인공위성, MRI, 재해 예측 시스템 개발에 활용된다. <span class="hq-underline">⑤CT(문화콘텐츠기술)</span>은 오염 방지와 자원 효율 극대화를 핵심으로 하는 기술이다.</div>`,
+      choices: ['①','②','③','④','⑤'],
+      answer: 4,
+      exp: '오염 방지와 자원 효율 극대화를 핵심으로 하는 것은 ET(환경기술)입니다. CT(문화콘텐츠기술)는 공학+인문학+예술+디자인의 융합 기술입니다. ⑤가 오답입니다.'
+    }
+  ];
+
+  const v = VERSIONS[Math.floor(Math.random() * VERSIONS.length)];
+  return {
     type: 'mc_hard',
-    fmt: '조건 추론형',
-    q: '다음 조건을 모두 만족하는 산업 분류 체계의 이론가와 분류 기준을 옳게 연결한 것은?',
-    htmlContent: `<div class="hq-box">
-      <strong>조건 1.</strong> 산업을 크게 세 가지 차수(次數)로 나눈다.<br>
-      <strong>조건 2.</strong> 1차는 농·임·수산업, 2차는 제조업, 3차는 서비스업이다.<br>
-      <strong>조건 3.</strong> 산업 구조 고도화의 흐름을 설명하는 데 활용된다.
-    </div>`,
-    choices: [
-      '호프만 — 생산재와 소비재 산업으로 분류',
-      '클라크 — 1·2·3차 산업으로 분류',
-      '베버 — 운송비·노동비·집적이익 기준 분류',
-      '호프만 — 1·2·3차 산업으로 분류',
-      '클라크 — 생산재와 소비재 산업으로 분류'
-    ],
-    answer: 1,
-    exp: '클라크는 산업을 1·2·3차 산업으로 분류한 이론가입니다. 호프만은 생산재/소비재로, 베버는 입지론(최소 비용 이론)으로 분류합니다.'
-  },
-  {
+    fmt: '글 속 오류 찾기',
+    q: '다음 글에서 밑줄 친 부분 중 옳지 않은 것은?',
+    htmlContent: v.html,
+    choices: v.choices,
+    answer: v.answer,
+    exp: v.exp
+  };
+}
+
+// 표 옳고 그름 판단 - 옳지 않은 항목이 매번 바뀜
+function makeDynTableErrorQ() {
+  const ROWS = [
+    { label:'기초 공업', desc:'자동차·조선 등 다른 공업의 바탕이 되는 원료·자재 생산', correct: true },
+    { label:'공영 공업', desc:'민간 기업이 이익 극대화를 위해 자유롭게 운영하는 공업', correct: false, fix:'공영 공업은 국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업입니다.' },
+    { label:'산업 소프트화', desc:'하드웨어보다 서비스·정보·지식의 가치 비중이 높아지는 현상', correct: true },
+    { label:'HACCP', desc:'식품의 원재료부터 최종 소비까지 위해요소를 차단하는 기준', correct: true },
+    { label:'정밀 화학 공업', desc:'나프타를 원료로 에틸렌·프로필렌 등 기초 원료를 생산', correct: false, fix:'나프타→에틸렌·프로필렌 생산은 석유 화학 공업입니다. 정밀 화학 공업은 이를 원료로 의약품·화장품·염료를 만듭니다.' },
+    { label:'장치 공업', desc:'거대한 설비와 대규모 자본이 필요하며, 석유 화학·제철이 대표적이다', correct: true },
+    { label:'조선 공업', desc:'표준화된 대량 생산 방식으로 2~3만 개의 부품을 조립하는 산업', correct: false, fix:'표준화 대량 생산은 자동차 공업의 특징입니다. 조선 공업은 주문 생산 방식이 주류입니다.' },
+  ];
+
+  // 항상 3개 정답 + 1개 오답이 나오도록 구성
+  const wrongRows = ROWS.filter(r => !r.correct);
+  const correctRows = ROWS.filter(r => r.correct);
+
+  const pickedWrong = shuffle(wrongRows)[0];
+  const pickedCorrect = shuffle(correctRows).slice(0, 3);
+
+  const allRows = shuffle([pickedWrong, ...pickedCorrect]);
+  const labels = ['㉠','㉡','㉢','㉣','㉤'];
+
+  const wrongLabel = labels[allRows.indexOf(pickedWrong)];
+
+  const tableRows = allRows.map((r, i) =>
+    `<tr><td>${labels[i]}</td><td>${r.label}</td><td>${r.desc}</td></tr>`
+  ).join('');
+
+  const correctLabels = allRows
+    .map((r, i) => r.correct ? labels[i] : null)
+    .filter(Boolean)
+    .join(', ');
+
+  return {
     type: 'mc_hard',
-    fmt: '빠진 연결고리형',
-    q: '다음 산업 발전 흐름에서 ㉠에 들어갈 내용으로 가장 적절한 것은?',
-    htmlContent: `<div class="hq-arrow-flow">
-      <div class="hq-flow-box">고대<br><span style="font-size:0.72rem;color:var(--text-muted);">가내 수공업<br>자급자족</span></div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-box">중세<br><span style="font-size:0.72rem;color:var(--text-muted);">길드 제도<br>장인 중심</span></div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-blank">( ㉠ )</div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-box">현대<br><span style="font-size:0.72rem;color:var(--text-muted);">지식·정보<br>소프트화</span></div>
-    </div>`,
-    choices: [
-      '첨단 산업 사회 — 6T 기술 중심의 산업 구조',
-      '근대 산업 사회 — 공장제도 확립, 대량 생산, 2차 산업 급성장',
-      '농업 중심 사회 — 1차 산업 비중 확대',
-      '서비스 중심 사회 — 3차 산업 급성장',
-      '공영 공업 사회 — 국가 주도 중화학 공업 육성'
-    ],
-    answer: 1,
-    exp: '고대(가내수공업) → 중세(길드) → 근대 산업혁명(공장제도·대량생산·2차 산업 급성장) → 현대(지식·정보·소프트화) 순서입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '적용·반박형',
-    q: '다음 주장에 대한 반박으로 가장 적절한 것은?',
-    htmlContent: `<div class="hq-box">
-      <div class="hq-box-title">학생의 주장</div>
-      "조선 공업과 자동차 공업은 둘 다 중화학 공업에 속하고 수많은 부품을 조립하는 방식이므로, 두 산업의 특징은 완전히 동일하다고 볼 수 있다."
-    </div>`,
-    choices: [
-      '자동차 공업은 중화학 공업에 해당하지 않으므로 주장이 틀렸다',
-      '조선 공업은 주문 생산 방식이 주를 이루는 반면, 자동차 공업은 표준화된 대량 생산이 중심이므로 동일하지 않다',
-      '두 산업 모두 전후방 연쇄 효과가 동일하게 크므로 주장이 옳다',
-      '자동차 공업이 더 많은 부품을 사용하므로 두 산업은 다르다',
-      '조선 공업이 경공업에 해당하므로 두 산업을 같다고 볼 수 없다'
-    ],
-    answer: 1,
-    exp: '두 산업 모두 조립 산업·중화학 공업이지만, 자동차는 표준화된 대량 생산, 조선은 고객 맞춤 주문 생산 방식이라는 핵심 차이가 있습니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '공통 개념 찾기',
-    q: '다음 사례들의 공통점으로 가장 적절한 것은?',
-    htmlContent: `<div class="hq-box">
-      • 나일론, 폴리에스테르 — 강도 높고 해충에 강하며 구김이 적음<br>
-      • 인공위성 개발 중 파생된 MRI — 의료 기기로 전용<br>
-      • 태양광 패널 소재 개발 → 전기차 배터리에 적용<br>
-      • 반도체 소형화 기술 → 스마트폰·웨어러블 기기에 활용
-    </div>`,
-    choices: [
-      '모두 경공업 분야에서 개발된 소재·기술이다',
-      '모두 기존 기술·소재가 다른 분야로 파급·응용된 사례이다',
-      '모두 장치 공업에서 생산되는 제품이다',
-      '모두 6T 중 BT(생명공학기술)에 해당하는 사례이다',
-      '모두 공영 공업을 통해 개발·보급된 기술이다'
-    ],
-    answer: 1,
-    exp: '모든 사례는 한 분야에서 개발된 기술·소재가 다른 분야로 응용·파급된 기술 전이(파급 효과)의 공통점을 가집니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '최종 종합형',
-    q: '다음 표에서 설명이 옳은 항목만 고른 것은?',
-    htmlContent: `<div class="hq-table-wrap"><table class="hq-table">
-      <thead><tr><th>번호</th><th>개념</th><th>설명</th></tr></thead>
-      <tbody>
-        <tr><td>㉠</td><td>기초 공업</td><td>자동차·조선 등 다른 공업의 바탕이 되는 원료·자재 생산</td></tr>
-        <tr><td>㉡</td><td>공영 공업</td><td>민간 기업이 이익 극대화를 위해 자유롭게 운영하는 공업</td></tr>
-        <tr><td>㉢</td><td>산업 소프트화</td><td>하드웨어보다 서비스·정보·지식의 가치 비중이 높아지는 현상</td></tr>
-        <tr><td>㉣</td><td>HACCP</td><td>식품의 원재료부터 최종 소비까지 위해요소를 차단하는 기준</td></tr>
-        <tr><td>㉤</td><td>정밀 화학 공업</td><td>나프타를 원료로 에틸렌·프로필렌 등 기초 원료를 생산</td></tr>
-      </tbody>
-    </table></div>`,
-    choices: [
-      '㉠, ㉡, ㉢',
-      '㉠, ㉢, ㉣',
-      '㉡, ㉣, ㉤',
-      '㉠, ㉡, ㉤',
-      '㉢, ㉣, ㉤'
-    ],
-    answer: 1,
-    exp: '㉡ 틀림(공영 공업은 국가·지자체가 공공 이익을 위해 운영), ㉤ 틀림(나프타→에틸렌·프로필렌은 석유 화학 공업, 정밀 화학은 의약품·화장품·염료). ㉠✓, ㉢✓, ㉣✓'
-  },
-  // 하드 추가 10문제
-  {
-    type: 'mc_hard',
-    fmt: '상황 판단형',
-    q: '다음 A 공장의 입지 결정 과정에서 적용된 이론으로 가장 적절한 것은?',
-    htmlContent: `<div class="hq-box">
-      A 공장은 입지를 결정하기 위해 세 가지 요소를 분석했다.<br><br>
-      1. 원료 산지에서 시장까지의 운송비 비교<br>
-      2. 지역별 노동력 임금 차이로 인한 비용 절감 가능성<br>
-      3. 인근 기업들과의 집적으로 얻을 수 있는 이익<br><br>
-      → 이 세 요소를 종합 분석하여 총 생산비가 가장 낮은 지점을 최적 입지로 선택
-    </div>`,
-    choices: [
-      '베버(Weber)의 최소 비용 이론',
-      '클라크(Clark)의 산업 구조 이론',
-      '호프만(Hoffmann)의 생산재/소비재 분류 이론',
-      '적환지 입지 이론',
-      '시장 지향형 입지 이론'
-    ],
-    answer: 0,
-    exp: '운송비, 노동비, 집적 이익 세 가지를 종합하여 최소 생산비 지점을 최적 입지로 보는 것은 베버(Weber)의 최소 비용 이론입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '빈칸 완성형',
-    q: '다음 빈칸 ㉠, ㉡에 들어갈 말이 바르게 짝지어진 것은?',
-    htmlContent: `<div class="hq-box">
-      섬유 공업의 생산 공정은 원료에서 실을 뽑는 ( ㉠ ) 단계에서 시작하여, 실을 가로세로로 엮어 옷감을 만드는 제직·편성, 색을 입히는 염색·가공을 거쳐 최종적으로 옷감을 재단하고 꿰매는 ( ㉡ ) 단계로 완성된다.
-    </div>`,
-    choices: [
-      '㉠ 봉제 — ㉡ 제사·방적',
-      '㉠ 제사·방적 — ㉡ 봉제',
-      '㉠ 염색·가공 — ㉡ 제직·편성',
-      '㉠ 제직·편성 — ㉡ 염색·가공',
-      '㉠ 봉제 — ㉡ 염색·가공'
-    ],
-    answer: 1,
-    exp: '섬유 공정의 시작은 제사·방적(실 뽑기), 마지막은 봉제(의류 완성)입니다. ㉠=제사·방적, ㉡=봉제.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '옳고 그름 판단형',
-    q: '다음 보기 중 경공업의 특징으로 옳은 것을 모두 고른 것은?',
-    htmlContent: `<div class="hq-box">
-      ㄱ. 노동 집약적 성격이 강하며 적은 자본으로 시작 가능하다.<br>
-      ㄴ. 주로 소비재(옷, 신발 등)를 생산하며 고용 창출 효과가 크다.<br>
-      ㄷ. 우리나라는 1970년대 이후 경공업 비중이 더욱 확대되었다.<br>
-      ㄹ. 최근에는 기능성 소재, 친환경, ICT 융합 등 고부가가치 방향으로 변화하고 있다.
-    </div>`,
-    choices: [
-      'ㄱ, ㄴ, ㄷ, ㄹ 모두',
-      'ㄱ, ㄴ, ㄹ',
-      'ㄴ, ㄷ, ㄹ',
-      'ㄱ, ㄷ',
-      'ㄴ, ㄹ'
-    ],
-    answer: 1,
-    exp: 'ㄷ이 틀렸습니다. 우리나라는 1970년대 이후 경공업에서 중화학 공업 중심으로 비중이 이동했습니다. ㄱ, ㄴ, ㄹ은 옳은 설명입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '인과 관계 분석형',
-    q: '다음 현상의 원인으로 가장 적절한 것은?',
-    htmlContent: `<div class="hq-box">
-      <div class="hq-box-title">현상</div>
-      우리나라의 포항, 광양, 울산, 거제 등의 도시에는 철강 공업, 자동차 공업, 조선 공업 등 중화학 공업 단지가 주로 해안가에 집중되어 있다.
-    </div>`,
-    choices: [
-      '해안 지역은 기후가 온화하여 근로자 생활에 유리하기 때문이다',
-      '원료를 수입하고 완성품을 수출하기 위한 운송 비용 절감이 유리하기 때문이다',
-      '해안 지역의 토지 가격이 내륙보다 저렴하기 때문이다',
-      '해안 지역에 풍부한 노동력이 집중되어 있기 때문이다',
-      '정부의 해안 개발 정책에 따른 강제적 배치 때문이다'
-    ],
-    answer: 1,
-    exp: '중화학 공업은 원자재 수입과 제품 수출의 비중이 크기 때문에 항구(임해 지역)에 위치해야 운송비를 최소화할 수 있습니다. 이것이 임해 공업 지역 형성의 핵심 이유입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '개념 비교형',
-    q: '석유 화학 공업과 정밀 화학 공업을 비교한 내용으로 옳은 것은?',
-    htmlContent: `<div class="hq-table-wrap"><table class="hq-table">
-      <thead><tr><th>구분</th><th>석유 화학 공업</th><th>정밀 화학 공업</th></tr></thead>
-      <tbody>
-        <tr><td>원료</td><td>?</td><td>석유 화학 제품</td></tr>
-        <tr><td>주요 생산품</td><td>에틸렌, 프로필렌 등</td><td>?</td></tr>
-        <tr><td>성격</td><td>기초 원료 공급</td><td>고부가가치 최종 제품</td></tr>
-      </tbody>
-    </table></div>`,
-    choices: [
-      '석유 화학 원료는 천연가스이며, 정밀 화학 생산품은 강철이다',
-      '석유 화학 원료는 나프타(석유)이며, 정밀 화학 생산품은 의약품·화장품·염료 등이다',
-      '석유 화학 원료는 철광석이며, 정밀 화학 생산품은 합성섬유이다',
-      '석유 화학 원료는 나프타이며, 정밀 화학 생산품은 에틸렌·프로필렌이다',
-      '석유 화학 원료는 석탄이며, 정밀 화학 생산품은 나프타이다'
-    ],
-    answer: 1,
-    exp: '석유 화학 공업의 원료는 나프타(석유)이며, 이를 가공한 제품을 다시 원료로 받아 의약품·화장품·염료 등 고부가가치 제품을 만드는 것이 정밀 화학 공업입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '시대적 흐름 파악형',
-    q: '다음 우리나라 산업 발달의 흐름에서 ㉠, ㉡에 들어갈 내용이 바르게 연결된 것은?',
-    htmlContent: `<div class="hq-arrow-flow">
-      <div class="hq-flow-box">1960년대<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉠ ) 중심<br>수출 주도 성장</span></div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-box">1970년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉡ ) 중심<br>산업 고도화</span></div>
-      <div class="hq-flow-arrow">→</div>
-      <div class="hq-flow-box">1990년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">전자·반도체<br>고부가가치 산업</span></div>
-    </div>`,
-    choices: [
-      '㉠ 중화학 공업 — ㉡ 경공업',
-      '㉠ 경공업 — ㉡ 중화학 공업',
-      '㉠ 첨단 공업 — ㉡ 경공업',
-      '㉠ 경공업 — ㉡ 첨단 공업',
-      '㉠ 농업 — ㉡ 경공업'
-    ],
-    answer: 1,
-    exp: '우리나라는 1960년대 섬유·신발 등 경공업으로 수출 성장을 이루었고, 1970년대 이후 철강·자동차·조선 등 중화학 공업 중심으로 산업 구조가 고도화되었습니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '신소재 적용형',
-    q: '다음 각 신소재와 그 특징·활용이 바르게 연결되지 않은 것은?',
-    htmlContent: `<div class="hq-box">
-      ① 초전도 재료 — 특정 저온에서 전기 저항 0, 강력한 자기장 형성 가능<br>
-      ② 형상 기억 합금 — 변형 후 특정 온도에서 원래 형태로 복원<br>
-      ③ 파인 세라믹스 — 고온·부식·충격에 강한 세라믹 소재<br>
-      ④ 나노 소재 — 10억 분의 1미터 단위 초미세 구조로 고성능 특성 부여<br>
-      ⑤ 합성 섬유 — 고온에서 전기 저항이 0이 되는 특성을 가진 소재
-    </div>`,
-    choices: ['①', '②', '③', '④', '⑤'],
-    answer: 4,
-    exp: '⑤가 틀렸습니다. 합성 섬유(나일론, 폴리에스테르)는 강도가 높고 구김이 적은 섬유 소재이며, 고온에서 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '6T 적용 판단형',
-    q: '다음 각 사례에 해당하는 6T 기술이 바르게 연결된 것은?',
-    htmlContent: `<div class="hq-table-wrap"><table class="hq-table">
-      <thead><tr><th>사례</th><th>해당 기술</th></tr></thead>
-      <tbody>
-        <tr><td>A. 유전자 편집으로 신약 개발</td><td>(가)</td></tr>
-        <tr><td>B. 인공위성을 통한 재해 예측</td><td>(나)</td></tr>
-        <tr><td>C. 게임·애니메이션·디지털 영상 제작</td><td>(다)</td></tr>
-        <tr><td>D. 태양광 발전 및 폐기물 재활용 기술</td><td>(라)</td></tr>
-      </tbody>
-    </table></div>`,
-    choices: [
-      'A-IT, B-ST, C-CT, D-ET',
-      'A-BT, B-ST, C-CT, D-ET',
-      'A-BT, B-NT, C-IT, D-ET',
-      'A-NT, B-ST, C-BT, D-CT',
-      'A-BT, B-IT, C-CT, D-NT'
-    ],
-    answer: 1,
-    exp: 'A(유전자 편집·신약) = BT(생명공학기술), B(인공위성·재해 예측) = ST(우주항공기술), C(게임·영상) = CT(문화콘텐츠기술), D(태양광·재활용) = ET(환경기술)'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '인쇄 방식 종합 판단형',
-    q: '다음 인쇄 방식에 대한 설명 중 옳은 것끼리 묶인 것은?',
-    htmlContent: `<div class="hq-box">
-      ㄱ. 볼록판 인쇄는 판의 높은 부분에 잉크를 묻혀 도장·활판 인쇄 등에 활용된다.<br>
-      ㄴ. 오목판(그라비어) 인쇄는 물과 기름의 반발 원리를 이용한다.<br>
-      ㄷ. 평판 인쇄(오프셋)는 신문·잡지·교과서 인쇄에 가장 널리 활용된다.<br>
-      ㄹ. 공판 인쇄는 판의 구멍을 통해 잉크를 통과시키는 방식으로 티셔츠 프린팅에 활용된다.
-    </div>`,
-    choices: [
-      'ㄱ, ㄴ, ㄷ, ㄹ 모두',
-      'ㄱ, ㄷ, ㄹ',
-      'ㄴ, ㄷ, ㄹ',
-      'ㄱ, ㄴ',
-      'ㄷ, ㄹ'
-    ],
-    answer: 1,
-    exp: 'ㄴ이 틀렸습니다. 물과 기름의 반발 원리는 평판 인쇄(오프셋)의 특징입니다. 오목판은 홈에 잉크를 채우는 방식입니다. ㄱ, ㄷ, ㄹ은 옳습니다.'
-  },
-  {
-    type: 'mc_hard',
-    fmt: '경제적 역할 분석형',
-    q: '다음 중 자동차 공업의 전후방 연쇄 효과에 해당하지 않는 것은?',
-    htmlContent: `<div class="hq-box">
-      자동차 공업은 약 2~3만 개의 부품이 필요한 종합 조립 산업으로, 관련 산업에 미치는 파급 효과가 매우 크다.
-    </div>`,
-    choices: [
-      '자동차 생산을 위해 철강·유리·고무 산업이 함께 성장한다',
-      '자동차 보급으로 주유소·정비소·보험업 등 서비스 산업이 발달한다',
-      '자동차 공장 건설로 지역 고용이 증가하고 지역 경제가 활성화된다',
-      '자동차 수출 증가로 국가 외화 수입이 늘어난다',
-      '자동차 공업이 발달하면 조선 공업의 주문 생산 방식이 표준화된다'
-    ],
-    answer: 4,
-    exp: '조선 공업의 주문 생산 방식은 자동차 공업과 무관합니다. 자동차 공업의 전후방 연쇄 효과는 철강·유리·고무 등 소재 산업(후방)과 정비·보험·주유 등 서비스(전방)에 나타납니다.'
-  }
+    fmt: '표 오류 찾기',
+    q: '다음 표에서 설명이 옳지 않은 항목은?',
+    htmlContent: `<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th></th><th>개념</th><th>설명</th></tr></thead><tbody>${tableRows}</tbody></table></div>`,
+    choices: labels.slice(0, 4),
+    answer: allRows.indexOf(pickedWrong),
+    exp: `${wrongLabel}이 틀렸습니다. ${pickedWrong.fix} 옳은 항목: ${correctLabels}`
+  };
+}
+
+// ════════════════════════════════════════════════
+// 노말 문제 50문항
+// ════════════════════════════════════════════════
+const NORMAL_QUESTIONS = [
+  {type:'mc',q:'공업의 정의로 가장 올바른 것은?',choices:['자연의 생산물을 가공하여 중간재나 최종 생산물을 창출하고 부가가치를 높이는 산업활동','자연환경을 보호하며 생태계를 관리하는 산업활동','1차 산업에서 생산된 농산물을 유통하는 활동','지식과 정보를 기반으로 서비스를 제공하는 활동','토지를 개간하고 작물을 재배하는 농업 활동','원자재를 수입하여 타국에 판매하는 무역 활동'],answer:0,exp:'공업은 자연의 생산물을 가공하는 제조 과정을 통해 중간재나 최종 생산물을 창출하여 부가가치를 높이는 산업활동입니다.'},
+  {type:'mc',q:'공업 발달을 위한 인적 자원에 해당하지 않는 것은?',choices:['넓은 평야','노동력','기술 및 능력','창의적 생각','협동심','전문 교육을 받은 기술자'],answer:0,exp:'넓은 평야는 자연적 조건이지 인적자원이 아닙니다. 인적자원에는 노동력, 기술 및 능력, 창의적 생각, 협동심이 포함됩니다.'},
+  {type:'mc',q:'시장 지향형 공업의 대표적인 예로 가장 적절한 것은?',choices:['얼음 제조 공업','철강 공업','조선 공업','석유 화학 공업','자동차 공업','시멘트 공업'],answer:0,exp:'얼음 제조 공업은 제품이 무겁고 부피가 크며 변질되기 쉬워 소비자와 가까운 시장 주변에 입지하는 시장 지향형 공업의 대표 예입니다.'},
+  {type:'mc',q:'중세 길드(guild) 제도에 대한 설명으로 옳은 것은?',choices:['중세 상공업자들의 상호 부조적 동업 조합이다','대량 생산 체제를 갖춘 현대식 공장 제도이다','국가가 자본을 출자하여 경영하는 공영 공업이다','소비자 중심의 서비스 산업 조합이다','산업혁명 이후 생겨난 노동자 보호 조합이다','원료 수급을 위해 만들어진 국제 무역 연합이다'],answer:0,exp:'길드(guild)는 중세 상공업자들이 만든 상호 부조적 동업 조합으로, 장인(숙련된 기술자)들이 직인과 도제를 두고 생산 활동을 주도했습니다.'},
+  {type:'mc',q:'근대 산업 사회(산업혁명)의 특징으로 가장 거리가 먼 것은?',choices:['지식 정보 중심 사회로 전환','공장 제도의 확립','대량 생산 체제 구축','2차 산업의 비중 급격히 증가','증기 기관의 발명과 보급','면직물 공업의 급속한 발달'],answer:0,exp:'지식 정보 중심 사회는 현대 사회의 특징입니다. 근대 산업 사회(산업혁명)는 공장 제도 확립, 대량 생산 체제, 2차 산업(제조업) 비중 급증이 핵심 특징입니다.'},
+  {type:'mc',q:'베버(Weber)의 최소 비용 이론에서 최적의 공업 입지로 보는 지점은?',choices:['운송비, 노동비, 집적 이익을 종합적으로 고려하여 생산비를 최소화할 수 있는 지점','소비자와 가장 가까운 지점','원료 산지에 가장 가까운 지점','항구와 가장 인접한 임해 지역','토지 가격이 가장 낮은 농촌 지역','정부 산업단지가 조성된 지역'],answer:0,exp:'베버의 최소 비용 이론은 운송비, 노동비, 집적 이익을 종합적으로 고려하여 생산비가 가장 최소화되는 지점이 최적의 공업 입지라는 이론입니다.'},
+  {type:'mc',q:'장치 공업의 특징으로 옳지 않은 것은?',choices:['노동집약적 성격이 강하다','거대한 설비가 필수적이다','고도의 자동화 시스템이 필요하다','대규모 자본 투자가 요구된다','자본 집약적 산업으로 분류된다','석유 화학, 제철이 대표적인 예이다'],answer:0,exp:'장치 공업은 자본 집약적 산업으로 거대한 설비와 고도의 자동화, 대규모 자본이 필요합니다. 노동집약적 성격은 경공업의 특징입니다.'},
+  {type:'mc',q:'1960년대 우리나라 산업 발달의 특징으로 옳은 것은?',choices:['경공업 중심의 수출 주도형 성장 정책','중화학 공업 중심의 내수 지향형 성장','첨단 기술 산업 중심의 산업 구조','서비스업 중심의 3차 산업 비중 증가','반도체 수출을 통한 고부가가치 성장','자동차 공업을 바탕으로 한 조립 산업 육성'],answer:0,exp:'1960년대 우리나라는 섬유, 신발 등 경공업 중심으로 풍부한 노동력을 바탕으로 한 수출 주도형 성장 정책을 추진했습니다.'},
+  {type:'mc',q:'철강 공업의 3대 공정을 순서대로 바르게 나열한 것은?',choices:['제선 → 제강 → 압연','제강 → 제선 → 압연','압연 → 제선 → 제강','제선 → 압연 → 제강','압연 → 제강 → 제선','제강 → 압연 → 제선'],answer:0,exp:'철강 공업의 순서는 제선(용광로에서 쇳물 생산) → 제강(불순물 제거, 강철 생산) → 압연(롤러로 판/봉 형태로 성형) 입니다.'},
+  {type:'mc',q:'전자 공업의 3대 특성으로 모두 맞는 것은?',choices:['지식 집약적, 고부가가치, 저자원·저에너지 소비형','노동 집약적, 저부가가치, 고자원 소비형','자본 집약적, 고부가가치, 고에너지 소비형','기술 집약적, 저부가가치, 저자원 소비형','노동 집약적, 고부가가치, 저에너지 소비형','자본 집약적, 저부가가치, 고자원 소비형'],answer:0,exp:'전자 공업(반도체 포함)은 지식 집약적, 고부가가치, 저자원·저에너지 소비형 산업이 3대 특성입니다.'},
+  {type:'mc',q:'섬유 공업의 생산 공정을 순서대로 바르게 나열한 것은?',choices:['제사·방적 → 제직·편성 → 염색·가공 → 봉제','염색·가공 → 제직·편성 → 제사·방적 → 봉제','봉제 → 제사·방적 → 제직·편성 → 염색·가공','제직·편성 → 제사·방적 → 봉제 → 염색·가공','봉제 → 염색·가공 → 제사·방적 → 제직·편성','염색·가공 → 봉제 → 제직·편성 → 제사·방적'],answer:0,exp:'섬유 공업의 생산 공정 순서: 제사·방적(실 뽑기) → 제직·편성(옷감 짜기) → 염색·가공(색 입히기) → 봉제(완제품 제작)'},
+  {type:'mc',q:'인쇄 방식 중 지폐, 증권 등 정밀 인쇄에 사용되는 방식은?',choices:['오목판 인쇄','볼록판 인쇄','평판 인쇄','공판 인쇄','디지털 인쇄','잉크젯 인쇄'],answer:0,exp:'오목판(그라비어) 인쇄는 판의 낮은 홈에 잉크를 채우는 방식으로, 지폐·증권·정밀 인쇄에 사용됩니다.'},
+  {type:'mc',q:'HACCP에 대한 설명으로 옳은 것은?',choices:['식품의 원재료부터 최종 소비까지 위해요소를 차단하는 위해도 중점관리기준','식품의 맛과 영양 성분을 분석하는 기준','식품의 유통기한을 연장하는 특수 가공 기술','식품 수출을 위한 국제 인증 시스템','식품의 가격을 안정시키는 정부 규제 제도','식품 첨가물의 허용량을 정하는 국제 기준'],answer:0,exp:'HACCP은 식품의 원재료부터 최종 소비에 이르기까지 모든 단계에서 위해요소를 차단하는 위해도 중점관리기준입니다.'},
+  {type:'mc',q:'화학 공업에서 석유(나프타)를 원료로 에틸렌, 프로필렌 등 기초 원료를 생산하는 공업은?',choices:['석유 화학 공업','정밀 화학 공업','바이오 화학 공업','고분자 화학 공업','무기 화학 공업','천연가스 화학 공업'],answer:0,exp:'석유 화학 공업은 석유(나프타)를 원료로 에틸렌, 프로필렌 등 기초 화학 원료를 생산합니다.'},
+  {type:'mc',q:'6T 첨단 기술 중 생명체 현상을 이용하며 윤리적 문제(복제)가 존재하는 기술은?',choices:['BT(생명공학기술)','IT(정보통신기술)','NT(나노기술)','ST(우주항공기술)','ET(환경기술)','CT(문화콘텐츠기술)'],answer:0,exp:'BT(생명공학기술)는 생명체 현상을 이용한 기술로 유전자 치료, 신약 개발, 바이오 에너지 등에 활용되며, 복제 등 윤리적 문제가 존재합니다.'},
+  {type:'mc',q:'초전도 재료의 특징으로 옳은 것은?',choices:['특정 온도 이하에서 전기 저항이 0이 되는 소재','고온에서도 형태를 유지하는 소재','원래 모양을 기억하는 합금','고온·부식에 강한 세라믹 소재','빛을 전기로 변환하는 반도체 소재','충격에 강한 탄소 섬유 복합 소재'],answer:0,exp:'초전도 재료는 특정 온도 이하에서 전기 저항이 0이 되는 현상을 이용한 소재로, 강력한 자기장 형성이 가능합니다.'},
+  {type:'mc',q:'조선 공업의 특징으로 가장 옳은 것은?',choices:['주문 생산 방식이며 노동 집약적 성격이 강하다','표준화된 완전 자동화 방식으로 대량 생산','2~3만 개의 부품이 들어가는 종합 조립 산업','자본 집약적이며 소규모 설비로 생산 가능하다','소비재 생산 중심으로 시장 지향형 입지가 유리하다','고부가가치 전자 부품을 주로 생산한다'],answer:0,exp:'조선 공업은 거대한 배를 만드는 산업으로 표준화된 자동화보다는 주문 생산 방식을 취하며, 노동 집약적 성격이 강합니다.'},
+  {type:'mc',q:'산업 구조 고도화의 일반적인 발전 순서로 옳은 것은?',choices:['1차 산업 → 2차 산업 → 3차 산업','3차 산업 → 1차 산업 → 2차 산업','2차 산업 → 1차 산업 → 3차 산업','1차 산업 → 3차 산업 → 2차 산업','2차 산업 → 3차 산업 → 1차 산업','3차 산업 → 2차 산업 → 1차 산업'],answer:0,exp:'산업 구조 고도화 순서: 1차 산업(농·임·수산업) → 2차 산업(제조업) → 3차 산업(서비스·지식·정보) 중심으로 발전합니다.'},
+  {type:'mc',q:'중화학 공업의 입지 조건으로 가장 적합한 곳은?',choices:['원료 수입과 제품 수출이 편리한 임해 지역(항구)','풍부한 노동력이 있는 내륙 대도시','소비자와 가까운 대형 쇼핑몰 주변','자연환경이 우수한 산간 지역','정부 행정 기관과 인접한 수도권 지역','대학 연구 기관이 집중된 학술 도시'],answer:0,exp:'중화학 공업은 원료 수입과 제품 수출 비중이 크기 때문에 원료와 제품의 운반이 편리한 임해 지역(항구)에 입지하는 것이 가장 유리합니다.'},
+  {type:'mc',q:'자동차 공업에 대한 설명으로 옳지 않은 것은?',choices:['주문 생산 방식이 주류이며 표준화가 어렵다','약 2~3만 개의 부품이 들어가는 종합 조립 산업이다','전후방 연쇄 효과가 매우 크다','미래 키워드는 전기차, 자율주행, 수소차 등이다','관련 산업(철강, 유리, 고무 등)에 미치는 파급 효과가 크다','대량 생산 체제와 표준화된 공정을 갖추고 있다'],answer:0,exp:'주문 생산 방식과 노동 집약적 성격은 조선 공업의 특징입니다. 자동차 공업은 표준화된 대량 생산 방식의 종합 조립 산업입니다.'},
+  {type:'mc',q:'다음 중 클라크(Clark)의 산업 분류에 해당하지 않는 것은?',choices:['생산재 산업','1차 산업','2차 산업','3차 산업','농·임·수산업(1차)','서비스업(3차)'],answer:0,exp:'생산재/소비재 산업은 호프만의 분류입니다. 클라크는 1차(농·임·수산업), 2차(제조업), 3차(서비스업)로 산업을 분류했습니다.'},
+  {type:'mc',q:'합성 섬유의 특징으로 옳지 않은 것은?',choices:['해충에 약하고 구김이 잘 생긴다','강도가 높다','대량 생산이 용이하다','나일론, 폴리에스테르 등이 대표적이다','구김이 적다','해충에 강하다'],answer:0,exp:'합성섬유(나일론, 폴리에스테르 등)는 강도가 높고 대량 생산이 용이하며, 해충에 강하고 구김이 적은 것이 특징입니다.'},
+  {type:'mc',q:'인쇄 방식 중 신문, 잡지, 교과서 인쇄에 주로 사용되는 방식은?',choices:['평판 인쇄(오프셋)','볼록판 인쇄','오목판 인쇄','공판 인쇄','그라비어 인쇄','디지털 잉크젯 인쇄'],answer:0,exp:'평판 인쇄(오프셋)는 물과 기름의 반발 원리를 이용한 방식으로, 신문·잡지·교과서 인쇄에 가장 널리 사용됩니다.'},
+  {type:'mc',q:'6T 기술 중 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하는 기술은?',choices:['ET(환경기술)','IT(정보통신기술)','BT(생명공학기술)','NT(나노기술)','ST(우주항공기술)','CT(문화콘텐츠기술)'],answer:0,exp:'ET(환경기술)는 오염 방지, 자원 효율 극대화, 재생 에너지를 핵심으로 하며 태양광 발전, 폐기물 재활용, 스마트 그리드 등에 활용됩니다.'},
+  {type:'mc',q:'공영 공업의 특징으로 옳은 것은?',choices:['국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업이다','민간 기업이 이윤 극대화를 목적으로 운영하는 공업이다','소규모 자본으로 시작 가능한 경공업의 일종이다','외국 자본을 유치하여 수출 위주로 운영하는 공업이다','노동 집약적 방식으로 저임금 노동자를 활용하는 공업이다','소비자 협동조합이 운영하는 공업 형태이다'],answer:0,exp:'공영 공업은 국가나 지방 공공 단체가 자본을 출자하고 경영하는 공업으로, 주로 공공의 이익과 직결되거나 막대한 자본이 필요한 분야에서 운영됩니다.'},
+  {type:'mc',q:'기계 공업의 역할로 가장 옳은 것은?',choices:['다른 산업에 생산 설비(기계)를 공급하는 기초 산업이다','소비자에게 직접 완제품을 판매하는 최종 소비재 산업이다','천연자원을 채굴하여 공급하는 1차 산업의 일부이다','정보통신 기술을 기반으로 하는 첨단 서비스 산업이다','농산물 가공을 위한 식품 공업의 하위 분류이다','에너지 절약을 목적으로 하는 환경 친화적 산업이다'],answer:0,exp:'기계 공업은 다른 산업에 생산 설비(기계)를 공급하는 기초 산업의 핵심으로, 자동차·조선·전자 등 다양한 제조업의 토대가 됩니다.'},
+  // 제품 분류 문제
+  {type:'mc',q:'제품을 내구성에 따라 분류할 때, 비내구재에 해당하는 것은?',choices:['식료품, 의류, 화장품, 의약품','가전제품, 자동차, 가구, 기계류','생산 장비, 실험 장비, 반도체','농산물, 수산물, 천연자원','사무 용품, 청소 용품','자본재에 해당하는 기계'],answer:0,exp:'비내구재는 한 번 또는 단기간 사용 후 소비되는 제품으로, 식료품·의류·화장품·의약품 등이 해당합니다.'},
+  {type:'mc',q:'내구재의 예로 가장 옳은 것은?',choices:['가전제품, 자동차, 가구, 기계류','식료품, 의류, 화장품','사무 용품, 청소 용품, 소모품','농산물, 수산물, 천연자원','의약품, 세제, 식품','인터넷 서비스, 소프트웨어'],answer:0,exp:'내구재는 오랜 기간 반복 사용이 가능한 제품으로, 가전제품·자동차·가구·기계류 등이 해당합니다.'},
+  {type:'mc',q:'소비재를 사용 목적에 따라 세 가지로 분류할 때, 해당하지 않는 것은?',choices:['자본재','편의품','선매품','전문품','일상용품','고급품'],answer:0,exp:'소비재는 사용 목적에 따라 편의품, 선매품, 전문품으로 분류됩니다. 자본재는 생산 활동에 사용되는 별도의 분류입니다.'},
+  {type:'mc',q:'편의품의 특징으로 옳은 것은?',choices:['구매가 쉽고 일상적으로 자주 구입하는 제품이다','여러 제품을 비교 분석하여 구입하는 제품이다','특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품이다','생산 활동에 사용되는 기계·장비류이다','소모가 빠르고 단기간에 사용되는 제품이다','내구성이 높고 오래 사용할 수 있는 제품이다'],answer:0,exp:'편의품은 구매가 쉽고 일상적으로 자주 구입하는 식료품·신문 등이 대표적입니다.'},
+  {type:'mc',q:'선매품의 예로 가장 적절한 것은?',choices:['가구, 의류, 가전제품','식료품, 신문','카메라, 자동차, 음향 기기','사무 용품, 청소 용품','생산 장비, 실험 장비','의약품, 화장품'],answer:0,exp:'선매품은 소비자가 여러 제품을 놓고 가격·품질 등을 비교 분석하여 구입하는 제품으로, 가구·의류·가전제품 등이 해당합니다.'},
+  {type:'mc',q:'전문품의 특징으로 옳은 것은?',choices:['특정 브랜드를 위해 특별한 노력을 들여 구입하는 제품이다','일상적으로 자주 구매하며 구매 노력이 적은 제품이다','여러 제품을 비교 분석하여 구입하는 제품이다','단기간 사용 후 소비되는 비내구재이다','생산에 사용되는 기계·장비류에 해당한다','농산물·수산물처럼 자연에서 얻는 제품이다'],answer:0,exp:'전문품은 소비자가 특정 브랜드나 제품을 얻기 위해 특별한 노력을 기울이는 제품으로, 카메라·자동차·음향 기기 등이 대표적입니다.'},
+  {type:'mc',q:'생산재 중 자본재에 해당하는 것은?',choices:['생산 장비, 실험 장비, 반도체, 기계류','농산물, 수산물, 천연자원, 옷감','사무 용품, 청소 용품, 설비 보수 용품','식료품, 의류, 화장품','가전제품, 자동차, 가구','카메라, 음향 기기, 자동차'],answer:0,exp:'자본재는 생산 활동에 사용되는 기계·장비로, 생산 장비·실험 장비·반도체·기계류 등이 해당합니다.'},
+  {type:'mc',q:'생산재 중 소모품의 예로 가장 적절한 것은?',choices:['사무 용품, 청소 용품, 설비 보수 용품','생산 장비, 실험 장비, 기계류','농산물, 수산물, 천연자원','가전제품, 자동차, 가구','의약품, 화장품, 식료품','카메라, 음향 기기, 자동차'],answer:0,exp:'소모품은 생산 과정에서 소비되는 용품으로, 사무 용품·청소 용품·설비 보수 용품 등이 해당합니다.'},
+  {type:'mc',q:'재료 및 부품에 해당하는 예로 옳은 것은?',choices:['농산물, 수산물, 천연자원, 옷감, 강판 등','생산 장비, 실험 장비, 반도체, 기계류','사무 용품, 청소 용품, 설비 보수 용품','가전제품, 자동차, 가구','식료품, 의류, 화장품','카메라, 음향 기기, 전문 의료 기기'],answer:0,exp:'재료 및 부품은 다른 제품 생산에 투입되는 원자재로, 농산물·수산물·천연자원·옷감·강판 등이 해당합니다.'},
+  {type:'mc',q:'다음 중 제품을 "내구성에 따른 분류"와 "사용 목적에 따른 분류" 두 기준 모두에 속할 수 있는 것은?',choices:['자동차 (내구재이자 선매품)','식료품 (내구재이자 편의품)','사무 용품 (비내구재이자 자본재)','신문 (내구재이자 전문품)','화장품 (내구재이자 전문품)','생산 장비 (비내구재이자 편의품)'],answer:0,exp:'자동차는 내구성에 따른 분류에서는 내구재, 사용 목적에 따른 분류에서는 소비자가 비교 구매하는 선매품이자 특정 브랜드를 선호하는 전문품적 성격도 가집니다.'},
+  // 단답형
+  {type:'sa',q:'철강 공업에서 용광로에 철광석을 넣어 쇳물을 뽑아내는 첫 번째 공정의 이름을 쓰시오.',answers:['제선'],exp:'제선은 용광로에 철광석을 넣어 쇳물을 뽑아내는 단계로, 철강 공업 3대 공정의 첫 번째 단계입니다.'},
+  {type:'sa',q:'하드웨어(물질적 생산)보다 서비스, 정보, 지식의 가치 비중이 높아지는 현대 산업의 경향을 무엇이라 하는가?',answers:['소프트화','산업의 소프트화','소프트화 현상'],exp:'산업의 소프트화는 하드웨어보다 서비스·정보·지식 등 무형의 가치 비중이 높아지는 현상으로, 현대 산업 사회의 특징입니다.'},
+  {type:'sa',q:'운송 수단이 바뀌는 지점(예: 항구)에 입지하여 운송비 절감 효과를 극대화하는 입지 유형을 무엇이라 하는가?',answers:['적환지 입지','적환지입지','적환지'],exp:'적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 원료 수입과 제품 수출의 운송비를 절감하는 입지 유형입니다.'},
+  {type:'sa',q:'공판 인쇄 방식의 대표적인 활용 예를 한 가지 쓰시오.',answers:['스크린 인쇄','실크스크린','실크 스크린','티셔츠 인쇄','티셔츠 프린팅','의류 인쇄'],exp:'공판 인쇄는 구멍을 통해 잉크를 통과시키는 방식으로, 스크린 인쇄(티셔츠 프린팅)에 활용됩니다.'},
+  {type:'sa',q:'6T 기술 중 10억 분의 1 단위의 초미세 기술을 의미하는 기술의 약어를 쓰시오.',answers:['NT','nt','Nt'],exp:'NT(나노 기술)는 10억 분의 1 단위의 초미세 기술로, 나노 소자·고성능 필터·초경량 소재 등에 활용됩니다.'},
+  // 추가 객관식
+  {type:'mc',q:'정밀 화학 공업의 주요 생산품으로 가장 적절한 것은?',choices:['의약품, 화장품, 염료','에틸렌, 프로필렌','강판, 봉강','반도체, 나노 소자','인공위성 부품','합성섬유, 나일론'],answer:0,exp:'정밀 화학 공업은 석유 화학에서 나온 기초 원료를 바탕으로 의약품·화장품·염료 등 고부가가치 제품을 생산합니다.'},
+  {type:'mc',q:'6T 기술 중 CT(문화콘텐츠기술)의 특징으로 옳은 것은?',choices:['공학, 인문학, 예술, 디자인의 융합 기술이다','10억 분의 1 단위 초미세 기술이다','오염 방지와 재생 에너지를 핵심으로 한다','생명체 현상을 이용한 바이오 기술이다','우주 및 항공기 개발 기술이다','정보의 생성과 전달을 핵심으로 한다'],answer:0,exp:'CT(문화콘텐츠기술)는 공학+인문학+예술+디자인의 융합 기술로, 게임·애니메이션·디지털 영상 처리 등에 활용됩니다.'},
+  {type:'mc',q:'형상 기억 합금의 특징으로 옳은 것은?',choices:['변형 후 특정 온도에서 원래 모양으로 돌아오는 합금이다','특정 저온에서 전기 저항이 0이 되는 소재이다','고온·부식에 강한 세라믹 계열 소재이다','나노 단위로 설계된 초경량 소재이다','빛을 전기로 변환하는 반도체 소재이다','탄소 섬유로 만들어진 복합 재료이다'],answer:0,exp:'형상 기억 합금은 변형 후 특정 온도가 되면 원래 형태로 복원되는 특성이 있는 소재입니다.'},
+  {type:'mc',q:'ST(우주항공기술)의 주요 활용 사례로 옳지 않은 것은?',choices:['유전자 치료 및 신약 개발','인공위성 개발','재해 예측 시스템','고성능 컴퓨터 부품 개발','MRI 의료 기기 개발','항공기 개발'],answer:0,exp:'유전자 치료 및 신약 개발은 BT(생명공학기술)의 활용 사례입니다. ST(우주항공기술)는 인공위성·MRI·재해 예측·고성능 컴퓨터 등에 활용됩니다.'},
+  {type:'mc',q:'IT(정보통신기술)의 핵심 개념으로 옳은 것은?',choices:['정보의 생성, 가공, 전달(시공간 제약 없음)','생명체 현상을 이용한 바이오 기술','10억 분의 1 단위의 초미세 기술','오염 방지와 자원 효율 극대화','우주 및 항공기 개발','공학과 예술의 융합 기술'],answer:0,exp:'IT(정보통신기술)는 정보의 생성, 가공, 전달을 핵심으로 하는 기술로, 시공간의 제약 없이 정보 교환을 가능하게 합니다.'},
+  {type:'mc',q:'고대 사회의 산업 구조 특징으로 옳은 것은?',choices:['자급자족 중심의 경제 체제와 가내 수공업 형태','길드 제도를 통한 장인 중심 생산','공장 제도를 통한 대량 생산','지식·정보 중심의 3차 산업 비중 증가','수출 주도형 경공업 발달','중화학 공업 중심의 산업 고도화'],answer:0,exp:'고대 사회는 자급자족 중심의 경제 체제로, 가내 수공업 형태의 소규모 생산 활동이 이루어졌습니다.'},
+  {type:'mc',q:'소비재를 사용 목적으로 나눌 때 편의품의 예로 적절한 것은?',choices:['식료품, 신문','가구, 의류, 가전제품','카메라, 자동차, 음향 기기','사무 용품, 청소 용품','생산 장비, 실험 장비','농산물, 수산물'],answer:0,exp:'편의품은 구매가 쉽고 자주 구입하는 제품으로, 식료품·신문 등이 대표적입니다.'},
+  {type:'mc',q:'파인 세라믹스(fine ceramics)의 주요 특성으로 옳은 것은?',choices:['고온·부식·충격에 강한 세라믹 소재이다','특정 저온에서 전기 저항이 0이 되는 소재이다','원래 모양을 기억하는 합금 소재이다','나노 단위 초미세 구조의 소재이다','빛을 전기로 변환하는 반도체 소재이다','탄소 섬유 복합 재료이다'],answer:0,exp:'파인 세라믹스는 고온·부식에 강하고 내마모성이 뛰어난 고기능성 세라믹 소재입니다.'},
 ];
 
-// ══════════════════════════════════════════
-//  유틸 함수
-// ══════════════════════════════════════════
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+// ════════════════════════════════════════════════
+// 하드 문제 50문항
+// ════════════════════════════════════════════════
+const HARD_QUESTIONS_STATIC = [
+  {type:'mc_hard',fmt:'공통 개념 찾기',q:'다음 (가)~(다)의 공통점을 가장 잘 설명한 것은?',htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">(가)</div>석유 화학 공업<br>제철 공업</div><div class="hq-col-card"><div class="hq-col-label">(나)</div>거대한 설비 필수<br>고도의 자동화 시스템</div></div><div class="hq-box"><div class="hq-box-title">(다)</div>대규모 자본 투자 요구, 자본 집약적 성격 강함</div>`,choices:['(가)~(다)는 모두 경공업의 특징을 설명한다','(가)~(다)는 모두 장치 공업의 특징에 해당한다','(가)~(다)는 모두 노동 집약적 산업의 특징이다','(가)는 기초 공업, (나)(다)는 공영 공업을 설명한다','(가)~(다)는 모두 시장 지향형 공업의 사례이다'],answer:1,exp:'석유 화학·제철 공업은 장치 공업의 대표 사례이며, 거대 설비·고도 자동화·대규모 자본 투자는 모두 장치 공업의 핵심 특징입니다.'},
+  {type:'mc_hard',fmt:'흐름도 완성형',q:'다음 철강 공업의 생산 흐름도에서 ㉠, ㉡에 들어갈 내용이 바르게 짝지어진 것은?',htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-blank">( ㉠ )</div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">제강<br><span style="font-size:0.72rem;color:var(--text-muted);">불순물 제거, 강철 생산</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-blank">( ㉡ )</div></div><div class="hq-box" style="margin-top:8px;">㉠의 결과물: 쇳물(선철)<br>㉡의 결과물: 강판(슬래브), 봉강 등</div>`,choices:['㉠ 압연 — ㉡ 제선','㉠ 제선 — ㉡ 압연','㉠ 제강 — ㉡ 제선','㉠ 압연 — ㉡ 제강','㉠ 제선 — ㉡ 제강'],answer:1,exp:'제선(용광로→쇳물) → 제강(불순물 제거→강철) → 압연(롤러로 형태 성형). ㉠=제선, ㉡=압연입니다.'},
+  {type:'mc_hard',fmt:'분류 판단형',q:'다음 A~E를 경공업과 중화학 공업으로 분류할 때, 같은 그룹으로 묶인 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>산업</th><th>주요 특징</th></tr></thead><tbody><tr><td>A. 섬유 공업</td><td>노동 집약적, 소비재 생산</td></tr><tr><td>B. 조선 공업</td><td>주문 생산, 노동 집약적, 대형 선박 제조</td></tr><tr><td>C. 식품 공업</td><td>농업과 연계, 소비재 생산</td></tr><tr><td>D. 자동차 공업</td><td>종합 조립 산업, 전후방 연쇄효과 큼</td></tr><tr><td>E. 인쇄 공업</td><td>다양한 판 방식, 출판·포장 등에 활용</td></tr></tbody></table></div>`,choices:['경공업: A,B,C / 중화학: D,E','경공업: A,C,E / 중화학: B,D','경공업: A,B,E / 중화학: C,D','경공업: C,D,E / 중화학: A,B','경공업: A,D / 중화학: B,C,E'],answer:1,exp:'경공업: 섬유(A), 식품(C), 인쇄(E) — 부피 작고 노동 집약적 소비재. 중화학 공업: 조선(B), 자동차(D) — 대규모 자본이 필요한 산업.'},
+  {type:'mc_hard',fmt:'조건 추론형',q:'다음 조건을 모두 만족하는 산업 분류 체계의 이론가와 분류 기준을 옳게 연결한 것은?',htmlContent:`<div class="hq-box"><strong>조건 1.</strong> 산업을 크게 세 가지 차수(次數)로 나눈다.<br><strong>조건 2.</strong> 1차는 농·임·수산업, 2차는 제조업, 3차는 서비스업이다.<br><strong>조건 3.</strong> 산업 구조 고도화의 흐름을 설명하는 데 활용된다.</div>`,choices:['호프만 — 생산재와 소비재 산업으로 분류','클라크 — 1·2·3차 산업으로 분류','베버 — 운송비·노동비·집적이익 기준 분류','호프만 — 1·2·3차 산업으로 분류','클라크 — 생산재와 소비재 산업으로 분류'],answer:1,exp:'클라크는 산업을 1·2·3차 산업으로 분류한 이론가입니다. 호프만은 생산재/소비재로, 베버는 입지론으로 분류합니다.'},
+  {type:'mc_hard',fmt:'빠진 연결고리형',q:'다음 산업 발전 흐름에서 ㉠에 들어갈 내용으로 가장 적절한 것은?',htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-box">고대<br><span style="font-size:0.72rem;color:var(--text-muted);">가내 수공업<br>자급자족</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">중세<br><span style="font-size:0.72rem;color:var(--text-muted);">길드 제도<br>장인 중심</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-blank">( ㉠ )</div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">현대<br><span style="font-size:0.72rem;color:var(--text-muted);">지식·정보<br>소프트화</span></div></div>`,choices:['첨단 산업 사회 — 6T 기술 중심','근대 산업 사회 — 공장제도 확립, 대량 생산, 2차 산업 급성장','농업 중심 사회 — 1차 산업 비중 확대','서비스 중심 사회 — 3차 산업 급성장','공영 공업 사회 — 국가 주도 중화학 공업 육성'],answer:1,exp:'고대(가내수공업) → 중세(길드) → 근대 산업혁명(공장제도·대량생산·2차 산업 급성장) → 현대(지식·정보·소프트화) 순서입니다.'},
+  {type:'mc_hard',fmt:'적용·반박형',q:'다음 주장에 대한 반박으로 가장 적절한 것은?',htmlContent:`<div class="hq-box"><div class="hq-box-title">학생의 주장</div>"조선 공업과 자동차 공업은 둘 다 중화학 공업에 속하고 수많은 부품을 조립하는 방식이므로, 두 산업의 특징은 완전히 동일하다고 볼 수 있다."</div>`,choices:['자동차 공업은 중화학 공업에 해당하지 않으므로 주장이 틀렸다','조선 공업은 주문 생산 방식이 주를 이루는 반면, 자동차 공업은 표준화된 대량 생산이 중심이므로 동일하지 않다','두 산업 모두 전후방 연쇄 효과가 동일하게 크므로 주장이 옳다','자동차 공업이 더 많은 부품을 사용하므로 두 산업은 다르다','조선 공업이 경공업에 해당하므로 두 산업을 같다고 볼 수 없다'],answer:1,exp:'두 산업 모두 조립 산업·중화학 공업이지만, 자동차는 표준화된 대량 생산, 조선은 고객 맞춤 주문 생산 방식이라는 핵심 차이가 있습니다.'},
+  {type:'mc_hard',fmt:'인과 관계 분석형',q:'다음 현상의 원인으로 가장 적절한 것은?',htmlContent:`<div class="hq-box"><div class="hq-box-title">현상</div>우리나라의 포항, 광양, 울산, 거제 등의 도시에는 철강 공업, 자동차 공업, 조선 공업 등 중화학 공업 단지가 주로 해안가에 집중되어 있다.</div>`,choices:['해안 지역은 기후가 온화하여 근로자 생활에 유리하기 때문이다','원료를 수입하고 완성품을 수출하기 위한 운송 비용 절감이 유리하기 때문이다','해안 지역의 토지 가격이 내륙보다 저렴하기 때문이다','해안 지역에 풍부한 노동력이 집중되어 있기 때문이다','정부의 해안 개발 정책에 따른 강제적 배치 때문이다'],answer:1,exp:'중화학 공업은 원자재 수입과 제품 수출의 비중이 크기 때문에 항구(임해 지역)에 위치해야 운송비를 최소화할 수 있습니다.'},
+  {type:'mc_hard',fmt:'개념 비교형',q:'석유 화학 공업과 정밀 화학 공업을 비교한 내용으로 옳은 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>석유 화학 공업</th><th>정밀 화학 공업</th></tr></thead><tbody><tr><td>원료</td><td>?</td><td>석유 화학 제품</td></tr><tr><td>주요 생산품</td><td>에틸렌, 프로필렌 등</td><td>?</td></tr><tr><td>성격</td><td>기초 원료 공급</td><td>고부가가치 최종 제품</td></tr></tbody></table></div>`,choices:['석유 화학 원료는 천연가스이며, 정밀 화학 생산품은 강철이다','석유 화학 원료는 나프타(석유)이며, 정밀 화학 생산품은 의약품·화장품·염료 등이다','석유 화학 원료는 철광석이며, 정밀 화학 생산품은 합성섬유이다','석유 화학 원료는 나프타이며, 정밀 화학 생산품은 에틸렌·프로필렌이다','석유 화학 원료는 석탄이며, 정밀 화학 생산품은 나프타이다'],answer:1,exp:'석유 화학 공업의 원료는 나프타(석유)이며, 이를 가공한 제품을 원료로 받아 의약품·화장품·염료 등을 만드는 것이 정밀 화학 공업입니다.'},
+  {type:'mc_hard',fmt:'시대적 흐름 파악형',q:'다음 우리나라 산업 발달의 흐름에서 ㉠, ㉡에 들어갈 내용이 바르게 연결된 것은?',htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-box">1960년대<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉠ ) 중심<br>수출 주도 성장</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">1970년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">( ㉡ ) 중심<br>산업 고도화</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">1990년대~<br><span style="font-size:0.72rem;color:var(--text-muted);">전자·반도체<br>고부가가치 산업</span></div></div>`,choices:['㉠ 중화학 공업 — ㉡ 경공업','㉠ 경공업 — ㉡ 중화학 공업','㉠ 첨단 공업 — ㉡ 경공업','㉠ 경공업 — ㉡ 첨단 공업','㉠ 농업 — ㉡ 경공업'],answer:1,exp:'1960년대 경공업(섬유·신발) → 1970년대 이후 중화학 공업(철강·자동차·조선) → 1990년대 이후 전자·반도체 순으로 산업이 고도화되었습니다.'},
+  {type:'mc_hard',fmt:'신소재 적용형',q:'다음 각 신소재와 그 특징·활용이 바르게 연결되지 않은 것은?',htmlContent:`<div class="hq-box">① 초전도 재료 — 특정 저온에서 전기 저항 0, 강력한 자기장 형성 가능<br>② 형상 기억 합금 — 변형 후 특정 온도에서 원래 형태로 복원<br>③ 파인 세라믹스 — 고온·부식·충격에 강한 세라믹 소재<br>④ 나노 소재 — 10억 분의 1미터 단위 초미세 구조로 고성능 특성 부여<br>⑤ 합성 섬유 — 고온에서 전기 저항이 0이 되는 특성을 가진 소재</div>`,choices:['①','②','③','④','⑤'],answer:4,exp:'⑤가 틀렸습니다. 합성 섬유(나일론, 폴리에스테르)는 강도가 높고 구김이 적은 섬유 소재이며, 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다.'},
+  {type:'mc_hard',fmt:'6T 적용 판단형',q:'다음 각 사례에 해당하는 6T 기술이 바르게 연결된 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>사례</th><th>해당 기술</th></tr></thead><tbody><tr><td>A. 유전자 편집으로 신약 개발</td><td>(가)</td></tr><tr><td>B. 인공위성을 통한 재해 예측</td><td>(나)</td></tr><tr><td>C. 게임·애니메이션·디지털 영상 제작</td><td>(다)</td></tr><tr><td>D. 태양광 발전 및 폐기물 재활용 기술</td><td>(라)</td></tr></tbody></table></div>`,choices:['A-IT, B-ST, C-CT, D-ET','A-BT, B-ST, C-CT, D-ET','A-BT, B-NT, C-IT, D-ET','A-NT, B-ST, C-BT, D-CT','A-BT, B-IT, C-CT, D-NT'],answer:1,exp:'A(유전자 편집·신약)=BT, B(인공위성·재해 예측)=ST, C(게임·영상)=CT, D(태양광·재활용)=ET'},
+  {type:'mc_hard',fmt:'인쇄 방식 종합 판단형',q:'다음 인쇄 방식에 대한 설명 중 옳은 것끼리 묶인 것은?',htmlContent:`<div class="hq-box">ㄱ. 볼록판 인쇄는 판의 높은 부분에 잉크를 묻혀 도장·활판 인쇄 등에 활용된다.<br>ㄴ. 오목판(그라비어) 인쇄는 물과 기름의 반발 원리를 이용한다.<br>ㄷ. 평판 인쇄(오프셋)는 신문·잡지·교과서 인쇄에 가장 널리 활용된다.<br>ㄹ. 공판 인쇄는 판의 구멍을 통해 잉크를 통과시키는 방식으로 티셔츠 프린팅에 활용된다.</div>`,choices:['ㄱ, ㄴ, ㄷ, ㄹ 모두','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄴ','ㄷ, ㄹ'],answer:1,exp:'ㄴ이 틀렸습니다. 물과 기름의 반발 원리는 평판 인쇄(오프셋)의 특징입니다. 오목판은 홈에 잉크를 채우는 방식입니다. ㄱ, ㄷ, ㄹ은 옳습니다.'},
+  {type:'mc_hard',fmt:'분류 체계 판단형',q:'다음 제품 분류 기준과 그 설명이 바르게 짝지어진 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류 기준</th><th>설명</th></tr></thead><tbody><tr><td>㉠ 내구성에 따른 분류</td><td>?</td></tr><tr><td>㉡ 사용 목적에 따른 분류</td><td>?</td></tr></tbody></table></div><div class="hq-box" style="margin-top:8px;">A. 소비재와 생산재로 나뉜다<br>B. 내구재와 비내구재로 나뉜다</div>`,choices:['㉠-A, ㉡-B','㉠-B, ㉡-A','㉠-A, ㉡-A','㉠-B, ㉡-B','두 기준 모두 동일하다'],answer:1,exp:'내구성에 따른 분류는 내구재/비내구재(B), 사용 목적에 따른 분류는 소비재/생산재(A)로 나뉩니다.'},
+  {type:'mc_hard',fmt:'사례 분류형',q:'다음 A~D 제품을 제품 분류표에 바르게 배치한 것은?',htmlContent:`<div class="hq-box">A. 카메라 (특정 브랜드 고집, 비교적 비쌈)<br>B. 신문 (매일 구매, 저렴, 비교 없이 구입)<br>C. 냉장고 (여러 브랜드 비교 후 구입)<br>D. 생산 공장의 선반 기계 (생산에 사용)</div>`,choices:['A-전문품, B-편의품, C-선매품, D-자본재','A-선매품, B-전문품, C-편의품, D-소모품','A-전문품, B-선매품, C-편의품, D-소모품','A-편의품, B-선매품, C-전문품, D-자본재','A-선매품, B-편의품, C-전문품, D-재료및부품'],answer:0,exp:'A카메라=전문품(특정 브랜드 고집), B신문=편의품(일상적 구매), C냉장고=선매품(비교 구매), D선반기계=자본재(생산용 기계)'},
+  {type:'mc_hard',fmt:'종합 판단형',q:'다음 표의 ㉠~㉤ 중 옳지 않은 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류</th><th>설명</th><th>예시</th></tr></thead><tbody><tr><td>㉠ 편의품</td><td>구매 쉽고 자주 구입</td><td>식료품, 신문</td></tr><tr><td>㉡ 선매품</td><td>여러 제품 비교 후 구입</td><td>가구, 의류, 가전제품</td></tr><tr><td>㉢ 전문품</td><td>특정 브랜드 위해 특별한 노력</td><td>카메라, 음향 기기</td></tr><tr><td>㉣ 자본재</td><td>생산용 기계·장비, 비내구재</td><td>생산 장비, 기계류</td></tr><tr><td>㉤ 소모품</td><td>생산 과정에서 소비되는 용품</td><td>사무 용품, 청소 용품</td></tr></tbody></table></div>`,choices:['㉠','㉡','㉢','㉣','㉤'],answer:3,exp:'㉣이 틀렸습니다. 자본재는 생산용 기계·장비로 내구재에 속합니다. "비내구재"라고 설명한 것이 오류입니다.'},
+  {type:'mc_hard',fmt:'추론형',q:'다음 조건을 모두 만족하는 제품 분류로 가장 적절한 것은?',htmlContent:`<div class="hq-box"><strong>조건 1.</strong> 사용 목적에 따른 분류에서 생산재에 속한다.<br><strong>조건 2.</strong> 내구성에 따른 분류에서 내구재에 속한다.<br><strong>조건 3.</strong> 다른 제품을 만드는 데 사용하는 기계·장비이다.</div>`,choices:['편의품','선매품','자본재','소모품','비내구재'],answer:2,exp:'자본재는 생산재이면서 내구재에 속하고, 다른 제품을 만드는 데 사용하는 기계·장비류입니다. 세 조건을 모두 만족합니다.'},
+  {type:'mc_hard',fmt:'오류 찾기형',q:'다음 제품 분류에 대한 설명 중 옳지 않은 것은?',htmlContent:`<div class="hq-box">① 비내구재는 소비가 빠르고 단기간에 사용되는 제품이다.<br>② 내구재는 오래 사용할 수 있는 제품으로 가전제품, 자동차, 가구 등이 포함된다.<br>③ 전문품은 소비자가 여러 제품을 비교 분석하여 구입하는 제품이다.<br>④ 편의품은 구매가 쉽고 일상적으로 자주 구입하는 제품이다.<br>⑤ 자본재는 생산을 위한 기계·장비이며 동시에 내구재에도 속한다.</div>`,choices:['①','②','③','④','⑤'],answer:2,exp:'③이 틀렸습니다. 여러 제품을 비교 분석하여 구입하는 것은 선매품의 특징입니다. 전문품은 특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품입니다.'},
+  {type:'mc_hard',fmt:'공통점 찾기형',q:'다음 중 소비재와 생산재의 공통점으로 가장 적절한 것은?',htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">소비재</div>편의품, 선매품, 전문품<br>(최종 소비 목적)</div><div class="hq-col-card"><div class="hq-col-label">생산재</div>재료·부품, 자본재, 소모품<br>(생산 활동 목적)</div></div>`,choices:['둘 다 비내구재에만 속한다','둘 다 제품의 사용 목적에 따른 분류에 포함된다','둘 다 편의품의 하위 분류이다','둘 다 내구재에만 속한다','둘 다 클라크의 산업 분류에서 2차 산업에 해당한다'],answer:1,exp:'소비재와 생산재는 모두 제품을 사용 목적에 따라 분류할 때 나타나는 두 가지 대분류입니다.'},
+  {type:'mc_hard',fmt:'적용 판단형',q:'다음 A씨의 구매 상황에서 A씨가 구입한 제품의 분류로 가장 옳은 것은?',htmlContent:`<div class="hq-box"><div class="hq-box-title">상황</div>A씨는 평소 좋아하는 특정 브랜드의 카메라를 구입하기 위해 3개월 동안 돈을 모으고, 멀리 있는 전문 매장까지 방문하였다.</div>`,choices:['편의품','선매품','전문품','비내구재','소모품'],answer:2,exp:'특정 브랜드를 위해 특별한 노력(돈 모으기, 전문 매장 방문)을 들여 구입하는 제품은 전문품입니다.'},
+  {type:'mc_hard',fmt:'경제적 역할 분석형',q:'다음 중 자동차 공업의 전후방 연쇄 효과에 해당하지 않는 것은?',htmlContent:`<div class="hq-box">자동차 공업은 약 2~3만 개의 부품이 필요한 종합 조립 산업으로, 관련 산업에 미치는 파급 효과가 매우 크다.</div>`,choices:['자동차 생산을 위해 철강·유리·고무 산업이 함께 성장한다','자동차 보급으로 주유소·정비소·보험업 등 서비스 산업이 발달한다','자동차 공장 건설로 지역 고용이 증가하고 지역 경제가 활성화된다','자동차 수출 증가로 국가 외화 수입이 늘어난다','자동차 공업이 발달하면 조선 공업의 주문 생산 방식이 표준화된다'],answer:4,exp:'조선 공업의 주문 생산 방식은 자동차 공업과 무관합니다. 자동차 공업의 전후방 연쇄 효과는 철강·유리·고무(후방)와 정비·보험·주유(전방)에 나타납니다.'},
+  {type:'mc_hard',fmt:'분류 적용형',q:'공장에서 제품 생산에 사용하는 "원자재(면화, 강판 등)"와 "생산 기계(로봇 팔, 선반)"의 제품 분류로 옳은 것은?',htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">원자재 (면화, 강판 등)</div>다른 제품의 원료로 투입됨<br>소비 후 사라짐</div><div class="hq-col-card"><div class="hq-col-label">생산 기계 (로봇 팔, 선반)</div>생산에 반복 사용<br>오래 사용 가능</div></div>`,choices:['원자재-자본재, 생산기계-소모품','원자재-재료및부품, 생산기계-자본재','원자재-소모품, 생산기계-재료및부품','원자재-편의품, 생산기계-선매품','원자재-내구재, 생산기계-비내구재'],answer:1,exp:'원자재(면화, 강판)는 재료 및 부품, 생산 기계(로봇 팔, 선반)는 자본재로 분류됩니다.'},
+  {type:'mc_hard',fmt:'상황 판단형',q:'다음 A 공장의 입지 결정 과정에서 적용된 이론으로 가장 적절한 것은?',htmlContent:`<div class="hq-box">A 공장은 입지를 결정하기 위해 세 가지 요소를 분석했다.<br><br>1. 원료 산지에서 시장까지의 운송비 비교<br>2. 지역별 노동력 임금 차이로 인한 비용 절감 가능성<br>3. 인근 기업들과의 집적으로 얻을 수 있는 이익<br><br>→ 이 세 요소를 종합 분석하여 총 생산비가 가장 낮은 지점을 최적 입지로 선택</div>`,choices:['베버(Weber)의 최소 비용 이론','클라크(Clark)의 산업 구조 이론','호프만(Hoffmann)의 생산재/소비재 분류 이론','적환지 입지 이론','시장 지향형 입지 이론'],answer:0,exp:'운송비, 노동비, 집적 이익 세 가지를 종합하여 최소 생산비 지점을 최적 입지로 보는 것은 베버(Weber)의 최소 비용 이론입니다.'},
+  {type:'mc_hard',fmt:'옳고 그름 판단형',q:'다음 보기 중 경공업의 특징으로 옳은 것을 모두 고른 것은?',htmlContent:`<div class="hq-box">ㄱ. 노동 집약적 성격이 강하며 적은 자본으로 시작 가능하다.<br>ㄴ. 주로 소비재(옷, 신발 등)를 생산하며 고용 창출 효과가 크다.<br>ㄷ. 우리나라는 1970년대 이후 경공업 비중이 더욱 확대되었다.<br>ㄹ. 최근에는 기능성 소재, 친환경, ICT 융합 등 고부가가치 방향으로 변화하고 있다.</div>`,choices:['ㄱ, ㄴ, ㄷ, ㄹ 모두','ㄱ, ㄴ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄷ','ㄴ, ㄹ'],answer:1,exp:'ㄷ이 틀렸습니다. 우리나라는 1970년대 이후 경공업에서 중화학 공업 중심으로 이동했습니다. ㄱ, ㄴ, ㄹ은 옳습니다.'},
+  {type:'mc_hard',fmt:'선매품·전문품 비교형',q:'선매품과 전문품의 차이점으로 가장 적절한 것은?',htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">선매품</div>여러 제품을 비교 분석하여 구입<br>예: 가구, 의류, 가전제품</div><div class="hq-col-card"><div class="hq-col-label">전문품</div>특정 브랜드를 위해 특별한 노력<br>예: 카메라, 자동차, 음향 기기</div></div>`,choices:['선매품은 생산재, 전문품은 소비재이다','선매품은 여러 대안을 비교하고, 전문품은 특정 제품·브랜드에 대한 강한 선호가 있다','선매품은 비내구재, 전문품은 내구재이다','선매품은 자주 구매하고, 전문품은 드물게 구매하는 점이 다르다','선매품과 전문품은 둘 다 편의품의 하위 분류이다'],answer:1,exp:'선매품은 소비자가 여러 대안을 비교 분석하는 과정이 핵심이고, 전문품은 특정 브랜드나 제품에 대한 강한 선호와 특별한 구매 노력이 핵심입니다.'},
+  {type:'mc_hard',fmt:'최종 종합형',q:'다음 표에서 설명이 옳은 항목만 고른 것은?',htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>번호</th><th>개념</th><th>설명</th></tr></thead><tbody><tr><td>㉠</td><td>기초 공업</td><td>자동차·조선 등 다른 공업의 바탕이 되는 원료·자재 생산</td></tr><tr><td>㉡</td><td>공영 공업</td><td>민간 기업이 이익 극대화를 위해 자유롭게 운영하는 공업</td></tr><tr><td>㉢</td><td>산업 소프트화</td><td>하드웨어보다 서비스·정보·지식의 가치 비중이 높아지는 현상</td></tr><tr><td>㉣</td><td>HACCP</td><td>식품의 원재료부터 최종 소비까지 위해요소를 차단하는 기준</td></tr><tr><td>㉤</td><td>정밀 화학 공업</td><td>나프타를 원료로 에틸렌·프로필렌 등 기초 원료를 생산</td></tr></tbody></table></div>`,choices:['㉠, ㉡, ㉢','㉠, ㉢, ㉣','㉡, ㉣, ㉤','㉠, ㉡, ㉤','㉢, ㉣, ㉤'],answer:1,exp:'㉡ 틀림(공영 공업은 국가·지자체가 공공 이익을 위해 운영), ㉤ 틀림(나프타→에틸렌·프로필렌은 석유 화학 공업). ㉠✓, ㉢✓, ㉣✓'},
+];
+
+// ════════════════════════════════════════════════
+// 익스퍼트 문제 - 수능 실제 유형 기반 (20문항)
+// 실제 수능 공업 관련 문항 스타일 + 고교 산업지리 범위
+// ════════════════════════════════════════════════
+const EXPERT_QUESTIONS_STATIC = [
+  // [수능형 1] 자료 분석 - 산업별 특성 비교표
+  {type:'mc_hard',fmt:'수능형 자료 분석',q:'표는 우리나라 주요 공업의 특성을 나타낸 것이다. (가)~(다)에 해당하는 공업을 바르게 연결한 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>(가)</th><th>(나)</th><th>(다)</th></tr></thead><tbody>
+  <tr><td>생산 방식</td><td>주문 생산 중심</td><td>표준화 대량 생산</td><td>연속 공정(장치)</td></tr>
+  <tr><td>주요 입지</td><td>임해 지역</td><td>내륙·임해 혼재</td><td>임해 지역</td></tr>
+  <tr><td>전후방 연쇄</td><td>강함</td><td>매우 강함</td><td>보통</td></tr>
+  <tr><td>부품 수</td><td>매우 많음</td><td>약 2~3만 개</td><td>해당 없음</td></tr>
+  </tbody></table></div>`,
+  choices:['(가) 자동차 — (나) 조선 — (다) 석유화학','(가) 조선 — (나) 자동차 — (다) 석유화학','(가) 석유화학 — (나) 조선 — (다) 자동차','(가) 조선 — (나) 석유화학 — (다) 자동차','(가) 자동차 — (나) 석유화학 — (다) 조선'],
+  answer:1,exp:'(가) 조선: 주문 생산, 임해, 많은 부품 / (나) 자동차: 표준화 대량 생산, 2~3만 부품, 전후방 연쇄 매우 강함 / (다) 석유화학: 연속 장치 공정, 임해 입지, 부품 개수 해당 없음'},
+
+  // [수능형 2] 빈칸 완성 - 고난도 개념 통합
+  {type:'mc_hard',fmt:'수능형 빈칸 완성',q:'다음 글의 (ㄱ)~(ㄷ)에 들어갈 용어가 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-box">공업의 최적 입지를 결정하는 이론은 다양하다. ( ㄱ )의 최소 비용 이론에 따르면, 운송비·노동비·집적 이익을 종합 고려한 생산비 최소 지점이 최적 입지이다. 원료 수입과 제품 수출이 많은 공업은 운송 수단이 전환되는 지점인 ( ㄴ ) 입지가 유리하다. 한편 제품이 변질되거나 무거워져 소비자 근처에서 생산해야 하는 공업은 ( ㄷ ) 지향형 입지를 선택한다.</div>`,
+  choices:['ㄱ 클라크 — ㄴ 적환지 — ㄷ 원료','ㄱ 베버 — ㄴ 적환지 — ㄷ 시장','ㄱ 호프만 — ㄴ 시장 — ㄷ 원료','ㄱ 베버 — ㄴ 원료 — ㄷ 시장','ㄱ 클라크 — ㄴ 시장 — ㄷ 원료'],
+  answer:1,exp:'ㄱ=베버(최소비용이론), ㄴ=적환지(항구 등 운송 전환 지점), ㄷ=시장(변질·중량 증가 제품은 소비자 근처에 입지).'},
+
+  // [수능형 3] 그래프 해석형 - 산업 구조 변화
+  {type:'mc_hard',fmt:'수능형 그래프 해석',q:'그래프는 우리나라 제조업 수출 구조의 변화를 나타낸 것이다. 이에 대한 해석으로 옳지 않은 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>시기</th><th>경공업 비중</th><th>중화학공업 비중</th><th>주력 품목</th></tr></thead><tbody>
+  <tr><td>1960년대</td><td>높음 ↑</td><td>낮음</td><td>섬유, 신발</td></tr>
+  <tr><td>1970~80년대</td><td>감소 ↓</td><td>급증 ↑↑</td><td>철강, 자동차, 조선</td></tr>
+  <tr><td>1990년대~현재</td><td>낮음</td><td>유지</td><td>반도체, 전자</td></tr>
+  </tbody></table></div>`,
+  choices:['1960년대 경공업 성장의 핵심 요인은 풍부하고 저렴한 노동력이었다','1970~80년대 중화학 공업화는 정부의 적극적 육성 정책과 연관이 깊다','1990년대 이후 반도체는 지식 집약적·고부가가치 산업으로 새로운 주력 품목이 되었다','경공업 비중 감소는 중화학 공업이 경공업을 완전히 대체했기 때문이다','산업 구조 변화는 클라크의 1→2→3차 산업 고도화와 같은 흐름이다'],
+  answer:3,exp:'경공업 비중 감소는 중화학 공업 성장 + 개도국의 경공업 부상 + 산업 고도화 등 복합 원인 때문입니다. "완전 대체"는 사실과 다릅니다.'},
+
+  // [수능형 4] 선지 판단형 - 공업 분류 통합
+  {type:'mc_hard',fmt:'수능형 선지 판단',q:'다음 중 옳은 설명끼리 묶인 것은?',
+  htmlContent:`<div class="hq-box">ㄱ. 클라크(Clark)는 산업을 1·2·3차 산업으로 분류하였으며, 이는 산업 구조 고도화 흐름 설명에 활용된다.<br>ㄴ. 호프만(Hoffmann)은 산업을 생산재 산업과 소비재 산업으로 분류하였다.<br>ㄷ. 베버(Weber)의 최소 비용 이론에서 집적 이익은 고려 대상이 아니다.<br>ㄹ. 적환지 입지는 운송 수단이 전환되는 지점(항구 등)에 위치하여 운송비를 절감하는 입지 유형이다.<br>ㅁ. 공영 공업은 민간 기업이 이윤 극대화를 목적으로 운영하는 공업이다.</div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄴ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄷ, ㅁ','ㄴ, ㄹ, ㅁ'],
+  answer:1,exp:'ㄷ 틀림(베버 이론에서 집적이익도 고려), ㅁ 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영). 옳은 것: ㄱ(클라크), ㄴ(호프만), ㄹ(적환지 입지).'},
+
+  // [수능형 5] 제시문 오류 찾기 (수능 밑줄형)
+  {type:'mc_hard',fmt:'수능형 밑줄 오류',q:'다음 글에서 밑줄 친 ①~⑤ 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-box">철강 공업은 중화학 공업의 대표 사례로, ①제선 → 제강 → 압연의 3단계 공정을 거쳐 강판·봉강 등을 생산한다. 철강 제품은 ②자동차·조선·건설 등 다양한 산업의 기초 소재로 사용되어 기초 공업의 성격을 가진다. 우리나라 철강 공업의 주요 입지는 ③포항, 광양 등 임해 지역으로, 철광석 수입과 제품 수출에 유리하다. 전자 공업은 ④노동 집약적이며 고에너지 소비형 산업으로, 1990년대 이후 우리나라 수출의 핵심이 되었다. 조선 공업은 ⑤고객 요구에 따른 주문 생산 방식이 특징이며, 거제·울산 등 해안가에 주로 분포한다.</div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,exp:'④가 틀렸습니다. 전자 공업(반도체 포함)은 지식 집약적, 고부가가치, 저자원·저에너지 소비형 산업입니다. "노동 집약적, 고에너지 소비형"은 오류입니다.'},
+
+  // [수능형 6] 조건 추론형 - 산업 특성 찾기
+  {type:'mc_hard',fmt:'수능형 조건 추론',q:'다음 조건을 모두 만족하는 공업에 대한 설명으로 옳은 것은?',
+  htmlContent:`<div class="hq-box"><strong>조건 1.</strong> 중화학 공업의 한 종류이다.<br><strong>조건 2.</strong> 석유(나프타)를 원료로 한다.<br><strong>조건 3.</strong> 에틸렌, 프로필렌 등 기초 원료를 생산한다.<br><strong>조건 4.</strong> 거대한 설비와 대규모 자본이 요구되는 장치 공업이다.<br><strong>조건 5.</strong> 임해 지역에 주로 입지한다.</div>`,
+  choices:['철강 공업으로, 제선·제강·압연 공정을 거쳐 강판을 생산한다','석유 화학 공업으로, 정밀 화학 공업의 원료가 되는 기초 물질을 생산한다','전자 공업으로, 지식 집약적·고부가가치 산업이다','자동차 공업으로, 2~3만 개 부품을 조립하는 종합 산업이다','조선 공업으로, 주문 생산 방식이 특징이다'],
+  answer:1,exp:'나프타→에틸렌·프로필렌 생산, 장치 공업, 임해 입지의 조건을 모두 만족하는 것은 석유 화학 공업입니다. 이 제품들은 정밀 화학 공업(의약품·화장품 등)의 원료가 됩니다.'},
+
+  // [수능형 7] 사례 적용형 - 6T 기술 통합
+  {type:'mc_hard',fmt:'수능형 사례 적용',q:'다음 (가)~(라)의 기술 사례를 6T로 분류할 때, 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-box"><strong>(가)</strong> 줄기세포 배양 기술로 척수 손상 환자 치료 연구<br><strong>(나)</strong> 10나노미터 반도체 공정으로 초소형·초고성능 칩 생산<br><strong>(다)</strong> 폐플라스틱을 원료로 재활용하는 순환 경제 기술<br><strong>(라)</strong> 인공지능 기반 디지털 영화 제작 및 가상현실 콘텐츠</div>`,
+  choices:['(가)ST-(나)IT-(다)ET-(라)CT','(가)BT-(나)NT-(다)ET-(라)CT','(가)BT-(나)IT-(다)NT-(라)CT','(가)NT-(나)BT-(다)ET-(라)IT','(가)BT-(나)NT-(다)IT-(라)ET'],
+  answer:1,exp:'(가)줄기세포=BT(생명공학), (나)10나노 반도체=NT(나노기술), (다)폐플라스틱 재활용=ET(환경기술), (라)AI영화·VR=CT(문화콘텐츠기술)'},
+
+  // [수능형 8] 두 지역 비교 분석
+  {type:'mc_hard',fmt:'수능형 지역 비교',q:'표는 우리나라 두 지역의 공업 특성을 나타낸 것이다. 이에 대한 설명으로 옳은 것은?',
+  htmlContent:`<div class="hq-two-col"><div class="hq-col-card"><div class="hq-col-label">A 지역 (울산·광양권)</div>• 철광석·원유 수입항 인근<br>• 용광로·제철소·석유화학단지<br>• 초대형 장치 설비 밀집<br>• 강판, 나프타 계열 제품 생산</div><div class="hq-col-card"><div class="hq-col-label">B 지역 (수도권·내륙)</div>• 소비자 밀집 지역<br>• 중소 규모 공장 다수<br>• 식료품, 의류, 화장품 등 생산<br>• 노동력 의존도 높음</div></div>`,
+  choices:['A 지역은 경공업, B 지역은 중화학 공업 중심이다','A 지역은 자본 집약적 장치 공업, B 지역은 노동 집약적 경공업 중심이다','A와 B 지역 모두 시장 지향형 입지 특성을 가진다','A 지역 공업은 소비자 인접이 입지의 핵심 요인이다','B 지역은 원료 수입에 유리한 적환지 입지이다'],
+  answer:1,exp:'A는 항구 인근 대형 장치 공업(철강·석유화학) = 자본 집약적. B는 소비자 근처 소규모 노동집약 경공업 중심. 각각의 입지 특성이 다릅니다.'},
+
+  // [수능형 9] 복합 선지 판단
+  {type:'mc_hard',fmt:'수능형 복합 판단',q:'다음 ㉠~㉤에 대한 설명 중 옳은 것만 고른 것은?',
+  htmlContent:`<div class="hq-box">㉠ 편의품은 소비자가 여러 제품을 비교 후 구입하는 제품으로, 가전제품이 대표적이다.<br>㉡ 자본재는 생산 활동에 투입되는 기계·장비로, 내구재에 해당한다.<br>㉢ 전문품은 특정 브랜드를 위해 특별한 노력을 기울여 구입하는 제품이다.<br>㉣ 소모품은 생산 과정에서 소비되는 소재로, 사무 용품·청소 용품이 해당한다.<br>㉤ 선매품은 구매가 쉽고 자주 구입하는 식료품·신문이 대표적이다.</div>`,
+  choices:['㉠, ㉡, ㉢, ㉣, ㉤ 모두','㉡, ㉢, ㉣','㉠, ㉢, ㉤','㉡, ㉣, ㉤','㉠, ㉡, ㉤'],
+  answer:1,exp:'㉠ 틀림(여러 제품 비교는 선매품), ㉤ 틀림(자주 구입하는 식료품·신문은 편의품). 옳은 것: ㉡(자본재=생산용 기계=내구재), ㉢(전문품), ㉣(소모품).'},
+
+  // [수능형 10] 최고난도 통합 - 표+개념
+  {type:'mc_hard',fmt:'수능형 최고난도',q:'다음 자료를 보고 A~C에 해당하는 내용을 바르게 연결한 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>산업</th><th>원료/특징</th><th>주요 생산품</th><th>핵심 개념</th></tr></thead><tbody>
+  <tr><td>철강 공업</td><td>철광석, 코크스</td><td>A</td><td>기초 공업</td></tr>
+  <tr><td>석유 화학 공업</td><td>B</td><td>에틸렌, 프로필렌</td><td>장치 공업</td></tr>
+  <tr><td>전자 공업</td><td>실리콘 등</td><td>반도체</td><td>C</td></tr>
+  </tbody></table></div>`,
+  choices:['A-나프타, B-강판·봉강, C-노동집약형','A-강판·봉강, B-나프타, C-지식집약·고부가가치','A-에틸렌, B-철광석, C-자본집약형','A-강판·봉강, B-실리콘, C-지식집약형','A-반도체, B-나프타, C-장치공업형'],
+  answer:1,exp:'A: 철강 공업의 생산품=강판·봉강(슬래브) / B: 석유 화학 공업의 원료=나프타(석유) / C: 전자 공업(반도체)의 핵심 특성=지식 집약적, 고부가가치, 저자원·저에너지'},
+
+  // [수능형 11] 실제 수능 유형 - 공업 입지 변화
+  {type:'mc_hard',fmt:'수능형 입지 분석',q:'다음 글의 내용이 맞으면 ○, 틀리면 ×일 때, 바르게 표시한 것은?',
+  htmlContent:`<div class="hq-box">ㄱ. 시장 지향형 공업은 제품이 무겁거나 변질되기 쉬울 때 소비자 근처에 입지한다. (  )<br>ㄴ. 원료 지향형 공업은 원료 생산지 근처에 입지하는 것이 운송비 절감에 유리하다. (  )<br>ㄷ. 베버의 이론에 따르면 노동비 절감만을 고려하여 최적 입지를 결정한다. (  )<br>ㄹ. 중화학 공업은 원료 수입과 제품 수출 비중이 커 임해 지역이 유리하다. (  )</div>`,
+  choices:['ㄱ○ ㄴ○ ㄷ○ ㄹ○','ㄱ○ ㄴ○ ㄷ× ㄹ○','ㄱ× ㄴ○ ㄷ○ ㄹ×','ㄱ○ ㄴ× ㄷ× ㄹ○','ㄱ× ㄴ× ㄷ○ ㄹ○'],
+  answer:1,exp:'ㄱ○(시장 지향형 정의 옳음), ㄴ○(원료 지향형 정의 옳음), ㄷ×(베버는 운송비+노동비+집적이익 세 가지 모두 고려), ㄹ○(중화학 공업의 임해 입지 옳음)'},
+
+  // [수능형 12] 수능 경제지리형 - 제조업 특성
+  {type:'mc_hard',fmt:'수능형 종합 판단',q:'다음 중 옳은 것을 〈보기〉에서 모두 고른 것은?',
+  htmlContent:`<div class="hq-box"><strong>〈보기〉</strong><br>ㄱ. 자동차 공업은 전후방 연쇄 효과가 매우 크며, 미래 키워드는 전기차·자율주행·수소차이다.<br>ㄴ. 경공업은 자본 집약적 성격이 강하며 대규모 설비가 필수적이다.<br>ㄷ. 섬유 공업의 합성섬유는 천연섬유보다 강도가 높고 해충에 강하다.<br>ㄹ. 식품 공업에서 HACCP은 생산성 향상을 위한 생산 속도 관리 기준이다.</div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ 모두','ㄱ, ㄷ','ㄴ, ㄹ','ㄱ, ㄴ, ㄷ','ㄷ, ㄹ'],
+  answer:1,exp:'ㄴ 틀림(경공업은 노동 집약적), ㄹ 틀림(HACCP은 위해요소 차단 기준이지 생산성 기준이 아님). 옳은 것: ㄱ(자동차 공업), ㄷ(합성섬유 특징).'},
+
+  // [수능형 13] 실제 수능 패턴 - 그래프 + 서술
+  {type:'mc_hard',fmt:'수능형 자료+서술',q:'다음은 산업 역사 흐름도이다. ㉠~㉢에 대한 설명으로 옳지 않은 것은?',
+  htmlContent:`<div class="hq-arrow-flow"><div class="hq-flow-box">㉠ 고대 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">가내 수공업</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">㉡ 중세 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">길드 제도</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">㉢ 근대 산업 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">공장제도</span></div><div class="hq-flow-arrow">→</div><div class="hq-flow-box">현대 사회<br><span style="font-size:0.72rem;color:var(--text-muted);">소프트화</span></div></div>`,
+  choices:['㉠은 자급자족 중심의 경제체제로 소규모 생산이 이루어졌다','㉡의 길드는 장인이 직인과 도제를 두고 생산을 주도하는 조합이었다','㉢에서는 증기기관 보급과 공장제도 확립으로 대량 생산이 가능해졌다','㉢에서는 3차 산업(서비스업)의 비중이 급격히 증가하였다','현대 사회의 소프트화는 무형의 지식·서비스 가치가 증가하는 현상이다'],
+  answer:3,exp:'3차 산업 비중 급증은 현대 사회의 특징입니다. ㉢ 근대 산업 사회(산업혁명)에서는 2차 산업(제조업)의 비중이 급격히 증가하였습니다.'},
+
+  // [수능형 14] 수능 신유형 - 탐구 보고서 오류
+  {type:'mc_hard',fmt:'수능형 보고서 오류',q:'다음은 어느 학생이 작성한 탐구 보고서의 일부이다. 밑줄 친 부분 중 수정이 필요한 것은?',
+  htmlContent:`<div class="hq-box"><strong>주제: 우리나라 공업 발달과 신소재</strong><br><br>우리나라 공업은 ①1960년대 경공업 중심으로 시작하여, ②1970년대 이후 중화학 공업으로 고도화되었다. 현재는 ③반도체·전자 등 첨단 산업이 주력 수출 품목이다.<br><br>첨단 신소재 중 ④파인 세라믹스는 특정 저온에서 전기 저항이 0이 되는 성질이 있어 강력한 자기장 형성에 활용된다. 또한 ⑤형상 기억 합금은 변형 후 특정 온도에서 원래 형태로 되돌아오는 특성이 있다.</div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,exp:'④가 틀렸습니다. 특정 저온에서 전기 저항이 0이 되는 것은 초전도 재료의 특징입니다. 파인 세라믹스는 고온·부식에 강한 세라믹 소재입니다.'},
+
+  // [수능형 15] 수능 자료해석 - 제품 분류 적용
+  {type:'mc_hard',fmt:'수능형 제품분류 적용',q:'다음 표의 A~D 제품을 제품 분류 기준에 따라 바르게 분류한 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>제품</th><th>구매 빈도</th><th>사용 목적</th><th>내구성</th></tr></thead><tbody>
+  <tr><td>A. 크루아상(빵)</td><td>매우 자주</td><td>개인 소비</td><td>낮음</td></tr>
+  <tr><td>B. 공장용 프레스기</td><td>드물게</td><td>생산 활동</td><td>매우 높음</td></tr>
+  <tr><td>C. 특정 브랜드 명품 핸드백</td><td>드물게</td><td>개인 소비</td><td>높음</td></tr>
+  <tr><td>D. 공장 청소 세제</td><td>자주</td><td>생산 보조</td><td>낮음</td></tr>
+  </tbody></table></div>`,
+  choices:['A-편의품, B-소모품, C-전문품, D-자본재','A-편의품, B-자본재, C-전문품, D-소모품','A-선매품, B-자본재, C-편의품, D-소모품','A-전문품, B-자본재, C-편의품, D-재료및부품','A-편의품, B-재료및부품, C-선매품, D-자본재'],
+  answer:1,exp:'A 크루아상=편의품(자주, 소비재, 비내구재) / B 프레스기=자본재(생산재, 내구재) / C 명품 핸드백=전문품(특정 브랜드, 소비재, 내구재) / D 공장 세제=소모품(생산 보조, 비내구재)'},
+
+  // [수능형 16] 수능 신유형 - 대화 판단
+  {type:'mc_hard',fmt:'수능형 대화 판단',q:'공업의 분류에 관한 다음 대화에서 옳은 내용을 말한 학생만 고른 것은?',
+  htmlContent:`<div class="hq-box"><strong>A:</strong> "기초 공업은 철강처럼 다른 공업에 원료·자재를 공급하는 공업이야."<br><br><strong>B:</strong> "공영 공업은 민간 기업이 이윤을 목적으로 경영하는 공업이야."<br><br><strong>C:</strong> "장치 공업은 석유화학·제철처럼 거대한 설비와 자본이 필요한 자본 집약적 공업이야."<br><br><strong>D:</strong> "경공업은 대규모 설비와 막대한 자본이 필요한 자본 집약적 산업이야."<br><br><strong>E:</strong> "클라크는 산업을 1·2·3차로 분류했고, 호프만은 생산재·소비재로 분류했어."</div>`,
+  choices:['A, B, C, D, E 모두','A, C, E','B, C, D','A, B, E','C, D, E'],
+  answer:1,exp:'B 틀림(공영 공업은 국가·지자체가 공공이익을 위해 운영), D 틀림(대규모 설비·자본은 장치 공업·중화학 공업의 특징, 경공업은 노동 집약적). 옳은 것: A(기초 공업), C(장치 공업), E(클라크·호프만 분류).'},
+
+  // [수능형 17] 수능 유형 - 빈칸 2개 조합
+  {type:'mc_hard',fmt:'수능형 빈칸 조합',q:'다음 글의 (A)와 (B)에 들어갈 내용이 바르게 짝지어진 것은?',
+  htmlContent:`<div class="hq-box">제품의 분류에서 소비재는 편의품, 선매품, 전문품으로 나뉜다. 이 중 ( A )은(는) 소비자가 여러 제품을 놓고 가격·품질·디자인 등을 꼼꼼히 비교 분석하여 구입하는 제품으로, 가구·의류·냉장고 등이 대표적이다. 반면 ( B )은(는) 소비자가 특정 브랜드나 제품을 얻기 위해 특별한 시간·비용·노력을 기울이는 제품으로, 고급 카메라·명품 자동차·전문 음향 기기 등이 해당한다.</div>`,
+  choices:['A 편의품 — B 선매품','A 선매품 — B 전문품','A 전문품 — B 편의품','A 선매품 — B 편의품','A 전문품 — B 선매품'],
+  answer:1,exp:'A=선매품(여러 제품 비교 분석, 가구·의류·가전 등), B=전문품(특정 브랜드를 위한 특별 노력, 고급 카메라·명품 등).'},
+
+  // [수능형 18] 통합형 - 공업+제품 연결
+  {type:'mc_hard',fmt:'수능형 통합',q:'공업 생산물과 제품 분류의 연결이 바르지 않은 것은?',
+  htmlContent:`<div class="hq-box">① 철강 공업 → 강판·봉강: 생산재(재료 및 부품)에 해당한다.<br>② 전자 공업 → 가정용 냉장고: 소비재(선매품)이자 내구재에 해당한다.<br>③ 섬유 공업 → 의류: 소비재이며 편의품에 해당한다.<br>④ 석유 화학 공업 → 나프타 열분해 기초 원료: 다른 공업의 재료 및 부품이 된다.<br>⑤ 식품 공업 → 빵·음료: 소비재 중 편의품이며 비내구재에 해당한다.</div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:2,exp:'③이 틀렸습니다. 의류는 소비재이지만 편의품이 아닙니다. 의류는 여러 제품을 비교 분석하여 구입하는 선매품에 해당합니다.'},
+
+  // [수능형 19] 수능형 - 신소재 통합
+  {type:'mc_hard',fmt:'수능형 신소재 통합',q:'다음 〈보기〉에서 신소재와 그 특징이 바르게 연결된 것만 고른 것은?',
+  htmlContent:`<div class="hq-box"><strong>〈보기〉</strong><br>ㄱ. 초전도 재료 — 특정 저온에서 전기 저항이 0이 됨 → 강력한 자기장 형성<br>ㄴ. 형상 기억 합금 — 고온·부식에 강하며 세라믹 계열 소재<br>ㄷ. 파인 세라믹스 — 고온·부식에 강하고 내마모성이 뛰어난 소재<br>ㄹ. 나노 소재 — 10억 분의 1미터 단위로 초소형 구조, 고성능 특성<br>ㅁ. 합성 섬유 — 특정 저온에서 전기 저항이 0이 되는 특성</div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄴ, ㅁ','ㄷ, ㄹ, ㅁ'],
+  answer:1,exp:'ㄴ 틀림(형상 기억 합금은 변형 후 원래 형태로 복원되는 합금), ㅁ 틀림(초전도 특성은 합성 섬유가 아닌 초전도 재료의 것). 옳은 것: ㄱ(초전도), ㄷ(파인 세라믹스), ㄹ(나노 소재).'},
+
+  // [수능형 20] 수능 최고난도 통합형
+  {type:'mc_hard',fmt:'수능형 최고난도 종합',q:'다음 자료에서 (가)~(마)에 해당하는 내용이 모두 바르게 짝지어진 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody>
+  <tr><td>(가) 클라크 분류</td><td>1차: 농·임·수산업 / 2차: ___A___ / 3차: 서비스업</td></tr>
+  <tr><td>(나) 입지 이론</td><td>___B___: 운송비·노동비·집적 이익 종합 고려</td></tr>
+  <tr><td>(다) 철강 공정</td><td>제선 → ___C___ → 압연</td></tr>
+  <tr><td>(라) 석유화학</td><td>원료: ___D___ → 에틸렌·프로필렌 생산</td></tr>
+  <tr><td>(마) 전자공업</td><td>특성: 지식 집약적, ___E___, 저자원 소비형</td></tr>
+  </tbody></table></div>`,
+  choices:['A제조업-B클라크-C제강-D나프타-E고부가가치','A서비스업-B베버-C제강-D철광석-E저부가가치','A제조업-B클라크-C제선-D나프타-E고에너지소비형','A제조업-B호프만-C제강-D나프타-E고부가가치','A서비스업-B베버-C압연-D실리콘-E고부가가치'],
+  answer:0,exp:'A=제조업(2차 산업), B=베버(최소비용이론), C=제강(제선→제강→압연), D=나프타(석유화학 원료), E=고부가가치(전자공업 3대 특성).'},
+];
+
+// ════════════════════════════════════════════════
+// 동적 문제 배열 생성 함수
+// ════════════════════════════════════════════════
+function getHardQuestions() {
+  // 정적 문제 + 동적 변형 문제 합체
+  const dynamic = [
+    makeDynDialogQ(),
+    makeDynTextErrorQ(),
+    makeDynTableErrorQ(),
+  ];
+  return shuffle([...HARD_QUESTIONS_STATIC, ...dynamic]);
 }
 
-// 노말 MC: 정답1 + 오답5 중 3개 랜덤 = 4개
-function pickNormalMC(choices, answerIdx) {
-  const correctText = choices[answerIdx];
-  const wrongChoices = choices.filter((_, i) => i !== answerIdx);
-  const selectedWrong = shuffle(wrongChoices).slice(0, 3);
-  const pool = shuffle([correctText, ...selectedWrong]);
-  return { shuffledChoices: pool, newAnswerIdx: pool.indexOf(correctText) };
+function getExpertQuestions() {
+  return shuffle([...EXPERT_QUESTIONS_STATIC]);
 }
 
-// 하드 MC: 보기 5개 중 정답1 + 오답4 → 정답1 + 랜덤 오답3 = 4개
-function pickHardMC(choices, answerIdx) {
-  const correctText = choices[answerIdx];
-  const wrongChoices = choices.filter((_, i) => i !== answerIdx);
-  const selectedWrong = shuffle(wrongChoices).slice(0, 3);
-  const pool = shuffle([correctText, ...selectedWrong]);
-  return { shuffledChoices: pool, newAnswerIdx: pool.indexOf(correctText) };
+// ════════════════════════════════════════════════
+// 상태
+// ════════════════════════════════════════════════
+let selectedQuestions=[],currentIdx=0,score=0,answered=false,currentMode='normal';
+
+function selectDiff(mode){
+  currentMode=mode;
+  ['normal','hard','expert'].forEach(m=>{
+    document.getElementById('btn-diff-'+m).className='diff-btn'+(m===mode?' selected-'+m:'');
+  });
+  const btn=document.getElementById('btn-start-main');
+  const labels={normal:'📖 노말 시작하기 →',hard:'🔥 하드 시작하기 →',expert:'⚡ 익스퍼트 시작하기 →'};
+  const cls={normal:'btn-start',hard:'btn-start hard-mode',expert:'btn-start expert-mode'};
+  btn.textContent=labels[mode];btn.className=cls[mode];
 }
 
-function checkSAAnswer(input, answers) {
-  const normalize = s => s.replace(/\s/g, '').toLowerCase();
-  const normInput = normalize(input);
-  return answers.some(a => normalize(a) === normInput);
-}
+function startQuiz(forcedMode){
+  if(forcedMode)selectDiff(forcedMode);
 
-// ══════════════════════════════════════════
-//  상태 변수
-// ══════════════════════════════════════════
-let selectedQuestions = [];
-let currentIdx = 0;
-let score = 0;
-let answered = false;
-let currentMode = 'normal'; // 'normal' | 'hard'
+  let pool;
+  if(currentMode==='normal') pool=shuffle([...NORMAL_QUESTIONS]).slice(0,20);
+  else if(currentMode==='hard') pool=getHardQuestions().slice(0,20);
+  else pool=getExpertQuestions().slice(0,20);
 
-// ══════════════════════════════════════════
-//  시작 화면 난이도 선택
-// ══════════════════════════════════════════
-function selectDiff(mode) {
-  currentMode = mode;
-  const btnNormal = document.getElementById('btn-diff-normal');
-  const btnHard = document.getElementById('btn-diff-hard');
-  const btnStart = document.getElementById('btn-start-main');
+  selectedQuestions=pool;
+  currentIdx=0;score=0;
 
-  if (mode === 'normal') {
-    btnNormal.className = 'diff-btn selected-normal';
-    btnHard.className = 'diff-btn';
-    btnStart.className = 'btn-start';
-    btnStart.textContent = '노말 시작하기 →';
-  } else {
-    btnNormal.className = 'diff-btn';
-    btnHard.className = 'diff-btn selected-hard';
-    btnStart.className = 'btn-start hard-mode';
-    btnStart.textContent = '하드 시작하기 🔥';
-  }
-}
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  document.getElementById('live-score').textContent=0;
 
-// ══════════════════════════════════════════
-//  퀴즈 시작
-// ══════════════════════════════════════════
-function startQuiz(forcedMode) {
-  if (forcedMode) currentMode = forcedMode;
+  const fill=document.getElementById('progress-fill');
+  fill.className='progress-bar-fill'+(currentMode==='hard'?' hard-fill':currentMode==='expert'?' expert-fill':'');
 
-  const pool = currentMode === 'hard' ? HARD_QUESTIONS : NORMAL_QUESTIONS;
-  selectedQuestions = shuffle(pool).slice(0, Math.min(20, pool.length));
-  currentIdx = 0;
-  score = 0;
-
-  document.getElementById('start-screen').style.display = 'none';
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('quiz-screen').style.display = 'block';
-  document.getElementById('live-score').textContent = 0;
-
-  // 하드 모드 진행바 색상
-  const fill = document.getElementById('progress-fill');
-  if (currentMode === 'hard') {
-    fill.classList.add('hard-fill');
-  } else {
-    fill.classList.remove('hard-fill');
-  }
-
-  // quiz-screen hard 클래스
-  const qs = document.getElementById('quiz-screen');
-  if (currentMode === 'hard') qs.classList.add('hard-mode-active');
-  else qs.classList.remove('hard-mode-active');
+  const qs=document.getElementById('quiz-screen');
+  qs.className=currentMode==='hard'?'hard-mode-active':currentMode==='expert'?'expert-mode-active':'';
 
   renderQuestion();
 }
 
-function startHardRetry() {
-  currentMode = 'hard';
-  startQuiz('hard');
-}
+function renderQuestion(){
+  answered=false;
+  const q=selectedQuestions[currentIdx];
+  const total=selectedQuestions.length;
 
-// ══════════════════════════════════════════
-//  문제 렌더링
-// ══════════════════════════════════════════
-function renderQuestion() {
-  answered = false;
-  const q = selectedQuestions[currentIdx];
-  const total = selectedQuestions.length;
+  document.getElementById('cur-q').textContent=currentIdx+1;
+  document.getElementById('progress-fill').style.width=((currentIdx+1)/total*100)+'%';
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('btn-next').style.display='none';
 
-  document.getElementById('cur-q').textContent = currentIdx + 1;
-  document.getElementById('progress-fill').style.width = ((currentIdx + 1) / total * 100) + '%';
-  document.getElementById('explanation').style.display = 'none';
-  document.getElementById('btn-next').style.display = 'none';
+  const qCard=document.getElementById('q-card');
+  const qType=document.getElementById('q-type');
+  const qText=document.getElementById('q-text');
+  const qHtml=document.getElementById('q-html-content');
+  const btnNext=document.getElementById('btn-next');
 
-  const qCard = document.getElementById('q-card');
-  const qType = document.getElementById('q-type');
-  const qText = document.getElementById('q-text');
-  const qHtmlContent = document.getElementById('q-html-content');
-  const btnNext = document.getElementById('btn-next');
+  qCard.className='question-card'+(currentMode==='hard'?' hard-card':currentMode==='expert'?' expert-card':'');
+  btnNext.className='btn-next'+(currentMode==='hard'?' hard-next':currentMode==='expert'?' expert-next':'');
 
-  // 카드 스타일
-  if (currentMode === 'hard') {
-    qCard.classList.add('hard-card');
-    btnNext.classList.add('hard-next');
+  if(q.type==='mc') qType.innerHTML='✏️ 객관식';
+  else if(q.type==='sa') qType.innerHTML='📝 단답형';
+  else if(currentMode==='expert') qType.innerHTML=`⚡ <span class="expert-badge-inline">EXPERT</span> &nbsp;<span class="fmt-tag">${q.fmt}</span>`;
+  else qType.innerHTML=`🔥 <span class="hard-badge-inline">HARD</span> &nbsp;<span class="fmt-tag">${q.fmt}</span>`;
+
+  qText.textContent=q.q;
+  qHtml.innerHTML=q.htmlContent||'';
+
+  const area=document.getElementById('choices-area');
+  area.innerHTML='';
+
+  if(q.type==='mc'||q.type==='mc_hard'){
+    const{shuffledChoices,newAnswerIdx}=pickMC(q.choices,q.answer);
+    const div=document.createElement('div');div.className='choices';
+    ['①','②','③','④'].forEach((lbl,i)=>{
+      if(i>=shuffledChoices.length)return;
+      const btn=document.createElement('button');btn.className='choice-btn';
+      btn.innerHTML=`<span class="choice-num">${lbl}</span><span>${shuffledChoices[i]}</span>`;
+      btn.onclick=()=>handleMC(i,btn,div,newAnswerIdx,q);div.appendChild(btn);
+    });
+    area.appendChild(div);
   } else {
-    qCard.classList.remove('hard-card');
-    btnNext.classList.remove('hard-next');
-  }
-
-  // 문제 타입 표시
-  if (q.type === 'mc') {
-    qType.innerHTML = '✏️ 객관식';
-  } else if (q.type === 'sa') {
-    qType.innerHTML = '📝 단답형';
-  } else if (q.type === 'mc_hard') {
-    qType.innerHTML = `🔥 <span class="hard-badge-inline">HARD</span> &nbsp;<span class="fmt-tag">${q.fmt}</span>`;
-  }
-
-  qText.textContent = q.q;
-
-  // 하드 HTML 콘텐츠
-  if (q.htmlContent) {
-    qHtmlContent.innerHTML = q.htmlContent;
-  } else {
-    qHtmlContent.innerHTML = '';
-  }
-
-  const area = document.getElementById('choices-area');
-  area.innerHTML = '';
-
-  if (q.type === 'mc') {
-    const { shuffledChoices, newAnswerIdx } = pickNormalMC(q.choices, q.answer);
-    renderMCChoices(area, shuffledChoices, newAnswerIdx, q);
-
-  } else if (q.type === 'mc_hard') {
-    const { shuffledChoices, newAnswerIdx } = pickHardMC(q.choices, q.answer);
-    renderMCChoices(area, shuffledChoices, newAnswerIdx, q);
-
-  } else {
-    // 단답형
-    renderSAInput(area, q);
+    const wrap=document.createElement('div');wrap.className='short-answer-wrap';
+    const row=document.createElement('div');row.className='short-input-row';
+    const inp=document.createElement('input');inp.className='short-input';inp.type='text';inp.placeholder='정답을 입력하세요';
+    const submitBtn=document.createElement('button');submitBtn.className='btn-submit';submitBtn.textContent='제출';
+    const hint=document.createElement('div');hint.className='sa-hint';
+    const doSubmit=()=>submitSA(inp,submitBtn,hint,q);
+    inp.onkeydown=e=>{if(e.key==='Enter')doSubmit();};submitBtn.onclick=doSubmit;
+    row.appendChild(inp);row.appendChild(submitBtn);wrap.appendChild(row);wrap.appendChild(hint);area.appendChild(wrap);
+    setTimeout(()=>inp.focus(),100);
   }
 }
 
-function renderMCChoices(area, choices, correctIdx, q) {
-  const div = document.createElement('div');
-  div.className = 'choices';
-  const labels = ['①', '②', '③', '④'];
-  choices.forEach((c, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.innerHTML = `<span class="choice-num">${labels[i]}</span><span>${c}</span>`;
-    btn.onclick = () => handleMC(i, btn, div, correctIdx, q);
-    div.appendChild(btn);
-  });
-  area.appendChild(div);
-}
-
-function renderSAInput(area, q) {
-  const wrap = document.createElement('div');
-  wrap.className = 'short-answer-wrap';
-  const row = document.createElement('div');
-  row.className = 'short-input-row';
-  const inp = document.createElement('input');
-  inp.className = 'short-input';
-  inp.type = 'text';
-  inp.placeholder = '정답을 입력하세요';
-  const submitBtn = document.createElement('button');
-  submitBtn.className = 'btn-submit';
-  submitBtn.textContent = '제출';
-  const hint = document.createElement('div');
-  hint.className = 'sa-hint';
-  const doSubmit = () => submitSA(inp, submitBtn, hint, q);
-  inp.onkeydown = e => { if (e.key === 'Enter') doSubmit(); };
-  submitBtn.onclick = doSubmit;
-  row.appendChild(inp);
-  row.appendChild(submitBtn);
-  wrap.appendChild(row);
-  wrap.appendChild(hint);
-  area.appendChild(wrap);
-  setTimeout(() => inp.focus(), 100);
-}
-
-// ══════════════════════════════════════════
-//  정답 처리
-// ══════════════════════════════════════════
-function handleMC(idx, btn, div, correctIdx, q) {
-  if (answered) return;
-  answered = true;
-  const btns = div.querySelectorAll('.choice-btn');
-  btns.forEach(b => b.disabled = true);
-  const isCorrect = idx === correctIdx;
+function handleMC(idx,btn,div,correctIdx,q){
+  if(answered)return;answered=true;
+  const btns=div.querySelectorAll('.choice-btn');btns.forEach(b=>b.disabled=true);
+  const isCorrect=idx===correctIdx;
   btns[correctIdx].classList.add('correct');
-  if (!isCorrect) btn.classList.add('wrong');
-  if (isCorrect) score++;
-  document.getElementById('live-score').textContent = score;
+  if(!isCorrect)btn.classList.add('wrong');
+  if(isCorrect)score++;
+  document.getElementById('live-score').textContent=score;
   showExp(q.exp);
 }
 
-function submitSA(inp, submitBtn, hint, q) {
-  if (answered) return;
-  const val = inp.value.trim();
-  if (!val) return;
-  answered = true;
-  inp.disabled = true;
-  submitBtn.disabled = true;
-  const isCorrect = checkSAAnswer(val, q.answers);
-  if (isCorrect) {
-    inp.classList.add('correct');
-    hint.className = 'sa-hint correct-hint';
-    hint.textContent = '✅ 정답입니다!';
-    score++;
-  } else {
-    inp.classList.add('wrong');
-    hint.className = 'sa-hint wrong-hint';
-    hint.textContent = `❌ 오답 — 정답: ${q.answers[0]}`;
-  }
-  document.getElementById('live-score').textContent = score;
-  showExp(q.exp);
+function submitSA(inp,submitBtn,hint,q){
+  if(answered)return;const val=inp.value.trim();if(!val)return;
+  answered=true;inp.disabled=true;submitBtn.disabled=true;
+  const isCorrect=checkSA(val,q.answers);
+  if(isCorrect){inp.classList.add('correct');hint.className='sa-hint correct-hint';hint.textContent='✅ 정답입니다!';score++;}
+  else{inp.classList.add('wrong');hint.className='sa-hint wrong-hint';hint.textContent=`❌ 오답 — 정답: ${q.answers[0]}`;}
+  document.getElementById('live-score').textContent=score;showExp(q.exp);
 }
 
-function showExp(text) {
-  const el = document.getElementById('explanation');
-  document.getElementById('exp-text').textContent = text;
-  el.style.display = 'block';
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.style.display = 'block';
-  nextBtn.textContent = currentIdx < selectedQuestions.length - 1 ? '다음 문제 →' : '결과 보기 🏁';
-  nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+function showExp(text){
+  const el=document.getElementById('explanation');
+  document.getElementById('exp-text').textContent=text;el.style.display='block';
+  const nextBtn=document.getElementById('btn-next');nextBtn.style.display='block';
+  nextBtn.textContent=currentIdx<selectedQuestions.length-1?'다음 문제 →':'결과 보기 🏁';
+  nextBtn.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-// ══════════════════════════════════════════
-//  다음 문제 / 결과
-// ══════════════════════════════════════════
-function nextQuestion() {
+function nextQuestion(){
   currentIdx++;
-  if (currentIdx >= selectedQuestions.length) {
-    showResult();
-  } else {
-    renderQuestion();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  if(currentIdx>=selectedQuestions.length)showResult();
+  else{renderQuestion();window.scrollTo({top:0,behavior:'smooth'});}
 }
 
-function showResult() {
-  document.getElementById('quiz-screen').style.display = 'none';
-  const rs = document.getElementById('result-screen');
-  rs.style.display = 'flex';
-
-  const total = selectedQuestions.length;
-  const pct = Math.round(score / total * 100);
-
-  document.getElementById('result-score-num').textContent = score;
-  const scoreNum = document.getElementById('result-score-num');
-  if (currentMode === 'hard') scoreNum.classList.add('hard-score');
-  else scoreNum.classList.remove('hard-score');
-
-  document.getElementById('cnt-correct').textContent = score;
-  document.getElementById('cnt-wrong').textContent = total - score;
-
-  const diffBadge = document.getElementById('result-diff-badge');
-  if (currentMode === 'hard') {
-    diffBadge.className = 'result-diff-badge hard';
-    diffBadge.textContent = '🔥 하드 모드';
-  } else {
-    diffBadge.className = 'result-diff-badge normal';
-    diffBadge.textContent = '📖 노말 모드';
-  }
-
-  setTimeout(() => {
-    document.getElementById('bar-correct').style.width = (score / total * 100) + '%';
-    document.getElementById('bar-wrong').style.width = ((total - score) / total * 100) + '%';
-  }, 200);
-
-  let emoji, title, detail;
-  if (pct >= 90) {
-    emoji = '🏆'; title = '완벽해요!';
-    detail = `${total}문제 중 ${score}문제 정답 (${pct}%)\n공업 단원 완전 정복!`;
-  } else if (pct >= 70) {
-    emoji = '😊'; title = '잘했어요!';
-    detail = `${total}문제 중 ${score}문제 정답 (${pct}%)\n조금만 더 보강하면 만점!`;
-  } else if (pct >= 50) {
-    emoji = '📖'; title = '더 공부해요!';
-    detail = `${total}문제 중 ${score}문제 정답 (${pct}%)\n오답 노트를 꼭 만들어보세요.`;
-  } else {
-    emoji = '💪'; title = '다시 도전!';
-    detail = `${total}문제 중 ${score}문제 정답 (${pct}%)\n핵심 개념을 다시 복습해요.`;
-  }
-
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-detail').textContent = detail;
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('result-screen');rs.style.display='flex';
+  const total=selectedQuestions.length;const pct=Math.round(score/total*100);
+  document.getElementById('result-score-num').textContent=score;
+  const sn=document.getElementById('result-score-num');
+  sn.className='score-num'+(currentMode==='hard'?' hard-score':currentMode==='expert'?' expert-score':'');
+  document.getElementById('cnt-correct').textContent=score;
+  document.getElementById('cnt-wrong').textContent=total-score;
+  const db=document.getElementById('result-diff-badge');
+  const labels={normal:'📖 노말 모드',hard:'🔥 하드 모드',expert:'⚡ 익스퍼트 모드'};
+  db.className='result-diff-badge '+currentMode;db.textContent=labels[currentMode];
+  setTimeout(()=>{
+    document.getElementById('bar-correct').style.width=(score/total*100)+'%';
+    document.getElementById('bar-wrong').style.width=((total-score)/total*100)+'%';
+  },200);
+  let emoji,title,detail;
+  if(pct>=90){emoji='🏆';title='완벽해요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n공업 단원 완전 정복!`;}
+  else if(pct>=70){emoji='😊';title='잘했어요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n조금만 더 보강하면 만점!`;}
+  else if(pct>=50){emoji='📖';title='더 공부해요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n오답 노트를 꼭 만들어보세요.`;}
+  else{emoji='💪';title='다시 도전!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n핵심 개념을 다시 복습해요.`;}
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-detail').textContent=detail;
 }
 
-function goHome() {
-  document.getElementById('result-screen').style.display = 'none';
-  document.getElementById('start-screen').style.display = 'flex';
+function goHome(){
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('start-screen').style.display='flex';
 }
 
-// 초기 버튼 텍스트 설정
-document.getElementById('btn-start-main').textContent = '노말 시작하기 →';
+selectDiff('normal');
 </script>
 </body>
 </html>
