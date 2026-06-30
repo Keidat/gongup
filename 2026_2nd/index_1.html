@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공업 일반 시험 대비 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --card: #1c2230; --border: #30363d;
+    --accent: #58a6ff; --accent2: #f78166; --accent3: #56d364; --text: #e6edf3;
+    --text-muted: #8b949e; --correct: #1a4731; --correct-border: #56d364;
+    --wrong: #4a1c1c; --wrong-border: #f85149; --yellow: #e3b341;
+    --hard: #c678dd; --hard-bg: rgba(198,120,221,0.12); --hard-border: rgba(198,120,221,0.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
+  #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; position: relative; overflow: hidden; }
+  #start-screen::before { content: ''; position: absolute; top: -200px; left: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(88,166,255,0.12) 0%, transparent 70%); pointer-events: none; }
+  #start-screen::after { content: ''; position: absolute; bottom: -150px; right: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(247,129,102,0.10) 0%, transparent 70%); pointer-events: none; }
+  .start-badge { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.35); color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; padding: 0.35rem 1rem; border-radius: 100px; margin-bottom: 1.5rem; text-transform: uppercase; }
+  .start-title { font-family: 'Black Han Sans', sans-serif; font-size: clamp(2.2rem, 6vw, 3.8rem); text-align: center; line-height: 1.15; margin-bottom: 0.8rem; background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .start-sub { color: var(--text-muted); font-size: 1rem; text-align: center; margin-bottom: 2.5rem; line-height: 1.7; }
+  .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; width: 100%; max-width: 480px; }
+  .info-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
+  .info-card .num { font-size: 1.8rem; font-weight: 900; color: var(--accent); display: block; }
+  .info-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .diff-select-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.8rem; text-align: center; }
+  .diff-buttons { display: flex; gap: 1rem; margin-bottom: 2rem; width: 100%; max-width: 400px; }
+  .diff-btn { flex: 1; padding: 1rem 0.8rem; border-radius: 12px; border: 2px solid var(--border); background: var(--card); color: var(--text-muted); font-family: 'Noto Sans KR', sans-serif; font-size: 0.92rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+  .diff-btn .diff-icon { font-size: 1.6rem; }
+  .diff-btn .diff-name { font-size: 1rem; }
+  .diff-btn .diff-desc { font-size: 0.68rem; font-weight: 400; opacity: 0.7; }
+  .diff-btn.selected-normal { border-color: var(--accent); background: rgba(88,166,255,0.1); color: var(--accent); }
+  .diff-btn.selected-hard { border-color: var(--hard); background: var(--hard-bg); color: var(--hard); }
+  .btn-start { background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; border: none; padding: 1rem 3rem; font-size: 1.1rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; border-radius: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 24px rgba(88,166,255,0.3); }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(88,166,255,0.45); }
+  .btn-start.hard-mode { background: linear-gradient(135deg, #c678dd, #9b59b6); box-shadow: 0 4px 24px rgba(198,120,221,0.3); }
+  .btn-start.hard-mode:hover { box-shadow: 0 8px 32px rgba(198,120,221,0.45); }
+  #quiz-screen { display: none; max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .quiz-counter { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; letter-spacing: 0.05em; }
+  .quiz-counter span { color: var(--accent); font-size: 1.1rem; }
+  .score-badge { background: rgba(86,211,100,0.15); border: 1px solid rgba(86,211,100,0.3); color: var(--accent3); font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.8rem; border-radius: 100px; }
+  .progress-bar-wrap { height: 4px; background: var(--border); border-radius: 99px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #58a6ff, #56d364); border-radius: 99px; transition: width 0.4s ease; }
+  .progress-bar-fill.hard-fill { background: linear-gradient(90deg, #c678dd, #f78166); }
+  .question-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; margin-bottom: 1.4rem; position: relative; overflow: hidden; }
+  .question-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #58a6ff, #388bfd); }
+  .question-card.hard-card::before { background: linear-gradient(90deg, #c678dd, #f78166); }
+  .question-type { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+  .question-type::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .question-card.hard-card .question-type { color: var(--hard); }
+  .question-card.hard-card .question-type::before { background: var(--hard); }
+  .hard-badge-inline { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 700; }
+  .fmt-tag { background: rgba(88,166,255,0.12); border: 1px solid rgba(88,166,255,0.25); color: var(--accent); font-size: 0.68rem; padding: 0.1rem 0.5rem; border-radius: 100px; font-weight: 700; }
+  .question-card.hard-card .fmt-tag { background: var(--hard-bg); border-color: var(--hard-border); color: var(--hard); }
+  .question-text { font-size: 1.05rem; font-weight: 500; line-height: 1.7; color: var(--text); margin-top: 0.3rem; }
+  .hq-box { background: rgba(255,255,255,0.03); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 0.88rem; color: var(--text); line-height: 1.8; }
+  .hq-box-title { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .hq-underline { display: inline; border-bottom: 2px solid #f85149; color: var(--text); font-weight: 600; }
+  .hq-arrow-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; font-size: 0.85rem; }
+  .hq-flow-box { background: rgba(255,255,255,0.05); border: 0.5px solid var(--border); border-radius: 8px; padding: 6px 12px; color: var(--text); white-space: nowrap; font-size: 0.82rem; line-height: 1.4; text-align: center; }
+  .hq-flow-blank { background: rgba(198,120,221,0.12); border: 0.5px solid rgba(198,120,221,0.4); border-radius: 8px; padding: 6px 14px; color: var(--hard); font-weight: 700; white-space: nowrap; font-size: 0.82rem; }
+  .hq-flow-arrow { color: var(--text-muted); font-size: 1rem; }
+  .hq-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .hq-col-card { background: rgba(255,255,255,0.03); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; color: var(--text); line-height: 1.7; }
+  .hq-col-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+  .hq-table-wrap { overflow-x: auto; margin: 10px 0; }
+  .hq-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .hq-table th { background: rgba(255,255,255,0.04); color: var(--text-muted); font-weight: 600; padding: 7px 10px; text-align: left; border-bottom: 0.5px solid var(--border); }
+  .hq-table td { padding: 7px 10px; border-bottom: 0.5px solid rgba(255,255,255,0.05); color: var(--text); vertical-align: top; line-height: 1.5; }
+  .hq-glyph-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0; }
+  .hq-glyph { background: rgba(255,255,255,0.04); border: 0.5px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
+  .hq-glyph .sym { font-size: 1.1rem; font-weight: 700; color: var(--accent); width: 20px; text-align: center; }
+  .choices { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.4rem; }
+  .choice-btn { background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.9rem 1.2rem; border-radius: 10px; text-align: left; font-size: 0.93rem; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 0.8rem; line-height: 1.5; }
+  .choice-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(88,166,255,0.08); transform: translateX(3px); }
+  .hard-mode-active .choice-btn:hover:not(:disabled) { border-color: var(--hard); background: var(--hard-bg); }
+  .choice-btn .choice-num { min-width: 24px; height: 24px; border-radius: 6px; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; }
+  .choice-btn:hover:not(:disabled) .choice-num { background: var(--accent); color: #fff; }
+  .hard-mode-active .choice-btn:hover:not(:disabled) .choice-num { background: var(--hard); color: #fff; }
+  .choice-btn.correct { background: var(--correct); border-color: var(--correct-border); color: #fff; }
+  .choice-btn.correct .choice-num { background: var(--correct-border); color: #fff; }
+  .choice-btn.wrong { background: var(--wrong); border-color: var(--wrong-border); color: #fff; }
+  .choice-btn.wrong .choice-num { background: var(--wrong-border); color: #fff; }
+  .choice-btn:disabled { cursor: default; }
+  .explanation { display: none; background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.2); border-radius: 10px; padding: 1rem 1.2rem; font-size: 0.88rem; color: #a8c9f7; line-height: 1.7; margin-bottom: 1.4rem; }
+  .explanation .ex-label { font-weight: 700; color: var(--accent); margin-bottom: 0.3rem; display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .short-answer-wrap { display: flex; gap: 0.7rem; margin-bottom: 1.4rem; flex-direction: column; }
+  .short-input-row { display: flex; gap: 0.7rem; }
+  .short-input { flex: 1; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.95rem; font-family: 'Noto Sans KR', sans-serif; outline: none; transition: border-color 0.15s; }
+  .short-input:focus { border-color: var(--accent); }
+  .short-input.correct { border-color: var(--correct-border); background: var(--correct); }
+  .short-input.wrong { border-color: var(--wrong-border); background: var(--wrong); }
+  .btn-submit { background: var(--accent); color: #fff; border: none; padding: 0.85rem 1.4rem; border-radius: 10px; font-size: 0.9rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .btn-submit:hover { opacity: 0.85; } .btn-submit:disabled { opacity: 0.4; cursor: default; }
+  .sa-hint { font-size: 0.82rem; color: var(--text-muted); padding: 0 0.2rem; }
+  .sa-hint.correct-hint { color: var(--accent3); font-weight: 700; }
+  .sa-hint.wrong-hint { color: var(--accent2); }
+  .btn-next { width: 100%; background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; border: none; padding: 1rem; border-radius: 12px; font-size: 1rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: transform 0.15s, opacity 0.15s; display: none; }
+  .btn-next.hard-next { background: linear-gradient(135deg, #c678dd, #9b59b6); }
+  .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+  #result-screen { display: none; max-width: 600px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center; min-height: 100vh; justify-content: center; flex-direction: column; align-items: center; }
+  .result-emoji { font-size: 5rem; margin-bottom: 1rem; display: block; animation: bounce 0.5s ease; }
+  @keyframes bounce { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+  .result-title { font-family: 'Black Han Sans', sans-serif; font-size: 2.2rem; margin-bottom: 0.5rem; }
+  .result-score { font-size: 3.5rem; font-weight: 900; margin: 1rem 0; }
+  .result-score .score-num { color: var(--accent); }
+  .result-score .score-num.hard-score { color: var(--hard); }
+  .result-diff-badge { display: inline-block; padding: 0.3rem 1rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .result-diff-badge.normal { background: rgba(88,166,255,0.15); border: 1px solid rgba(88,166,255,0.3); color: var(--accent); }
+  .result-diff-badge.hard { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); }
+  .result-detail { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.7; white-space: pre-line; }
+  .result-bars { width: 100%; max-width: 400px; margin: 0 auto 2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .result-bar-row { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; }
+  .result-bar-label { width: 50px; text-align: right; color: var(--text-muted); flex-shrink: 0; }
+  .result-bar-track { flex: 1; height: 10px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .result-bar-fill-correct { height: 100%; background: var(--accent3); border-radius: 99px; transition: width 1s ease; }
+  .result-bar-fill-wrong { height: 100%; background: var(--accent2); border-radius: 99px; transition: width 1s ease; }
+  .result-bar-count { width: 30px; font-weight: 700; }
+  .result-buttons { display: flex; gap: 0.7rem; width: 100%; max-width: 400px; flex-wrap: wrap; }
+  .btn-r { flex: 1; min-width: 100px; border: none; padding: 0.85rem 0.5rem; border-radius: 12px; font-size: 0.88rem; font-weight: 700; font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: opacity 0.15s; }
+  .btn-r:hover { opacity: 0.85; }
+  .btn-r.normal { background: linear-gradient(135deg, #58a6ff, #388bfd); color: #fff; }
+  .btn-r.hard-btn { background: linear-gradient(135deg, #c678dd, #9b59b6); color: #fff; }
+  .btn-r.home { background: var(--card); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-r.home:hover { border-color: var(--accent); }
+  @media(max-width:600px){
+    .info-grid{grid-template-columns:repeat(3,1fr);gap:0.6rem}
+    .question-text{font-size:0.95rem}
+    .choice-btn{font-size:0.85rem;padding:0.75rem 0.9rem}
+    .hq-two-col{grid-template-columns:1fr}
+    .diff-buttons{gap:0.6rem}
+  }
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+  <div class="start-badge">📚 시험 대비 퀴즈</div>
+  <h1 class="start-title">공업 일반<br>실력 점검</h1>
+  <p class="start-sub">제품과 제조 과정 · 표준화 · 생산 공정 개발<br>생산 관리·혁신 · 생산 정보 시스템 · 공장 자동화<br>교과서 전 범위 총정리 퀴즈</p>
+  <div class="info-grid">
+    <div class="info-card"><span class="num">20</span><div class="lbl">문제 수</div></div>
+    <div class="info-card"><span class="num" style="color:var(--yellow)">랜덤</span><div class="lbl">출제 방식</div></div>
+    <div class="info-card"><span class="num" style="color:var(--accent3)">즉시</span><div class="lbl">해설 제공</div></div>
+  </div>
+  <p class="diff-select-label">난이도를 선택하세요</p>
+  <div class="diff-buttons">
+    <button class="diff-btn selected-normal" id="btn-diff-normal" onclick="selectDiff('normal')">
+      <span class="diff-icon">📖</span><span class="diff-name">노말</span><span class="diff-desc">핵심 개념 (70문항 풀)</span>
+    </button>
+    <button class="diff-btn" id="btn-diff-hard" onclick="selectDiff('hard')">
+      <span class="diff-icon">🔥</span><span class="diff-name">하드</span><span class="diff-desc">고난도 추론 (45문항 풀)</span>
+    </button>
+  </div>
+  <button class="btn-start" id="btn-start-main" onclick="startQuiz()">노말 시작하기 →</button>
+</div>
+
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <div class="quiz-counter">문제 <span id="cur-q">1</span> / 20</div>
+    <div class="score-badge">점수: <span id="live-score">0</span>점</div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:5%"></div></div>
+  <div class="question-card" id="q-card">
+    <div class="question-type" id="q-type">객관식</div>
+    <div class="question-text" id="q-text"></div>
+    <div id="q-html-content"></div>
+  </div>
+  <div id="choices-area"></div>
+  <div class="explanation" id="explanation"><span class="ex-label">💡 해설</span><span id="exp-text"></span></div>
+  <button class="btn-next" id="btn-next" onclick="nextQuestion()">다음 문제 →</button>
+</div>
+
+<div id="result-screen">
+  <span class="result-emoji" id="result-emoji">🎉</span>
+  <div class="result-diff-badge normal" id="result-diff-badge">노말 모드</div>
+  <h2 class="result-title" id="result-title">수고했어요!</h2>
+  <div class="result-score"><span class="score-num" id="result-score-num">0</span> <span style="font-size:1.5rem;color:var(--text-muted)">/ 20</span></div>
+  <p class="result-detail" id="result-detail"></p>
+  <div class="result-bars">
+    <div class="result-bar-row">
+      <span class="result-bar-label" style="color:var(--accent3)">정답</span>
+      <div class="result-bar-track"><div class="result-bar-fill-correct" id="bar-correct" style="width:0%"></div></div>
+      <span class="result-bar-count" style="color:var(--accent3)" id="cnt-correct">0</span>
+    </div>
+    <div class="result-bar-row">
+      <span class="result-bar-label" style="color:var(--accent2)">오답</span>
+      <div class="result-bar-track"><div class="result-bar-fill-wrong" id="bar-wrong" style="width:0%"></div></div>
+      <span class="result-bar-count" style="color:var(--accent2)" id="cnt-wrong">0</span>
+    </div>
+  </div>
+  <div class="result-buttons">
+    <button class="btn-r normal" onclick="startQuiz('normal')">📖 노말</button>
+    <button class="btn-r hard-btn" onclick="startQuiz('hard')">🔥 하드</button>
+    <button class="btn-r home" onclick="goHome()">🏠 처음</button>
+  </div>
+</div>
+
+<script>
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+
+function pickMC(choices, answerIdx, noShuffle) {
+  if (noShuffle) return { shuffledChoices: choices, newAnswerIdx: answerIdx };
+  const correct = choices[answerIdx];
+  const wrong = shuffle(choices.filter((_, i) => i !== answerIdx)).slice(0, 3);
+  const pool = shuffle([correct, ...wrong]);
+  return { shuffledChoices: pool, newAnswerIdx: pool.indexOf(correct) };
+}
+
+function checkSA(input, answers){
+  const norm = s => s.replace(/\s/g,'').toLowerCase();
+  return answers.some(a => norm(a) === norm(input));
+}
+
+const LABELS4 = ['①','②','③','④'];
+const LABELS5 = ['①','②','③','④','⑤'];
+
+const NORMAL_QUESTIONS = [
+  {type:'mc',q:'주문 생산에 대한 설명으로 옳은 것은?',
+  choices:['고객의 주문에 따라 생산이 이루어지는 방식이다','시장의 수요를 예측하여 동일한 제품을 대량으로 생산하는 방식이다','구두, 운동화, 양말 등이 대표적인 예이다','자동화된 전용 설비를 이용하여 생산한다','자재의 대량 구매로 생산 원가를 낮게 유지한다','소품종 대량 생산에 최적화된 방식이다'],
+  answer:0,exp:'주문 생산(수주 생산)은 고객의 주문에 따라 생산이 이루어지는 방식으로, 선박·항공기·건물 등이 대표적입니다.'},
+
+  {type:'mc',q:'계획 생산의 특징으로 옳지 않은 것은?',
+  choices:['제품 종류가 다양하고 가격이 비쌈','시장 수요를 예측하여 동일 제품을 대량 생산','자동화된 전용 설비를 이용하여 생산','자재를 대량 구매하여 생산 원가 절감','구두, 운동화, 셔츠 등이 대표적인 예','기성품으로 판매됨'],
+  answer:0,exp:'제품 종류가 다양하고 가격이 비싼 것은 주문 생산의 특징입니다. 계획 생산은 동일 제품의 대량 생산으로 원가를 낮추는 방식입니다.'},
+
+  {type:'mc',q:'주문 생산의 대표적인 제품으로 옳은 것은?',
+  choices:['선박, 항공기, 건물','구두, 운동화, 양말','셔츠, 장갑, 모자','라면, 과자, 음료','볼펜, 노트, 지우개','타이어, 벽돌, 시멘트'],
+  answer:0,exp:'선박·항공기·건물은 고객의 주문에 따라 각각 다르게 제작되는 주문 생산(수주 생산)의 대표 사례입니다.'},
+
+  {type:'mc',q:'계획 생산의 예로 가장 적절한 것은?',
+  choices:['구두, 운동화, 셔츠, 양말, 장갑','선박, 항공기, 건물','특수 제작 의족, 맞춤 정장','고객 주문 가구, 맞춤 주방','특수 제작 산업용 로봇','주문 설계 교량'],
+  answer:0,exp:'구두·운동화·셔츠·양말·장갑은 시장 수요를 예측하여 동일 제품을 대량 생산하는 계획 생산(예측 생산)의 대표 예입니다.'},
+
+  {type:'mc',q:'생산 관리의 정의로 가장 올바른 것은?',
+  choices:['원자재가 공장에 들어와 완제품이 되어 나갈 때까지의 전체 흐름을 관리하는 활동','기업의 재무 상태를 파악하고 자금을 조달·운용하는 활동','소비자에게 제품을 판매하고 홍보하는 마케팅 활동','기업 내 인재를 채용·교육·평가하는 인사 활동','연구개발을 통해 새로운 제품을 설계하는 활동','공급자와의 협상을 통해 원자재를 구매하는 활동'],
+  answer:0,exp:'생산 관리는 원자재가 공장에 들어와 완제품이 되어 나갈 때까지의 전체 흐름(생산 계획·공정·품질·원가 등)을 관리하는 활동입니다.'},
+
+  {type:'mc',q:'생산 관리의 목표 4가지에 해당하지 않는 것은?',
+  choices:['광고 및 판매 촉진','원가 절감','품질 및 생산성 향상','납기 준수','유연성 확보','효율적 자원 활용'],
+  answer:0,exp:'생산 관리의 4대 목표는 원가 절감, 품질 및 생산성 향상, 납기 준수, 유연성 확보입니다. 광고·판매 촉진은 마케팅의 목표입니다.'},
+
+  {type:'mc',q:'생산 관리의 목표 중 "유연성(Flexibility)"이 중요한 이유로 가장 적절한 것은?',
+  choices:['소비자 요구가 다양해지고 시장 변화가 빨라 수요 변동에 따라 생산 수량을 빠르게 조절해야 하기 때문이다','생산 원가를 최소화하여 가격 경쟁력을 확보해야 하기 때문이다','납품 기한을 정확히 지켜 고객 신뢰를 유지해야 하기 때문이다','제품의 불량률을 줄여 품질을 향상시켜야 하기 때문이다','공장 자동화를 통해 인건비를 절감해야 하기 때문이다','대량 생산으로 단위 생산 원가를 낮춰야 하기 때문이다'],
+  answer:0,exp:'유연성은 소비자 요구의 다양화와 시장 변화 속도에 대응하여 수요 변동에 따라 생산 수량을 빠르게 조절할 수 있는 능력을 의미합니다.'},
+
+  {type:'mc',q:'생산 관리의 합리화 원칙 3S에 해당하지 않는 것은?',
+  choices:['소형화(Smallification)','표준화(Standardization)','전문화(Specialization)','단순화(Simplification)','표준화 원칙','전문화 원칙'],
+  answer:0,exp:'생산 관리의 합리화 원칙 3S는 표준화(Standardization), 전문화(Specialization), 단순화(Simplification)입니다. 소형화는 해당하지 않습니다.'},
+
+  {type:'mc',q:'생산 관리 합리화 원칙 중 "표준화(Standardization)"의 정의로 옳은 것은?',
+  choices:['제품의 크기, 형태, 품질 등을 일정한 기준에 맞추어 통일하는 원칙','불필요한 품목을 줄여 가짓수를 단순하게 만드는 활동','작업자의 전문성 향상으로 생산 능률을 높이는 원칙','컨베이어 시스템을 통해 대량 생산을 실현하는 방법','여러 종류의 제품을 소량씩 생산하는 방식','필요한 만큼만 생산하여 재고를 최소화하는 원칙'],
+  answer:0,exp:'표준화는 제품의 크기·형태·품질 등을 일정한 기준에 맞추어 통일하는 원칙입니다. 이를 통해 부품 호환성과 생산 효율이 높아집니다.'},
+
+  {type:'mc',q:'생산 관리 합리화 원칙 중 "단순화(Simplification)"의 정의로 옳은 것은?',
+  choices:['불필요한 품목을 줄여 가짓수를 단순하게 만드는 활동','제품의 크기, 형태, 품질을 일정 기준에 맞추어 통일하는 원칙','작업자의 전문성을 향상시켜 생산 능률을 높이는 원칙','이동 조립법으로 대량 생산의 기틀을 마련하는 활동','기업 전체의 자원을 통합 관리하는 시스템','생산에 필요한 원자재를 유리한 조건으로 확보하는 활동'],
+  answer:0,exp:'단순화는 불필요한 품목을 줄여 제품·부품·공정의 가짓수를 단순하게 만드는 활동입니다. 관리 효율과 생산성이 향상됩니다.'},
+
+  {type:'mc',q:'생산 관리 3S 중 "전문화(Specialization)"의 특징으로 옳지 않은 것은?',
+  choices:['동일 동작 반복으로 작업 피로도가 낮아진다','작업의 단순화로 숙련 기간이 단축된다','작업 도구 및 방법의 개선이 쉬워진다','개별 작업자의 업무 책임 한계가 명확해진다','생산 능률 향상으로 비용 절감 효과가 있다','안전도를 높이는 효과가 있다'],
+  answer:0,exp:'전문화에서 동일 동작의 반복은 오히려 높은 작업 피로도를 유발하는 단점입니다. 나머지는 전문화의 장점에 해당합니다.'},
+
+  {type:'mc',q:'포드 시스템(Ford System)의 핵심 특징으로 옳은 것은?',
+  choices:['이동 조립법(컨베이어 시스템)으로 대량 생산의 기틀을 마련한 생산 시스템','필요한 때 필요한 만큼만 생산하여 재고를 최소화하는 시스템','기업 전체의 인적·물적 자원을 통합 관리하는 시스템','컴퓨터를 이용하여 제품 설계를 수행하는 시스템','자동화 기기로 생산성과 유연성을 높이는 생산 공정 시스템','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 기술'],
+  answer:0,exp:'포드 시스템은 이동 조립법(컨베이어 시스템)을 활용하여 대량 생산의 기틀을 마련한 생산 시스템입니다.'},
+
+  {type:'mc',q:'포드 시스템에서 적용한 생산 관리 3S의 내용으로 옳은 것은?',
+  choices:['제품의 단순화, 부품의 표준화, 공정의 전문화','제품의 표준화, 부품의 단순화, 공정의 자동화','제품의 전문화, 부품의 단순화, 공정의 표준화','제품의 자동화, 부품의 전문화, 공정의 단순화','제품의 단순화, 부품의 자동화, 공정의 표준화','제품의 표준화, 부품의 전문화, 공정의 단순화'],
+  answer:0,exp:'포드 시스템의 3S는 제품의 단순화, 부품의 표준화, 공정의 전문화입니다. 이를 통해 대량 생산이 가능해졌습니다.'},
+
+  {type:'mc',q:'적시 생산 방식(JIT: Just In Time)의 핵심 원리로 옳은 것은?',
+  choices:['필요한 때 필요한 만큼 생산하여 낭비 요소를 제거하고 재고를 최소화하는 방식','대량 생산으로 단위 원가를 낮추고 재고를 최대화하여 공급 안정성을 확보하는 방식','컴퓨터 시스템으로 생산 전 과정을 자동화하여 무인 생산을 실현하는 방식','기업의 인적·물적 자원을 통합하여 실시간으로 관리하는 방식','설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 방식','생산 라인에 이동 조립법을 도입하여 대량 생산의 기틀을 마련하는 방식'],
+  answer:0,exp:'JIT(적시 생산 방식)는 필요한 때 필요한 만큼만 생산하여 낭비 요소를 제거하고 재고를 최소화하는 방식으로, 토요타 시스템이라고도 합니다.'},
+
+  {type:'mc',q:'JIT(적시 생산 방식)와 관련된 설명으로 옳지 않은 것은?',
+  choices:['대규모 창고 시설을 갖추어 재고를 최대한 많이 확보한다','필요한 만큼만 생산하는 것을 목표로 한다','낭비 요소의 제거를 핵심 원리로 한다','재고를 최소화하여 관리 비용을 절감한다','토요타 시스템이라고도 불린다','협력 업체와의 긴밀한 협력이 필요하다'],
+  answer:0,exp:'JIT는 재고를 최소화하는 방식이므로 대규모 창고 시설을 갖추어 재고를 많이 확보하는 것은 JIT와 반대 개념입니다.'},
+
+  {type:'mc',q:'ERP(전사적 자원 관리 시스템)에 대한 설명으로 옳은 것은?',
+  choices:['기업 내의 모든 경영 활동 과정을 통합 관리하고 정보를 공유하는 시스템','컴퓨터를 이용하여 제품의 설계를 수행하는 시스템','설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 시스템','자동화 기기로 생산성과 유연성을 높이는 생산 공정 시스템','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 제조 시스템','필요한 때 필요한 만큼만 생산하여 재고를 최소화하는 시스템'],
+  answer:0,exp:'ERP(Enterprise Resource Planning, 전사적 자원 관리 시스템)는 기업 내 모든 경영 활동(인적·물적 자원)을 통합 관리하고 정보를 공유하는 시스템입니다.'},
+
+  {type:'sa',q:'기업 전체의 인적, 물적 자원을 통합하여 관리하는 전사적 자원 관리 시스템의 영문 약어를 쓰시오.',
+  answers:['ERP','erp'],exp:'ERP(Enterprise Resource Planning)는 기업의 인적·물적 자원을 통합하여 관리하는 전사적 자원 관리 시스템입니다.'},
+
+  {type:'mc',q:'CAD에 대한 설명으로 옳은 것은?',
+  choices:['컴퓨터를 이용하여 제품의 설계를 수행하는 시스템','설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 시스템','자동화 기기로 생산성과 유연성을 높이는 생산 공정 시스템','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 시스템','기업 전체의 자원을 통합하여 관리하는 시스템','인간의 팔과 유사한 기능을 하는 자동화 장치'],
+  answer:0,exp:'CAD(Computer Aided Design)는 컴퓨터를 이용하여 제품의 설계를 수행하는 시스템입니다.'},
+
+  {type:'mc',q:'CAM에 대한 설명으로 옳은 것은?',
+  choices:['설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 시스템','컴퓨터를 이용하여 제품의 설계를 수행하는 시스템','자동화 기기로 생산성과 유연성을 높이는 생산 공정 시스템','기업 전체의 자원을 통합하여 관리하는 시스템','필요한 때 필요한 만큼만 생산하여 재고를 최소화하는 시스템','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 시스템'],
+  answer:0,exp:'CAM(Computer Aided Manufacturing)은 CAD의 설계 데이터를 바탕으로 컴퓨터를 이용해 실제 제조 및 가공을 수행하는 시스템입니다.'},
+
+  {type:'mc',q:'FMS(유연 생산 시스템)에 대한 설명으로 옳은 것은?',
+  choices:['자동화 기기와 이를 이용하여 생산성과 유연성을 높이도록 설계된 생산 공정 시스템','컴퓨터를 이용하여 제품의 설계를 수행하는 시스템','기업 내 모든 경영 활동을 통합 관리하고 정보를 공유하는 시스템','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 기술','설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 시스템','정해진 경로로 공장 내에서 부품이나 재료를 이동하는 장치'],
+  answer:0,exp:'FMS(Flexible Manufacturing System, 유연 생산 시스템)는 로봇과 자동화 설비를 결합하여 생산성과 유연성을 극대화하도록 설계된 생산 공정 시스템입니다.'},
+
+  {type:'mc',q:'CIM(컴퓨터 통합 제조)에 대한 설명으로 옳은 것은?',
+  choices:['제품 설계부터 판매까지의 모든 정보를 유기적으로 연결하여 인력과 시간을 줄이는 시스템','컴퓨터를 이용하여 제품의 설계만을 수행하는 시스템','설계 데이터로 제조 및 가공만을 수행하는 시스템','기업 전체의 자원을 통합 관리하는 회계 시스템','필요한 만큼만 생산하여 재고를 최소화하는 시스템','이동 조립법으로 대량 생산의 기틀을 마련한 시스템'],
+  answer:0,exp:'CIM(Computer Integrated Manufacturing)은 제품 설계부터 판매까지 모든 정보를 유기적으로 연결하여 인력과 시간을 절감하는 무인화 지향 통합 제조 기술입니다.'},
+
+  {type:'sa',q:'컴퓨터를 이용하여 제품의 설계를 수행하는 시스템의 영문 약어를 쓰시오.',
+  answers:['CAD','cad'],exp:'CAD(Computer Aided Design)는 컴퓨터를 이용하여 제품의 설계를 수행하는 시스템입니다.'},
+
+  {type:'sa',q:'적시 생산 방식(JIT)을 처음 도입한 기업의 이름을 딴 별칭으로, JIT를 무엇이라고도 부르는가?',
+  answers:['토요타 시스템','Toyota 시스템','도요타 시스템'],exp:'JIT는 일본의 토요타 자동차가 개발·도입한 생산 방식으로 "토요타 시스템"이라고도 불립니다.'},
+
+  {type:'mc',q:'공정 기호 중 "○(원)"이 의미하는 것은?',
+  choices:['원재료의 모양이나 성질을 변화시키는 가공(작업)','작업물의 품질이나 수량을 확인하는 검사','작업자의 위치 이동(운반)','작업물의 저장','다음 작업을 위해 대기(정체)','작업 완료 후 출하'],
+  answer:0,exp:'공정 기호에서 ○(원)은 원재료의 모양이나 성질을 변화시키는 가공(작업) 단계를 나타냅니다.'},
+
+  {type:'mc',q:'공정 기호 중 "□(사각형)"이 의미하는 것은?',
+  choices:['작업물의 품질이나 수량을 확인하는 검사','원재료의 모양이나 성질을 변화시키는 가공','작업자의 위치 이동(운반)','작업물의 저장','다음 작업을 위해 대기(정체)','완성된 제품의 포장'],
+  answer:0,exp:'공정 기호에서 □(사각형)은 작업물의 품질이나 수량을 확인하는 검사 단계를 나타냅니다.'},
+
+  {type:'mc',q:'공정 기호 중 "▽(역삼각형)"이 의미하는 것은?',
+  choices:['작업물의 저장','원재료의 가공','작업물의 검사','작업자의 운반','다음 작업을 위한 대기','제품의 출하'],
+  answer:0,exp:'공정 기호에서 ▽(역삼각형)은 작업물의 저장을 나타냅니다.'},
+
+  {type:'mc',q:'공정 기호 중 "D(대문자 D 모양)"가 의미하는 것은?',
+  choices:['다음 작업을 위해 대기(정체)','원재료의 가공','작업물의 검사','작업자의 운반','작업물의 저장','제품의 입고'],
+  answer:0,exp:'공정 기호에서 D는 다음 작업을 위한 대기(정체) 단계를 나타냅니다.'},
+
+  {type:'mc',q:'공정 기호 중 "→(화살표)"가 의미하는 것은?',
+  choices:['작업자의 위치 이동(운반)','원재료의 가공','작업물의 검사','작업물의 저장','다음 작업을 위한 대기','제품의 완성'],
+  answer:0,exp:'공정 기호에서 →(화살표)는 작업자 또는 작업물의 위치 이동, 즉 운반을 나타냅니다.'},
+
+  {type:'mc',q:'산업용 로봇에 대한 설명으로 옳은 것은?',
+  choices:['인간의 팔과 유사한 기능을 하며 위험한 작업 환경에서 주로 사용되는 장치','정해진 경로를 따라 공장 내에서 부품이나 재료를 이동하는 장치','제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 시스템','생산 라인의 불량품을 자동으로 감지하고 분류하는 장치','기업의 인적·물적 자원을 통합하여 관리하는 시스템','자동화 기기로 생산성과 유연성을 높이는 생산 공정 시스템'],
+  answer:0,exp:'산업용 로봇은 인간의 팔과 유사한 기능을 하는 자동화 장치로, 고온·위험·반복 작업 환경에서 주로 활용됩니다.'},
+
+  {type:'mc',q:'수직 관절형 로봇의 특징으로 옳은 것은?',
+  choices:['모든 방향을 자유롭게 움직이면서 작업할 수 있어 용도가 다양하다','가로, 세로, 높이 3차원 공간에서 직선 이동만 가능하다','허리처럼 회전하며 원통 형태의 작업 영역을 가진다','팔이 대포 포신처럼 움직이며 점용접 등에 활용된다','정해진 경로를 따라 공장 내 부품을 이동하는 장치이다','인간의 팔과 달리 수평 방향 이동만 가능하다'],
+  answer:0,exp:'수직 관절형 로봇은 모든 방향을 자유롭게 움직일 수 있어 용도가 가장 다양한 로봇입니다. 작업 영역이 구(球) 형태로 표현됩니다.'},
+
+  {type:'mc',q:'직각 좌표형 로봇의 특징으로 옳은 것은?',
+  choices:['가로, 세로, 높이의 3차원 공간 내에서 직선 방향으로 작업이 가능하다','모든 방향을 자유롭게 움직이며 용도가 가장 다양하다','허리처럼 회전하며 원통 형태의 작업 영역을 가진다','팔이 대포 포신처럼 움직이며 점용접 등에 활용된다','구 형태의 작업 영역을 가져 사각 방향 작업에 유리하다','정해진 경로를 따라 공장 내 부품을 운반하는 장치이다'],
+  answer:0,exp:'직각 좌표형 로봇은 가로·세로·높이(X·Y·Z축)의 3차원 공간에서 직선 이동으로 작업합니다. 작업 영역은 직육면체 형태입니다.'},
+
+  {type:'mc',q:'극 좌표형 로봇에 대한 설명으로 옳은 것은?',
+  choices:['팔이 대포의 포신처럼 움직이며 동작 영역이 넓어 점용접 등에 이용된다','가로, 세로, 높이 3차원 직선 이동이 가능한 로봇이다','모든 방향을 자유롭게 움직이며 용도가 다양한 로봇이다','허리처럼 회전하며 원통 형태의 작업 영역을 가진 로봇이다','정해진 경로를 따라 공장 내 부품을 이동하는 장치이다','구 형태 작업 영역으로 조립 작업에 주로 활용된다'],
+  answer:0,exp:'극 좌표형 로봇은 팔이 대포의 포신처럼 움직이며 동작 영역이 넓어 사각 방향 작업에 유리하고 점용접 등에 활용됩니다.'},
+
+  {type:'mc',q:'공장 자동화(FA)에서 무인 운반차(AGV)의 주요 역할로 옳은 것은?',
+  choices:['정해진 경로를 따라 공장 내에서 부품이나 재료를 자동으로 이동하는 역할','위험한 작업 환경에서 인간의 팔과 유사한 동작으로 가공 작업을 수행하는 역할','제품 설계부터 판매까지 모든 정보를 통합 관리하는 역할','생산 계획에 맞춰 자재를 자동으로 주문·발주하는 역할','제품의 불량 여부를 감지하고 분류하는 자동 검사 역할','생산 현장의 온도·습도를 자동으로 제어하는 역할'],
+  answer:0,exp:'무인 운반차(AGV: Automated Guided Vehicle)는 정해진 경로를 따라 공장 내에서 부품이나 재료를 자동 또는 수동으로 적재하여 이동하는 장치입니다.'},
+
+  {type:'mc',q:'제품별 배치에 의한 생산 시스템의 특징으로 옳지 않은 것은?',
+  choices:['다품종 소량 생산에 최적화되어 있다','소품종 대량 생산에 적합하다','자동화를 도입하기 쉽다','작업자의 숙련 기간이 짧고 습득이 쉽다','설비 장만 비용이 크다','기계 고장 시 전체 라인이 멈추는 위험이 있다'],
+  answer:0,exp:'제품별 배치는 소품종 대량 생산에 적합한 방식입니다. 다품종 소량 생산에 적합한 것은 공정별 배치입니다.'},
+
+  {type:'mc',q:'공정별 배치에 의한 생산 시스템의 특징으로 옳지 않은 것은?',
+  choices:['작업자의 숙련 기간이 짧고 습득이 쉽다','기계 가동률이 높다','생산 제품 변화에 융통성 있게 대처 가능하다','전문적인 설비 관리가 가능하다','물자와 인력의 이동이 복잡해진다','공정별로 보유해야 하는 재고량이 많다'],
+  answer:0,exp:'공정별 배치는 유사 기능 설비를 모아두는 방식으로, 다양한 제품 생산에 유연하게 대응할 수 있습니다. 그러나 작업자의 높은 숙련도가 요구됩니다.'},
+
+  {type:'mc',q:'다품종 소량 생산에 대한 설명으로 옳은 것은?',
+  choices:['소비자의 다양한 욕구에 대응하기 위해 여러 종류의 제품을 조금씩 생산하는 방식','동일한 제품을 대량으로 생산하여 단위 원가를 낮추는 방식','고객의 주문에 따라 개별적으로 특별 제작하는 방식','자동화된 전용 설비로 표준화된 제품을 반복 생산하는 방식','재고를 최대화하여 수요 변동에 안정적으로 대응하는 방식','소수의 표준화된 제품에 집중하여 품질을 높이는 방식'],
+  answer:0,exp:'다품종 소량 생산은 소비자의 다양한 욕구에 대응하기 위해 여러 종류의 제품을 소량씩 생산하는 방식으로, FMS(유연 생산 시스템)와 연계됩니다.'},
+
+  {type:'mc',q:'구매 관리의 정의로 옳은 것은?',
+  choices:['기업이 제품 생산에 필요한 원자재를 적절한 공급원으로부터 유리한 조건으로 확보하는 활동','기업 내의 모든 경영 활동 과정을 통합 관리하고 정보를 공유하는 시스템','생산 현장에서 발생하는 불량품을 검출하고 품질을 관리하는 활동','완성된 제품을 소비자에게 판매하고 유통하는 활동','원자재 재고를 최소화하여 창고 비용을 절감하는 활동','생산 라인의 설비와 기계를 유지·보수하는 활동'],
+  answer:0,exp:'구매 관리는 기업이 제품 생산에 필요한 원자재를 적절한 공급원으로부터 유리한 조건(가격, 품질, 납기 등)으로 확보하는 활동입니다.'},
+
+  {type:'mc',q:'자재 저장의 원칙 중 선입선출법에 대한 설명으로 옳은 것은?',
+  choices:['먼저 입고된 자재를 먼저 출고하여 자재의 노후화나 변질을 방지하는 방법','나중에 입고된 자재를 먼저 출고하여 재고 회전율을 높이는 방법','가장 최근에 구매한 자재를 우선 사용하여 원가를 절감하는 방법','자재를 임의 순서로 출고하여 창고 공간을 효율적으로 활용하는 방법','가장 비싸게 구입한 자재를 먼저 출고하여 손실을 최소화하는 방법','소비 기한에 상관없이 수량이 많은 자재부터 출고하는 방법'],
+  answer:0,exp:'선입선출법은 먼저 입고된 자재를 먼저 출고하는 원칙으로, 자재의 노후화·변질을 방지하고 재고 관리를 효율화합니다.'},
+
+  {type:'mc',q:'공장 자동화(FA) 단계 중 가장 상위 단계인 "통합화" 단계의 특징으로 옳은 것은?',
+  choices:['제품 설계·생산·관리·마케팅 정보의 실시간 공유 및 최적화','단순 반복 작업을 기계로 대체하는 기계화 단계','개별 기계에 제어 장치를 추가하는 자동화 단계','여러 자동화 기기를 연결하는 시스템화 단계','인간의 판단이 필요한 작업을 자동화하는 지능화 단계','컴퓨터로 설계와 제조를 통합하는 CAD/CAM 단계'],
+  answer:0,exp:'공장 자동화(FA)의 최상위 단계인 통합화 단계는 제품 설계·생산·관리·마케팅의 모든 정보를 실시간으로 공유하고 최적화하는 단계입니다.'},
+
+  {type:'sa',q:'구매 관리의 5대 적정 요소 중, 제품의 규격과 성능이 요구 수준에 부합하는지를 의미하는 요소를 쓰시오.',
+  answers:['적정 품질','품질'],exp:'구매 관리의 5대 적정 요소 중 "적정 품질"은 구매하는 원자재나 부품의 규격과 성능이 요구 수준에 부합하는지를 의미합니다.'},
+
+  {type:'sa',q:'자재 저장의 원칙 중, 먼저 입고된 자재를 먼저 출고하여 자재의 노후화나 변질을 방지하는 방법을 무엇이라 하는가?',
+  answers:['선입선출법','선입선출','FIFO'],exp:'선입선출법(FIFO: First In First Out)은 먼저 입고된 자재를 먼저 출고하는 방법으로 자재의 노후화와 변질을 방지합니다.'},
+
+  {type:'mc',q:'제품의 의미로 가장 올바른 것은?',
+  choices:['소비자의 요구를 충족하기 위하여 적절한 원료를 사용하여 고유한 형태로 만들어 낸 물품','시장에서 거래되는 모든 유·무형의 서비스','기업이 보유한 모든 자산을 의미하는 회계 용어','생산에 투입되는 원자재 그 자체','소비자가 직접 사용하지 않는 중간 생산물 전체','생산 공정에서 발생하는 부산물'],
+  answer:0,exp:'제품은 소비자의 요구를 충족하기 위하여 적절한 원료를 사용하여 고유한 형태로 만들어 낸 물품을 의미합니다.'},
+
+  {type:'mc',q:'내구재에 대한 설명으로 옳은 것은?',
+  choices:['여러 번 사용해도 소모되지 않고 오랜 기간 사용할 수 있는 제품으로, 기계·자동차·냉장고 등이 해당한다','단 한 번만 사용할 수 있거나 사용 기간이 비교적 짧은 제품이다','구매 전 가격·품질·디자인 등을 비교한 후 구입하는 고가 제품이다','상표나 점포의 명성에 따라 구매가 결정되는 제품이다','소비재를 만들기 위한 중간재로서 최종 소비자가 소비하지 않는 제품이다','특별한 노력 없이 즉시 구입하는 생활 필수품이다'],
+  answer:0,exp:'내구재는 여러 번 사용해도 소모되지 않고 오랜 기간 사용할 수 있는 제품으로, 산업용(기계·장치·건물)과 생활용(자동차·냉장고·TV) 내구재로 나뉩니다.'},
+
+  {type:'mc',q:'비내구재에 해당하는 제품으로 가장 적절한 것은?',
+  choices:['식료품, 의류, 화장품, 의약품','자동차, 냉장고, TV','기계, 장치, 건물','피아노, 명품 시계, 카메라','가구, 가전제품','선박, 항공기'],
+  answer:0,exp:'비내구재는 단 한 번만 사용하거나 사용 기간이 비교적 짧은 제품으로, 식료품·의류·화장품·의약품 등이 대표적입니다.'},
+
+  {type:'mc',q:'소비재와 생산재(산업재)에 대한 설명으로 옳은 것은?',
+  choices:['소비재는 구매자가 욕구 충족을 위해 직접 소비하는 제품이고, 생산재는 소비재를 만들기 위한 부품·재료 등 중간재를 말한다','소비재는 자본재와 동일한 개념이며, 생산재는 최종 소비자가 직접 소비하는 제품이다','소비재는 편의품으로만 구성되고, 생산재는 선매품으로만 구성된다','생산재는 일상생활에서 소비자가 직접 소비하는 제품을 의미한다','소비재는 항상 비내구재이고, 생산재는 항상 내구재이다','생산재는 소비자가 구매 전 충분히 비교 검토하는 제품을 의미한다'],
+  answer:0,exp:'소비재는 구매자가 욕구 충족을 위하여 일상생활에서 직접 소비하는 제품이며, 생산재(산업재)는 소비재를 만들기 위한 부품이나 재료 등 중간재를 의미합니다.'},
+
+  {type:'mc',q:'다음 중 "선매품"에 대한 설명으로 가장 적절한 것은?',
+  choices:['제품에 대한 정보가 부족한 소비자가 구매 전 가격·품질·디자인 등을 비교한 후 구입하는, 편의품보다 고가인 제품','특별한 노력 없이 즉시 구입하는 식료품, 약품 등 생활 필수품','상표나 점포의 명성과 신용에 따라 구매하며 가격이 매우 비싼 제품','최종 소비자가 소비하지 않는 부품이나 재료','인간에 의해 생산되어 완제품 생산에 부분적으로 투입되는 중간 생산물','여러 번 사용해도 소모되지 않는 산업용 내구재'],
+  answer:0,exp:'선매품은 제품 정보가 부족한 소비자가 구매 전 여러 제품을 비교한 후 구입하는 제품으로 의류, 가구, 가전제품, 구두 등이 해당하며 편의품보다 고가입니다.'},
+
+  {type:'mc',q:'다음 중 "전문품"의 예로 가장 적절한 것은?',
+  choices:['카메라, 피아노, 명품 시계, 자동차','식료품, 약품, 기호품','의류, 가구, 가전제품, 구두','기계, 장치, 건물','공업 원료','소모품'],
+  answer:0,exp:'전문품은 제품의 가치와 특성이 뚜렷하고 상표나 점포의 명성·신용에 따라 구매하는 제품으로, 카메라·피아노·명품 시계·자동차 등이 대표적이며 가격이 비쌉니다.'},
+
+  {type:'sa',q:'인간에 의해 생산되어 완제품 생산에 부분적으로 투입되는 수단 또는 중간 생산물로, 중간재라고도 불리는 생산 요소를 무엇이라 하는가?',
+  answers:['자본재'],exp:'자본재는 인간에 의해 생산되어 완제품 생산에 부분적으로 투입되는 수단 또는 중간 생산물로, 중간재라고도 하며 생산 요소 중 자본에 해당합니다.'},
+
+  {type:'mc',q:'제품의 일반적인 제조 과정 순서로 옳은 것은?',
+  choices:['제품 개발 → 설비 및 재료 준비 → 가공 및 조립(시제품) → 제품 검사 → 제품의 포장 및 출하','제품 검사 → 제품 개발 → 가공 및 조립 → 설비 및 재료 준비 → 포장 및 출하','설비 및 재료 준비 → 제품 개발 → 제품 검사 → 가공 및 조립 → 포장 및 출하','제품의 포장 및 출하 → 제품 개발 → 가공 및 조립 → 설비 및 재료 준비 → 제품 검사','가공 및 조립 → 설비 및 재료 준비 → 제품 개발 → 제품 검사 → 포장 및 출하','제품 개발 → 제품 검사 → 설비 및 재료 준비 → 가공 및 조립 → 포장 및 출하'],
+  answer:0,exp:'제품의 일반적인 제조 과정은 제품 개발 → 설비 및 재료 준비 → 가공 및 조립(시제품) → 제품 검사 → 제품의 포장 및 출하 순으로 진행됩니다.'},
+
+  {type:'mc',q:'표준화(Standardization)의 목적과 효과로 옳지 않은 것은?',
+  choices:['제품 종류를 늘려 다양성을 극대화하는 것이 핵심 목적이다','제품과 업무 행위의 단순화를 도모한다','호환성을 향상시켜 전체적인 경제성을 추구한다','제품의 품질을 향상시키고 균일성을 유지한다','생산 능률을 증진하고 원가를 절감하는 효과가 있다','생산·소비·유통 등 여러 분야에서 경제적 효과를 가져온다'],
+  answer:0,exp:'표준화는 제품과 업무 행위의 단순화, 호환성 향상을 통한 경제성 추구가 목적이며, 품질 향상·균일성 유지·생산 능률 증진·원가 절감 효과를 가져옵니다. 다양성 극대화는 표준화의 목적이 아닙니다.'},
+
+  {type:'mc',q:'다음 국제 표준화 기구와 그 명칭이 바르게 연결된 것은?',
+  choices:['ISO - 국제표준화기구','IEC - 국제표준화기구','ITU - 국제전기표준회의','ISO - 국제전기통신연합','IEC - 국제전기통신연합','ITU - 국제표준화기구'],
+  answer:0,exp:'ISO(International Standardization Organization)는 국제표준화기구, IEC는 국제전기표준회의, ITU는 국제전기(에너지)통신연합입니다.'},
+
+  {type:'mc',q:'한국산업표준(KS)에 대한 설명으로 옳은 것은?',
+  choices:['서비스의 품질, 생산 효율, 생산 기술을 향상시키고 거래를 단순화·공정화하여 산업경쟁력을 향상시키는 것을 목적으로 한다','미국의 국가 표준 기관에서 제정한 표준이다','일본공업표준을 한국에 그대로 적용한 표준이다','국제표준화기구가 직접 인증하는 국제 규격이다','전기·전자 부문만을 대상으로 하는 표준이다','자동차 산업에 한정하여 적용되는 표준이다'],
+  answer:0,exp:'한국산업표준(KS)은 서비스의 품질, 생산 효율, 생산 기술을 향상시키고 거래를 단순화·공정화하여 소비를 합리화함으로써 산업경쟁력을 향상시키고 국가 경제를 발전시키는 것을 목적으로 합니다.'},
+
+  {type:'sa',q:'우리나라의 국가 통합 인증 마크를 영문 약어로 쓰시오.',
+  answers:['KC','kc'],exp:'국가 통합 인증 마크는 KC이며, 유럽연합(EU)의 CE, 중국의 CCC와 같은 성격의 인증 마크입니다.'},
+
+  {type:'mc',q:'제품의 수명 주기 4단계를 순서대로 바르게 나열한 것은?',
+  choices:['도입기 → 성장기 → 성숙기 → 쇠퇴기','성장기 → 도입기 → 쇠퇴기 → 성숙기','도입기 → 성숙기 → 성장기 → 쇠퇴기','쇠퇴기 → 성장기 → 도입기 → 성숙기','성숙기 → 도입기 → 성장기 → 쇠퇴기','도입기 → 쇠퇴기 → 성장기 → 성숙기'],
+  answer:0,exp:'제품의 수명 주기는 도입기 → 성장기 → 성숙기 → 쇠퇴기 순으로 진행됩니다.'},
+
+  {type:'mc',q:'제품 수명 주기 중 "성숙기"의 특징으로 옳은 것은?',
+  choices:['매출액이 최고 수준을 유지하며 성장률이 정체되고, 이익의 극대화와 시장 점유율 유지가 마케팅 전략의 핵심이다','매출액이 서서히 증가하며 제품의 인지도 향상이 핵심 전략이다','매출액이 급격히 증가하며 시장 점유율 확대가 핵심 전략이다','매출액이 감소하며 최저 이익 유지와 비용 절감이 핵심 전략이다','신제품 출시 직후로 시장 규모 확대가 목표인 단계이다','제품이 시장에서 완전히 철수하는 단계이다'],
+  answer:0,exp:'성숙기는 매출액이 최고 수준을 유지하면서 성장률이 정체되는 단계로, 이익의 극대화와 시장 점유율 유지가 마케팅 전략의 핵심입니다.'},
+
+  {type:'mc',q:'제품 개발 과정의 순서로 옳은 것은?',
+  choices:['아이디어 창출 → 제품 아이디어 선정 → 제품 예비 설계 → 시제품 제작 및 시험 → 최종 제품 제조','제품 예비 설계 → 아이디어 창출 → 시제품 제작 및 시험 → 제품 아이디어 선정 → 최종 제품 제조','시제품 제작 및 시험 → 아이디어 창출 → 제품 아이디어 선정 → 제품 예비 설계 → 최종 제품 제조','최종 제품 제조 → 아이디어 창출 → 제품 아이디어 선정 → 시제품 제작 및 시험 → 제품 예비 설계','아이디어 창출 → 시제품 제작 및 시험 → 제품 아이디어 선정 → 제품 예비 설계 → 최종 제품 제조','제품 아이디어 선정 → 아이디어 창출 → 제품 예비 설계 → 최종 제품 제조 → 시제품 제작 및 시험'],
+  answer:0,exp:'제품 개발 과정은 아이디어 창출 → 제품 아이디어 선정 → 제품 예비 설계 → 시제품 제작 및 시험 → 최종 제품 제조의 순서로 진행됩니다.'},
+
+  {type:'mc',q:'제품의 최종 설계 단계에 포함되지 않는 것은?',
+  choices:['예비 설계','기능 설계','형태 설계','생산 설계','최종 설계는 기능·형태·생산 설계로 구성됨','제품 설계는 예비 설계와 최종 설계로 구분됨'],
+  answer:0,exp:'제품 설계 단계는 예비 설계와 최종 설계로 구분되며, 예비 설계는 최종 설계 이전 단계입니다. 최종 설계가 기능 설계, 형태 설계, 생산 설계로 구성됩니다.'},
+
+  {type:'mc',q:'설비 배치 시 반드시 고려해야 하는 목표로 옳지 않은 것은?',
+  choices:['생산의 경제성 추구만을 유일한 목표로 삼는다','운반의 최적화','생산 공정의 균형 유지','시설 공간의 효과적 활용','배치 변경에 대한 유연성','인력 및 설비 이용률 증대'],
+  answer:0,exp:'설비 배치의 목표에는 운반의 최적화, 생산 공정의 균형 유지, 시설 공간의 효과적 활용, 배치 변경에 대한 유연성 등이 있으며 이 중 일부가 반드시 고려되어야 합니다. "생산의 경제성 추구만을 유일한 목표로 삼는다"는 표현은 옳지 않습니다.'},
+
+  {type:'mc',q:'생산의 의미로 가장 올바른 것은?',
+  choices:['원자재와 부품 등의 자재를 노동, 설비 및 자본, 정보 등의 생산 자원을 투입하여 제품으로 변환함으로써 새로운 가치를 산출하는 활동','완성된 제품을 소비자에게 직접 판매하는 활동','기업의 인사와 조직을 관리하는 활동','제품의 가격을 책정하고 광고하는 활동','재무제표를 작성하고 회계 감사를 수행하는 활동','시장 조사를 통해 소비자 요구를 파악하는 활동'],
+  answer:0,exp:'생산은 자재(material), 노동(man), 설비(machine), 자본(money), 정보 등의 생산 자원을 투입하여 제품으로 변환함으로써 새로운 가치를 산출하는 활동을 말합니다.'},
+
+  {type:'sa',q:'생산의 효율을 나타내는 지표로, "산출량 ÷ 투입량"으로 계산되는 개념을 무엇이라 하는가?',
+  answers:['생산성'],exp:'생산성은 생산의 효율을 나타내는 지표로, 생산성 = 산출량 ÷ 투입량 으로 계산합니다.'},
+
+  {type:'mc',q:'품질 분임조에 대한 설명으로 옳은 것은?',
+  choices:['같은 작업장 내에서 생산 혁신 활동을 자발적으로 행하는 작은 그룹으로, 생산성과 품질 수준을 높이려는 목적으로 모든 구성원이 참여하는 활동','경영진이 일방적으로 품질 기준을 정하여 하달하는 제도','외부 컨설팅 업체에 품질 관리를 전적으로 위탁하는 방식','품질 불량 제품만을 전문적으로 폐기하는 부서','생산 라인을 일시 정지시키고 전수 검사를 수행하는 활동','국제 표준 인증을 전담하는 정부 기관'],
+  answer:0,exp:'품질 분임조는 같은 작업장 내에서 생산 혁신 활동을 자발적으로 수행하는 작은 그룹으로, 생산성과 품질 수준을 높이기 위해 모든 구성원이 참여하는 전사적 혁신 활동의 일부입니다.'},
+
+  {type:'mc',q:'6시그마(6σ)의 성공 요인으로 옳지 않은 것은?',
+  choices:['철저한 비공개와 부서 간 정보 차단','최고 경영자의 강력한 리더십','정확한 데이터에 의한 관리','직원들에 대한 교육, 훈련','시스템 구축','충분한 준비'],
+  answer:0,exp:'6시그마의 성공 요인은 최고 경영자의 강력한 리더십, 정확한 데이터에 의한 관리, 직원 교육·훈련, 시스템 구축, 충분한 준비 등입니다. 정보 차단은 해당하지 않습니다.'},
+
+  {type:'mc',q:'3정 5S 중 "정리(整理)"의 의미로 옳은 것은?',
+  choices:['필요한 물품과 불필요한 물품을 구분하고 불필요한 물품을 제거하여 공간의 낭비를 줄이는 것','즉시 꺼내어 사용할 수 있도록 보관 장소를 정하여 정렬하는 것','작업장의 모든 먼지와 이물을 제거하여 깨끗한 상태로 만드는 것','정리·정돈·청소를 계속 유지하여 오염 발생원을 근원적으로 개선하는 것','정리·정돈·청소·청결을 생활화하는 것','정품·정량·정위치를 지키는 것'],
+  answer:0,exp:'정리(整理)는 필요한 물품과 불필요한 물품을 구분하고 불필요한 물품을 제거하여 공간의 낭비를 줄이는 것을 의미합니다. 5S는 정리-정돈-청소-청결-습관화 순입니다.'},
+
+  {type:'mc',q:'3정 5S에서 "5S 성공의 열쇠"가 되는 마지막 단계는 무엇인가?',
+  choices:['습관화','정리','정돈','청소','청결','정품'],
+  answer:0,exp:'5S(정리-정돈-청소-청결-습관화) 중 나머지 4S(정리·정돈·청소·청결)의 성공 열쇠는 마지막 1S인 "습관화"에 달려 있습니다.'},
+
+  {type:'mc',q:'토요타 생산 시스템(TPS)의 특징으로 옳은 것은?',
+  choices:['필요한 양만큼 전 공정에 요구하는 후 공정 인수 방식(pull system)을 채택하여 효율을 극대화한다','대량의 재고를 미리 확보해 두는 푸시 방식(push system)을 채택한다','모든 공정을 무인 자동화하여 인력을 전혀 사용하지 않는다','컴퓨터 통합 제조(CIM)의 또 다른 명칭이다','제품의 표준화만을 강조하고 낭비 요소는 고려하지 않는다','전사적 자원 관리(ERP)와 동일한 개념이다'],
+  answer:0,exp:'토요타 생산 시스템(TPS)은 적시 생산 시스템(JIT)을 기반으로 하며, 필요한 양만큼 전 공정에 요구하는 후 공정 인수 방식(pull system)을 채택하여 효율을 극대화합니다.'},
+
+  {type:'mc',q:'LEAN 생산 시스템에서 말하는 7가지 낭비 요소에 해당하지 않는 것은?',
+  choices:['표준화의 낭비','과잉 생산의 낭비','불량의 낭비','운반의 낭비','재고의 낭비','동작의 낭비'],
+  answer:0,exp:'LEAN 생산 시스템의 7대 낭비 요소는 과잉 생산, 불량, 공정, 운반, 재고, 동작, 대기의 낭비입니다. 표준화의 낭비는 해당하지 않습니다.'},
+
+  {type:'mc',q:'생산 정보 시스템 중 제조 실행 시스템(MES)에 대한 설명으로 가장 적절한 것은?',
+  choices:['생산 현장에서 작업 지시, 실적 수집 등 제조 실행 과정을 관리하는 시스템','컴퓨터를 이용하여 제품의 설계만을 전담하는 시스템','기업 전체의 인적·물적 자원을 통합 관리하는 회계 중심 시스템','로봇과 자동화 설비를 결합한 생산 공정 시스템','제품 정보를 통합적으로 관리하는 데이터베이스 시스템','정해진 경로로 부품을 운반하는 무인 이동 장치'],
+  answer:0,exp:'MES(Manufacturing Execution System, 제조 실행 시스템)는 생산 현장에서의 작업 지시, 실적 수집 등 실제 제조 실행 과정을 관리하는 생산 정보 시스템입니다.'},
+
+  {type:'sa',q:'제품에 관한 모든 정보를 통합적으로 관리하는 시스템을 의미하는 영문 약어(Product Data Management)를 쓰시오.',
+  answers:['PDM','pdm'],exp:'PDM(Product Data Management)은 제품 정보를 통합적으로 관리하는 시스템입니다.'},
+
+  {type:'mc',q:'3D 프린팅 방식 중 "적층형"에 대한 설명으로 옳은 것은?',
+  choices:['층층이 재료를 쌓아 올리는 방식','재료를 깎아 형상을 만드는 방식으로 재료 손실이 많다','금속을 용해하여 거푸집에 붓는 방식','두 개 이상의 재료를 접착제로 붙이는 방식','고온으로 재료를 가열하여 압축하는 방식','레이저로 재료 표면을 연마하는 방식'],
+  answer:0,exp:'적층형 3D 프린팅은 층층이 재료를 쌓아 올리는 방식입니다. 반대로 절삭형은 재료를 깎아내는 방식으로 재료의 손실이 많습니다.'},
+
+  {type:'mc',q:'생산 시스템의 유형 중 "위치 고정형 배치"에 가장 적합한 사례는 무엇인가?',
+  choices:['선박이나 건물처럼 제품이 고정된 위치에 있고 설비와 작업자가 이동하며 작업하는 경우','동일한 자동차를 매일 수백 대씩 컨베이어 라인에서 생산하는 경우','여러 종류의 부품을 유사 기능별 설비에서 소량씩 가공하는 경우','전자제품 부품을 대량으로 표준화하여 생산하는 경우','식료품을 매일 같은 레시피로 대량 생산하는 경우','컴퓨터로 제품 설계만 전담하는 경우'],
+  answer:0,exp:'위치 고정형 배치는 선박, 건물처럼 제품의 크기가 크거나 이동이 어려운 경우 제품은 고정된 위치에 있고 설비와 작업자가 이동하며 작업하는 방식입니다.'},
+];
+
+const HARD_QUESTIONS = [
+  {type:'mc_hard',fmt:'흐름도 완성형',q:'다음 생산 방식의 분류에서 ㉠, ㉡에 들어갈 내용이 바르게 짝지어진 것은?',
+  htmlContent:`<div class="hq-arrow-flow" style="justify-content:center;gap:10px;">
+    <div class="hq-flow-blank" style="text-align:center;min-width:90px;">( ㉠ )<br><span style="font-size:0.7rem;color:var(--text-muted);">고객 주문 후 생산</span></div>
+    <div style="font-size:1.5rem;color:var(--text-muted);">vs</div>
+    <div class="hq-flow-blank" style="text-align:center;min-width:90px;">( ㉡ )<br><span style="font-size:0.7rem;color:var(--text-muted);">수요 예측 후 대량 생산</span></div>
+  </div>
+  <div class="hq-box" style="margin-top:8px;">
+    ㉠ 예: 선박, 항공기, 건물<br>㉡ 예: 구두, 운동화, 셔츠, 양말
+  </div>`,
+  choices:['㉠ 계획 생산 — ㉡ 주문 생산','㉠ 주문 생산 — ㉡ 계획 생산','㉠ 다품종 소량 생산 — ㉡ 계획 생산','㉠ 주문 생산 — ㉡ 다품종 소량 생산','㉠ 계획 생산 — ㉡ 다품종 소량 생산'],
+  answer:1,exp:'㉠=주문 생산(고객 주문에 따라 생산, 선박·항공기·건물), ㉡=계획 생산(수요 예측 후 대량 생산, 구두·운동화·셔츠).'},
+
+  {type:'mc_hard',fmt:'개념 비교형',q:'주문 생산과 계획 생산을 비교한 내용으로 옳은 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>주문 생산</th><th>계획 생산</th></tr></thead><tbody>
+    <tr><td>생산 시점</td><td>?</td><td>수요 예측 후 사전 생산</td></tr>
+    <tr><td>제품 가격</td><td>비쌈</td><td>?</td></tr>
+    <tr><td>예시</td><td>선박, 항공기, 건물</td><td>구두, 셔츠, 양말</td></tr>
+  </tbody></table></div>`,
+  choices:['주문 생산: 사전 대량 생산 / 계획 생산: 저렴함','주문 생산: 고객 주문 후 생산 / 계획 생산: 상대적으로 저렴함','주문 생산: 수요 예측 후 생산 / 계획 생산: 가격 비쌈','주문 생산: 저렴함 / 계획 생산: 고객 주문 후 생산','주문 생산: 고객 주문 후 생산 / 계획 생산: 가격 비쌈'],
+  answer:1,exp:'주문 생산은 고객 주문이 들어온 후 생산하며 가격이 비쌉니다. 계획 생산은 수요 예측 후 사전에 대량 생산하여 상대적으로 저렴합니다.'},
+
+  {type:'mc_hard',fmt:'시스템 비교형',q:'다음 각 시스템과 그 설명이 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>시스템</th><th>설명</th></tr></thead><tbody>
+    <tr><td>A. CAD</td><td>(가)</td></tr>
+    <tr><td>B. CAM</td><td>(나)</td></tr>
+    <tr><td>C. ERP</td><td>(다)</td></tr>
+    <tr><td>D. FMS</td><td>(라)</td></tr>
+  </tbody></table></div>
+  <div class="hq-box" style="margin-top:8px;">
+    ① 기업 전체 인적·물적 자원 통합 관리<br>
+    ② 컴퓨터로 제품 설계 수행<br>
+    ③ 로봇과 자동화 설비 결합으로 유연성 극대화<br>
+    ④ 설계 데이터 기반 컴퓨터 제조·가공
+  </div>`,
+  choices:['A-①, B-②, C-③, D-④','A-②, B-④, C-①, D-③','A-③, B-①, C-②, D-④','A-②, B-③, C-①, D-④','A-④, B-②, C-③, D-①'],
+  answer:1,exp:'CAD(②컴퓨터 설계), CAM(④컴퓨터 제조·가공), ERP(①전사적 자원 관리), FMS(③유연 생산 시스템, 로봇+자동화 설비).'},
+
+  {type:'mc_hard',fmt:'오류 찾기형',q:'다음 생산 관리 시스템에 대한 설명 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-box">
+    ① CAD는 컴퓨터를 이용하여 제품의 설계를 수행하는 시스템이다.<br>
+    ② CAM은 설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 시스템이다.<br>
+    ③ ERP는 기업 전체의 인적·물적 자원을 통합 관리하는 전사적 자원 관리 시스템이다.<br>
+    ④ FMS는 필요한 때 필요한 만큼만 생산하여 재고를 최소화하는 적시 생산 시스템이다.<br>
+    ⑤ CIM은 제품 설계부터 판매까지의 모든 정보를 유기적으로 연결하는 컴퓨터 통합 제조 시스템이다.
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,noShuffle:true,
+  exp:'④가 틀렸습니다. FMS(유연 생산 시스템)는 로봇과 자동화 설비를 결합해 생산성과 유연성을 높이는 시스템입니다. 재고를 최소화하는 것은 JIT(적시 생산 방식)의 특징입니다.'},
+
+  {type:'mc_hard',fmt:'빈칸 완성형',q:'다음 글의 ㉠~㉢에 들어갈 내용이 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-box">
+    포드 시스템은 ( ㉠ )을(를) 도입하여 대량 생산의 기틀을 마련했다. 이 시스템에서는 생산 관리 3S, 즉 제품의 ( ㉡ ), 부품의 표준화, 공정의 ( ㉢ )을(를) 핵심 원리로 적용하였다.
+  </div>`,
+  choices:['㉠ JIT — ㉡ 전문화 — ㉢ 단순화','㉠ 이동 조립법 — ㉡ 단순화 — ㉢ 전문화','㉠ 이동 조립법 — ㉡ 표준화 — ㉢ 단순화','㉠ FMS — ㉡ 단순화 — ㉢ 전문화','㉠ 이동 조립법 — ㉡ 전문화 — ㉢ 표준화'],
+  answer:1,exp:'포드 시스템의 핵심: 이동 조립법(컨베이어 시스템). 3S: 제품의 단순화, 부품의 표준화, 공정의 전문화.'},
+
+  {type:'mc_hard',fmt:'추론형',q:'다음 조건을 모두 만족하는 생산 방식으로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    <strong>조건 1.</strong> 소비자의 다양한 욕구에 대응하는 것이 목적이다.<br>
+    <strong>조건 2.</strong> 여러 종류의 제품을 소량씩 생산한다.<br>
+    <strong>조건 3.</strong> FMS(유연 생산 시스템)와 연계되는 생산 방식이다.<br>
+    <strong>조건 4.</strong> 소품종 대량 생산의 반대 개념이다.
+  </div>`,
+  choices:['주문 생산','계획 생산','다품종 소량 생산','소품종 대량 생산','JIT 생산'],
+  answer:2,exp:'다품종 소량 생산은 소비자의 다양한 욕구에 대응하기 위해 여러 종류의 제품을 소량씩 생산하며, FMS와 연계됩니다.'},
+
+  {type:'mc_hard',fmt:'공정 기호 적용형',q:'다음 공정 기호와 그 의미가 바르게 연결된 것을 모두 고른 것은?',
+  htmlContent:`<div class="hq-box">
+    ㄱ. ○ — 원재료의 모양이나 성질을 변화시키는 가공(작업)<br>
+    ㄴ. □ — 작업물의 품질이나 수량을 확인하는 검사<br>
+    ㄷ. → — 작업물의 저장<br>
+    ㄹ. ▽ — 작업자의 위치 이동(운반)<br>
+    ㅁ. D — 다음 작업을 위해 대기(정체)
+  </div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄴ, ㅁ','ㄴ, ㄷ, ㄹ','ㄱ, ㄷ, ㅁ','ㄴ, ㄹ, ㅁ'],
+  answer:1,exp:'ㄷ 틀림(→는 운반, 저장이 아님), ㄹ 틀림(▽은 저장, 운반이 아님). 옳은 것: ㄱ(○=가공), ㄴ(□=검사), ㅁ(D=대기).'},
+
+  {type:'mc_hard',fmt:'인과 관계 분석형',q:'다음 사례에 나타난 생산 혁신 활동으로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    <div class="hq-box-title">사례</div>
+    ○○사는 부품 재고를 쌓아두지 않기 위해 협력 업체로부터 필요한 부품을 생산 라인 가동 직전에 공급받는 시스템을 구축하였다. 이를 통해 창고 관리 비용을 획기적으로 줄였다.
+  </div>`,
+  choices:['ERP(전사적 자원 관리)','CAD(컴퓨터 이용 설계)','JIT(적시 생산 방식)','FMS(유연 생산 시스템)','CIM(컴퓨터 통합 제조)'],
+  answer:2,exp:'필요한 부품을 생산 직전에 공급받아 재고를 최소화하는 것은 JIT(적시 생산 방식, 토요타 시스템)의 핵심 특징입니다.'},
+
+  {type:'mc_hard',fmt:'배치 방식 비교형',q:'제품별 배치와 공정별 배치를 비교한 내용으로 옳은 것은?',
+  htmlContent:`<div class="hq-two-col">
+    <div class="hq-col-card"><div class="hq-col-label">제품별 배치</div>
+      생산 라인 흐름에 따라 기계 배치<br>
+      숙련 기간이 상대적으로 짧음
+    </div>
+    <div class="hq-col-card"><div class="hq-col-label">공정별 배치</div>
+      유사 기능 설비를 모아 배치<br>
+      생산 변화에 융통성 있게 대처
+    </div>
+  </div>`,
+  choices:['제품별 배치는 다품종 소량 생산, 공정별 배치는 소품종 대량 생산에 적합하다','제품별 배치는 소품종 대량 생산, 공정별 배치는 다품종 소량 생산에 적합하다','두 배치 방식 모두 소품종 대량 생산에 적합하다','공정별 배치는 기계 고장 시 전체 라인이 멈추는 위험이 크다','제품별 배치에서 작업자의 숙련도 요구가 더 높다'],
+  answer:1,exp:'제품별 배치는 소품종 대량 생산에 적합하고, 공정별 배치는 다품종 소량 생산 및 다양한 제품 변화에 유연하게 대응하는 데 적합합니다.'},
+
+  {type:'mc_hard',fmt:'로봇 유형 판단형',q:'다음 각 로봇의 특징과 그 유형이 바르게 연결되지 않은 것은?',
+  htmlContent:`<div class="hq-box">
+    ① 직각 좌표형 — X·Y·Z 3축 직선 이동, 직육면체 형태의 작업 영역<br>
+    ② 원통 좌표형 — 허리와 같이 회전하며 원통 형태의 작업 영역<br>
+    ③ 극 좌표형 — 대포 포신처럼 움직이며 점용접 등에 활용<br>
+    ④ 수직 관절형 — 가장 단순한 구조로 직선 이동만 가능<br>
+    ⑤ 수직 관절형 — 모든 방향으로 자유롭게 움직이며 용도가 다양
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,noShuffle:true,
+  exp:'④가 틀렸습니다. 수직 관절형 로봇은 가장 단순한 구조가 아니라 모든 방향을 자유롭게 움직일 수 있는 가장 다용도의 로봇입니다. 직선 이동만 가능한 것은 직각 좌표형입니다.'},
+
+  {type:'mc_hard',fmt:'종합 판단형',q:'다음 표의 ㉠~㉤ 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>번호</th><th>개념</th><th>설명</th></tr></thead><tbody>
+    <tr><td>㉠</td><td>표준화</td><td>제품의 크기·형태·품질을 일정 기준에 맞추어 통일하는 원칙</td></tr>
+    <tr><td>㉡</td><td>단순화</td><td>불필요한 품목을 줄여 가짓수를 단순하게 만드는 활동</td></tr>
+    <tr><td>㉢</td><td>전문화</td><td>작업자의 전문성 향상으로 생산 능률 향상, 비용 절감, 안전도를 높임</td></tr>
+    <tr><td>㉣</td><td>포드 시스템</td><td>JIT(적시 생산)를 통해 재고를 최소화한 생산 시스템</td></tr>
+    <tr><td>㉤</td><td>선입선출법</td><td>먼저 입고된 자재를 먼저 출고하여 노후화·변질을 방지하는 방법</td></tr>
+  </tbody></table></div>`,
+  choices:['㉠','㉡','㉢','㉣','㉤'],
+  answer:3,noShuffle:true,
+  exp:'㉣이 틀렸습니다. 포드 시스템은 이동 조립법(컨베이어 시스템)으로 대량 생산의 기틀을 마련한 시스템입니다. JIT(재고 최소화)는 토요타 시스템입니다.'},
+
+  {type:'mc_hard',fmt:'옳고 그름 판단형',q:'다음 보기 중 JIT(적시 생산 방식)의 특징으로 옳은 것을 모두 고른 것은?',
+  htmlContent:`<div class="hq-box">
+    ㄱ. 필요한 때 필요한 만큼만 생산하여 낭비를 최소화한다.<br>
+    ㄴ. 대규모 창고 시설을 갖추어 재고를 최대화하는 것이 핵심이다.<br>
+    ㄷ. 토요타 시스템이라고도 불린다.<br>
+    ㄹ. 협력 업체와의 긴밀한 협력으로 부품을 적시에 공급받는다.<br>
+    ㅁ. 생산 과정에서 낭비 요소의 제거를 핵심 원리로 한다.
+  </div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄷ, ㄹ, ㅁ','ㄴ, ㄷ, ㄹ','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㅁ'],
+  answer:1,exp:'ㄴ이 틀렸습니다. JIT는 재고를 최소화하는 것이 목표이며, 대규모 재고 확보는 JIT와 반대 개념입니다. ㄱ, ㄷ, ㄹ, ㅁ은 모두 옳습니다.'},
+
+  {type:'mc_hard',fmt:'적용 판단형',q:'다음 A씨의 작업 환경에서 도입할 자동화 장치로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    <div class="hq-box-title">상황</div>
+    A씨가 근무하는 공장에서는 완성된 제품을 조립 라인에서 도장 라인까지 이동시켜야 한다. 거리가 멀고 반복적인 운반 작업으로 인한 인력 낭비가 심하며, 이동 경로는 고정되어 있다.
+  </div>`,
+  choices:['수직 관절형 로봇','CAD 시스템','무인 운반차(AGV)','FMS 유연 생산 시스템','ERP 시스템'],
+  answer:2,exp:'고정된 경로를 따라 공장 내에서 부품이나 재료를 반복적으로 이동하는 작업에는 무인 운반차(AGV: Automated Guided Vehicle)가 적합합니다.'},
+
+  {type:'mc_hard',fmt:'전문화 효과 분석형',q:'생산 관리 3S 중 전문화(Specialization)의 장단점을 바르게 분석한 것은?',
+  htmlContent:`<div class="hq-two-col">
+    <div class="hq-col-card"><div class="hq-col-label">장점</div>
+      • 숙련 기간 단축<br>
+      • 작업 도구·방법 개선 용이<br>
+      • 업무 책임 한계 명확<br>
+      • 생산 능률·비용절감·안전도 향상
+    </div>
+    <div class="hq-col-card"><div class="hq-col-label">단점</div>
+      • ?
+    </div>
+  </div>`,
+  choices:['전문화의 단점은 초기 설비 투자 비용이 매우 크다는 점이다','전문화의 단점은 동일 동작의 반복으로 높은 작업 피로도가 발생한다는 점이다','전문화의 단점은 다품종 소량 생산에 적응하기 어렵다는 점이다','전문화의 단점은 자동화를 도입하기 어렵다는 점이다','전문화의 단점은 품질 불량률이 높아진다는 점이다'],
+  answer:1,exp:'전문화의 주요 단점은 동일한 동작의 반복으로 높은 작업 피로도가 발생한다는 것입니다. 이는 교과서에 명시된 전문화의 단점입니다.'},
+
+  {type:'mc_hard',fmt:'대화 오류 찾기',q:'다음 대화에서 틀린 내용을 말한 학생은?',
+  htmlContent:`<div class="hq-box">
+    <strong>지민:</strong> "CAD는 컴퓨터를 이용하여 제품 설계를 수행하는 시스템이야."<br><br>
+    <strong>수아:</strong> "CAM은 설계 데이터를 바탕으로 컴퓨터를 이용해 제조 및 가공을 수행하는 거야."<br><br>
+    <strong>현우:</strong> "CIM은 제품 설계부터 판매까지의 모든 정보를 유기적으로 연결하여 무인화를 지향하는 기술이야."<br><br>
+    <strong>나연:</strong> "ERP는 컴퓨터를 이용하여 제품 설계만을 전담하는 설계 전용 시스템이야."<br><br>
+    <strong>도윤:</strong> "FMS는 로봇과 자동화 설비를 결합하여 생산성과 유연성을 높이는 시스템이야."
+  </div>`,
+  choices:['지민','수아','현우','나연','도윤'],
+  answer:3,noShuffle:true,
+  exp:'나연이 틀렸습니다. ERP(전사적 자원 관리 시스템)는 기업 전체의 인적·물적 자원을 통합 관리하는 시스템입니다. 컴퓨터로 제품 설계를 수행하는 것은 CAD입니다.'},
+
+  {type:'mc_hard',fmt:'노동 생산성 계산형',q:'다음 표를 참고할 때, 기업 A의 노동 생산성은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>기업 A</th><th>기업 B</th></tr></thead><tbody>
+    <tr><td>투입된 작업자 수</td><td>10명</td><td>20명</td></tr>
+    <tr><td>하루 총 생산량</td><td>60개</td><td>100개</td></tr>
+    <tr><td>작업자 1인당 표준 생산량</td><td>10개</td><td>20개</td></tr>
+  </tbody></table></div>
+  <div class="hq-box" style="margin-top:8px;">
+    노동 생산성(%) = (실제 생산량 ÷ 표준 생산량) × 100<br>
+    <span style="font-size:0.78rem;color:var(--text-muted);">표준 생산량 = 작업자 수 × 1인당 표준 생산량</span>
+  </div>`,
+  choices:['40%','50%','60%','70%','80%'],
+  answer:2,exp:'기업 A의 표준 생산량 = 10명 × 10개 = 100개. 실제 생산량 = 60개. 노동 생산성 = (60 ÷ 100) × 100 = 60%.'},
+
+  {type:'mc_hard',fmt:'노동 생산성 비교형',q:'앞 문제의 표를 참고할 때, 기업 A와 기업 B의 노동 생산성을 바르게 비교한 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>구분</th><th>기업 A</th><th>기업 B</th></tr></thead><tbody>
+    <tr><td>투입된 작업자 수</td><td>10명</td><td>20명</td></tr>
+    <tr><td>하루 총 생산량</td><td>60개</td><td>100개</td></tr>
+    <tr><td>작업자 1인당 표준 생산량</td><td>10개</td><td>20개</td></tr>
+  </tbody></table></div>
+  <div class="hq-box" style="margin-top:8px;">노동 생산성(%) = (실제 생산량 ÷ 표준 생산량) × 100</div>`,
+  choices:['기업 A(60%) > 기업 B(25%)로 기업 A의 노동 생산성이 더 높다','기업 A(60%)와 기업 B(25%)로 기업 A의 노동 생산성이 더 높다','기업 A(60%) < 기업 B(25%)로 기업 B의 노동 생산성이 더 높다','기업 A(60%)와 기업 B(60%)로 두 기업의 노동 생산성이 같다','기업 A(40%) < 기업 B(25%)로 기업 B의 노동 생산성이 더 높다'],
+  answer:1,exp:'기업 A: 표준(100개), 실제(60개) → 60%. 기업 B: 표준(20명×20개=400개), 실제(100개) → 25%. 기업 A(60%)가 기업 B(25%)보다 노동 생산성이 높습니다.'},
+
+  {type:'mc_hard',fmt:'100% 달성 계산형',q:'기업 A가 노동 생산성 100%를 달성하기 위해 필요한 하루 총 생산량은?',
+  htmlContent:`<div class="hq-box">
+    기업 A: 투입 작업자 10명, 1인당 표준 생산량 10개<br>
+    현재 실제 생산량: 60개 (노동 생산성 60%)<br><br>
+    노동 생산성 100% = 실제 생산량이 표준 생산량에 도달해야 함
+  </div>`,
+  choices:['60개','80개','100개','120개','150개'],
+  answer:2,exp:'노동 생산성 100%를 달성하려면 실제 생산량 = 표준 생산량이 되어야 합니다. 표준 생산량 = 10명 × 10개 = 100개.'},
+
+  {type:'mc_hard',fmt:'공정도 형태 판단형',q:'다음 설명에 해당하는 공정도 형태로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    원자재 입고 후 하나의 공정 흐름으로만 진행되며, 여러 공정이 하나의 직선적 순서로 연결된 형태이다. 가장 단순한 공정도 구조를 가진다.
+  </div>`,
+  choices:['합류형','직류형','분리형','복합형','혼합형'],
+  answer:1,exp:'직류형은 원자재 → 가공 → 검사 → 저장으로 이어지는 하나의 직선적 흐름으로 구성된 가장 단순한 공정도 형태입니다.'},
+
+  {type:'mc_hard',fmt:'공정도 형태 분류형',q:'다음 공정도 형태와 그 특징이 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>형태</th><th>특징</th></tr></thead><tbody>
+    <tr><td>직류형</td><td>하나의 직선적 순서로 연결된 가장 단순한 형태</td></tr>
+    <tr><td>합류형</td><td>여러 원자재나 부품이 하나의 제품으로 합쳐지는 형태</td></tr>
+    <tr><td>분리형</td><td>하나의 원자재에서 여러 제품이 만들어지는 형태</td></tr>
+    <tr><td>복합형</td><td>합류와 분리가 복합적으로 나타나는 형태</td></tr>
+  </tbody></table></div>
+  <div class="hq-box" style="margin-top:6px;">다음 중 옳지 않은 설명은?</div>`,
+  choices:['직류형은 가장 단순한 공정도 형태이다','합류형은 여러 원자재가 하나로 합쳐지는 형태이다','분리형은 하나의 원자재에서 여러 제품이 만들어지는 형태이다','복합형은 합류와 분리가 나타나지 않는 단순 구조이다','공정도 형태는 직류·합류·분리·복합형으로 나뉜다'],
+  answer:3,exp:'복합형은 합류와 분리가 복합적으로 나타나는 형태입니다. "합류와 분리가 나타나지 않는다"는 설명은 직류형에 해당합니다.'},
+
+  {type:'mc_hard',fmt:'조건 추론형',q:'다음 조건을 모두 만족하는 시스템으로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    <strong>조건 1.</strong> 기업 내 모든 경영 활동을 통합한다.<br>
+    <strong>조건 2.</strong> 인적·물적 자원의 정보를 공유한다.<br>
+    <strong>조건 3.</strong> 생산뿐 아니라 재무·구매·인사 등 전 부서를 연결한다.<br>
+    <strong>조건 4.</strong> 실시간으로 정보를 확인하고 의사결정에 활용한다.
+  </div>`,
+  choices:['JIT','CAD','FMS','ERP','CIM'],
+  answer:3,exp:'ERP(전사적 자원 관리 시스템)는 기업 내 모든 경영 활동(생산·재무·구매·인사)을 통합 관리하고 정보를 실시간으로 공유하는 시스템입니다.'},
+
+  {type:'mc_hard',fmt:'설비 배치 판단형',q:'다음 A 공장의 상황에서 가장 적합한 설비 배치 방식은?',
+  htmlContent:`<div class="hq-box">
+    <div class="hq-box-title">A 공장 상황</div>
+    • 생산하는 제품 종류: 자동차 1가지<br>
+    • 일일 생산량: 500대<br>
+    • 생산 방식: 컨베이어 라인 활용<br>
+    • 요구 사항: 작업자 숙련 기간 단축, 자동화 도입 용이
+  </div>`,
+  choices:['공정별 배치 — 유사 기능 설비를 모아 배치하는 방식','제품별 배치 — 생산 라인 흐름에 따라 기계를 배치하는 방식','혼합 배치 — 두 방식을 절충한 배치','주문별 배치 — 주문에 따라 설비를 재배치하는 방식','유연 배치 — 상황에 따라 설비 위치를 변경하는 방식'],
+  answer:1,exp:'소품종(자동차 1종) 대량 생산(500대), 컨베이어 활용, 자동화 도입 용이, 숙련 기간 단축 → 모두 제품별 배치의 특징에 해당합니다.'},
+
+  {type:'mc_hard',fmt:'보고서 오류 수정형',q:'다음 탐구 보고서에서 밑줄 친 부분 중 수정이 필요한 것은?',
+  htmlContent:`<div class="hq-box">
+    <strong>주제: 생산 자동화 시스템의 이해</strong><br><br>
+    현대 제조업은 다양한 자동화 시스템을 도입하고 있다. <span class="hq-underline">①CAD는 컴퓨터를 이용한 제품 설계 시스템</span>이며, <span class="hq-underline">②CAM은 설계 데이터로 실제 제조·가공을 수행하는 시스템</span>이다. <span class="hq-underline">③FMS는 로봇과 자동화 설비를 결합하여 생산 유연성을 극대화한 시스템</span>이며, <span class="hq-underline">④CIM은 이동 조립법을 통해 대량 생산의 기틀을 마련한 생산 시스템</span>이다. <span class="hq-underline">⑤무인 운반차는 정해진 경로를 따라 공장 내에서 부품이나 재료를 이동시키는 장치</span>이다.
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,noShuffle:true,
+  exp:'④가 틀렸습니다. CIM(컴퓨터 통합 제조)은 제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 기술입니다. 이동 조립법(컨베이어 시스템)으로 대량 생산을 실현한 것은 포드 시스템입니다.'},
+
+  {type:'mc_hard',fmt:'선지 판단형',q:'다음 중 옳은 설명끼리 묶인 것은?',
+  htmlContent:`<div class="hq-box">
+    ㄱ. 포드 시스템은 이동 조립법(컨베이어 시스템)을 통해 대량 생산의 기틀을 마련했다.<br>
+    ㄴ. JIT의 핵심은 대규모 재고를 확보하여 공급 안정성을 높이는 것이다.<br>
+    ㄷ. ERP는 기업 전체의 인적·물적 자원을 통합하여 관리하는 시스템이다.<br>
+    ㄹ. 생산 관리의 3S에서 전문화의 단점은 동일 동작 반복으로 인한 높은 작업 피로도이다.<br>
+    ㅁ. 선입선출법은 나중에 입고된 자재를 먼저 출고하는 원칙이다.
+  </div>`,
+  choices:['ㄱ, ㄴ, ㄷ, ㄹ, ㅁ 모두','ㄱ, ㄷ, ㄹ','ㄴ, ㄷ, ㄹ','ㄱ, ㄴ, ㄹ','ㄷ, ㄹ, ㅁ'],
+  answer:1,exp:'ㄴ 틀림(JIT는 재고 최소화), ㅁ 틀림(선입선출은 먼저 입고된 것을 먼저 출고). 옳은 것: ㄱ(포드 시스템), ㄷ(ERP), ㄹ(전문화의 단점).'},
+
+  {type:'mc_hard',fmt:'공정 기호 종합형',q:'다음 공정 기호 5가지를 올바르게 정리한 것은?',
+  htmlContent:`<div class="hq-glyph-row">
+    <div class="hq-glyph"><span class="sym">○</span> 가공</div>
+    <div class="hq-glyph"><span class="sym">□</span> ?</div>
+    <div class="hq-glyph"><span class="sym">→</span> ?</div>
+    <div class="hq-glyph"><span class="sym">▽</span> ?</div>
+    <div class="hq-glyph"><span class="sym">D</span> ?</div>
+  </div>`,
+  choices:['□=운반, →=검사, ▽=저장, D=대기','□=검사, →=운반, ▽=저장, D=대기','□=저장, →=검사, ▽=운반, D=대기','□=대기, →=저장, ▽=검사, D=운반','□=검사, →=저장, ▽=운반, D=대기'],
+  answer:1,exp:'공정 기호: ○=가공(작업), □=검사, →=운반, ▽=저장, D=대기(정체).'},
+
+  {type:'mc_hard',fmt:'시스템 연결형',q:'다음 빈칸 ㉠~㉣에 들어갈 내용이 모두 바르게 짝지어진 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>시스템</th><th>핵심 설명</th></tr></thead><tbody>
+    <tr><td>( ㉠ )</td><td>컴퓨터를 이용한 제품 설계</td></tr>
+    <tr><td>( ㉡ )</td><td>설계 데이터 기반 제조·가공</td></tr>
+    <tr><td>( ㉢ )</td><td>기업 전체 자원 통합 관리</td></tr>
+    <tr><td>( ㉣ )</td><td>로봇+자동화, 유연성 극대화</td></tr>
+  </tbody></table></div>`,
+  choices:['㉠CAM-㉡CAD-㉢FMS-㉣ERP','㉠CAD-㉡CAM-㉢ERP-㉣FMS','㉠ERP-㉡FMS-㉢CAD-㉣CAM','㉠CAD-㉡ERP-㉢CAM-㉣FMS','㉠FMS-㉡CAD-㉢ERP-㉣CAM'],
+  answer:1,exp:'㉠=CAD(컴퓨터 설계), ㉡=CAM(컴퓨터 제조·가공), ㉢=ERP(전사적 자원 관리), ㉣=FMS(유연 생산 시스템).'},
+
+  {type:'mc_hard',fmt:'사례 적용형',q:'다음 각 사례에 적용된 생산 시스템이나 개념이 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-box">
+    A. 자동차 설계팀이 3D 모델링 소프트웨어로 신차 외형을 디자인했다.<br>
+    B. 설계 완료 후, 공작 기계가 설계 데이터를 받아 자동으로 부품을 깎아냈다.<br>
+    C. 협력 업체가 생산 라인 가동 30분 전에 필요한 부품 수량만 납품했다.<br>
+    D. 공장 내 부품 창고에서 조립 라인까지, 정해진 경로를 따라 무인으로 부품을 운반했다.
+  </div>`,
+  choices:['A-CAM, B-CAD, C-ERP, D-FMS','A-CAD, B-CAM, C-JIT, D-무인운반차','A-ERP, B-FMS, C-JIT, D-CAM','A-CAD, B-ERP, C-FMS, D-JIT','A-FMS, B-CAD, C-무인운반차, D-JIT'],
+  answer:1,exp:'A(3D 모델링·설계)=CAD, B(설계 데이터로 자동 가공)=CAM, C(필요 수량만 적시 납품)=JIT, D(고정 경로 무인 운반)=무인 운반차(AGV).'},
+
+  {type:'mc_hard',fmt:'생산 관리 목표 적용형',q:'다음 각 상황에 해당하는 생산 관리의 목표가 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-box">
+    A. 불량률을 낮추고 제품 성능을 향상시켜 고객 만족도를 높인다.<br>
+    B. 원자재 낭비를 줄이고 생산 효율을 높여 제품 단가를 낮춘다.<br>
+    C. 고객이 요청한 납품일에 맞추어 정확히 제품을 공급한다.<br>
+    D. 수요가 갑자기 2배로 늘어났을 때 생산량을 빠르게 조절한다.
+  </div>`,
+  choices:['A-원가절감, B-품질향상, C-유연성확보, D-납기준수','A-품질향상, B-원가절감, C-납기준수, D-유연성확보','A-납기준수, B-유연성확보, C-원가절감, D-품질향상','A-유연성확보, B-납기준수, C-품질향상, D-원가절감','A-품질향상, B-납기준수, C-원가절감, D-유연성확보'],
+  answer:1,exp:'A(불량률↓·성능↑)=품질 및 생산성 향상, B(원가↓·효율↑)=원가 절감, C(납품일 준수)=납기 준수, D(생산량 빠른 조절)=유연성 확보.'},
+
+  {type:'mc_hard',fmt:'로봇 좌표계 판단형',q:'다음 로봇의 특징 설명 중 옳지 않은 것끼리 묶인 것은?',
+  htmlContent:`<div class="hq-box">
+    ㄱ. 직각 좌표형 — X·Y·Z 3축 직선 이동, 직육면체 형태 작업 영역<br>
+    ㄴ. 원통 좌표형 — 팔이 대포 포신처럼 움직이며 점용접에 활용됨<br>
+    ㄷ. 극 좌표형 — 허리와 같이 회전하며 원통 형태 작업 영역<br>
+    ㄹ. 수직 관절형 — 모든 방향 자유 이동, 용도가 가장 다양함<br>
+    ㅁ. 극 좌표형 — 동작 영역이 넓고 사각 방향 작업이 쉬움
+  </div>`,
+  choices:['ㄱ, ㄹ','ㄴ, ㄷ','ㄴ, ㅁ','ㄷ, ㄹ','ㄱ, ㄷ'],
+  answer:1,exp:'ㄴ 틀림(대포 포신처럼 움직이는 것은 극 좌표형), ㄷ 틀림(허리처럼 회전하는 것은 원통 좌표형). ㄱ, ㄹ, ㅁ은 옳습니다.'},
+
+  {type:'mc_hard',fmt:'최종 종합형',q:'다음 표에서 설명이 옳은 항목만 고른 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>번호</th><th>개념</th><th>설명</th></tr></thead><tbody>
+    <tr><td>㉠</td><td>주문 생산</td><td>시장 수요를 예측하여 동일 제품을 사전에 대량 생산하는 방식</td></tr>
+    <tr><td>㉡</td><td>포드 시스템</td><td>이동 조립법(컨베이어)을 통해 대량 생산의 기틀을 마련한 시스템</td></tr>
+    <tr><td>㉢</td><td>JIT</td><td>필요한 때 필요한 만큼 생산, 낭비 제거, 재고 최소화</td></tr>
+    <tr><td>㉣</td><td>공정별 배치</td><td>소품종 대량 생산에 적합하며 기계 고장 시 전체 라인이 멈춤</td></tr>
+    <tr><td>㉤</td><td>CIM</td><td>제품 설계부터 판매까지 모든 정보를 유기적으로 연결하는 기술</td></tr>
+  </tbody></table></div>`,
+  choices:['㉠, ㉡, ㉢','㉡, ㉢, ㉤','㉠, ㉢, ㉤','㉡, ㉣, ㉤','㉠, ㉡, ㉣'],
+  answer:1,exp:'㉠ 틀림(주문 생산은 고객 주문 후 생산, 설명은 계획 생산), ㉣ 틀림(소품종 대량 생산·라인 멈춤 위험은 제품별 배치의 특징). 옳은 것: ㉡(포드 시스템), ㉢(JIT), ㉤(CIM).'},
+
+  {type:'mc_hard',fmt:'분류 판단형',q:'다음 제품 분류 기준과 그 결과가 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-two-col">
+    <div class="hq-col-card"><div class="hq-col-label">분류 기준 A: 사용 기간</div>
+      내구재 / 비내구재
+    </div>
+    <div class="hq-col-card"><div class="hq-col-label">분류 기준 B: 사용 목적</div>
+      소비재 / 생산재
+    </div>
+  </div>
+  <div class="hq-box" style="margin-top:8px;">
+    예시: 자동차, 냉장고, 식료품, 공업 원료, 기계, 의약품
+  </div>`,
+  choices:['자동차·냉장고=내구재, 식료품·의약품=비내구재, 공업 원료=생산재','자동차·냉장고=비내구재, 식료품=내구재','공업 원료=소비재, 식료품=생산재','기계=비내구재, 식료품=내구재','자동차=생산재, 공업 원료=소비재'],
+  answer:0,exp:'자동차·냉장고은 생활용 내구재, 식료품·의약품은 비내구 소비재, 공업 원료는 비내구 생산재에 해당합니다.'},
+
+  {type:'mc_hard',fmt:'구매 습관 매칭형',q:'다음 구매 습관에 따른 소비재 분류와 그 예시가 모두 옳게 짝지어진 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>분류</th><th>특징</th><th>예시</th></tr></thead><tbody>
+    <tr><td>편의품</td><td>특별한 노력 없이 즉시 구입</td><td>(가)</td></tr>
+    <tr><td>선매품</td><td>가격·품질·디자인 비교 후 구입</td><td>(나)</td></tr>
+    <tr><td>전문품</td><td>상표·점포 명성에 따라 구입, 고가</td><td>(다)</td></tr>
+  </tbody></table></div>`,
+  choices:['(가)식료품·약품 (나)의류·가구 (다)명품 시계·피아노','(가)명품 시계 (나)식료품 (다)의류','(가)피아노 (나)명품 시계 (다)식료품','(가)의류·가구 (나)식료품·약품 (다)명품 시계','(가)명품 시계·피아노 (나)명품 자동차 (다)식료품'],
+  answer:0,exp:'편의품(가)=식료품·약품 등 생활 필수품, 선매품(나)=의류·가구·가전제품, 전문품(다)=피아노·명품 시계·자동차 등 입니다.'},
+
+  {type:'mc_hard',fmt:'빈칸 추론형',q:'다음 글의 ㉠, ㉡에 들어갈 말로 옳은 것은?',
+  htmlContent:`<div class="hq-box">
+    ( ㉠ )은(는) 인간에 의해서 생산되어 완제품 생산에 부분적으로 투입되는 수단 또는 중간 생산물로 중간재라고도 하며, 생산 요소(토지, 노동, 자본) 중 ( ㉡ )에 해당하는 개념이다.
+  </div>`,
+  choices:['㉠ 자본재 — ㉡ 자본','㉠ 소비재 — ㉡ 노동','㉠ 생산재 — ㉡ 토지','㉠ 편의품 — ㉡ 자본','㉠ 자본재 — ㉡ 노동'],
+  answer:0,exp:'자본재(중간재)는 완제품 생산에 부분적으로 투입되는 중간 생산물로, 생산 요소(토지·노동·자본) 중 자본에 해당하는 개념입니다.'},
+
+  {type:'mc_hard',fmt:'표준화 종합형',q:'다음 표준화 관련 설명 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-box">
+    ① 표준화는 호환성을 향상시켜 전체적인 경제성을 추구한다.<br>
+    ② 표준화는 생산 능률을 증진하고 원가를 절감하는 효과가 있다.<br>
+    ③ ISO는 국제표준화기구, IEC는 국제전기표준회의의 약어이다.<br>
+    ④ 한국산업표준(KS)은 거래를 복잡화하여 다양성을 확대하는 것이 목적이다.<br>
+    ⑤ 국가 통합 인증 마크는 KC이며, EU는 CE, 중국은 CCC를 사용한다.
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,noShuffle:true,
+  exp:'④가 틀렸습니다. 한국산업표준(KS)은 거래를 단순화·공정화하여 소비를 합리화하고 산업경쟁력을 향상시키는 것이 목적입니다. "복잡화"가 아닙니다.'},
+
+  {type:'mc_hard',fmt:'표 완성형',q:'다음 국가/지역별 표준 기관과 인증 마크를 정리한 표에서 ㉠~㉢에 들어갈 내용이 바르게 짝지어진 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>국가/지역</th><th>표준 기관 또는 인증마크</th></tr></thead><tbody>
+    <tr><td>한국</td><td>( ㉠ )</td></tr>
+    <tr><td>유럽연합(EU)</td><td>( ㉡ )</td></tr>
+    <tr><td>중국</td><td>( ㉢ )</td></tr>
+  </tbody></table></div>`,
+  choices:['㉠ KC/KS — ㉡ CE — ㉢ CCC','㉠ CE — ㉡ KS — ㉢ KC','㉠ CCC — ㉡ KC — ㉢ CE','㉠ KS — ㉡ CCC — ㉢ CE','㉠ CE — ㉡ CCC — ㉢ KS'],
+  answer:0,exp:'한국은 한국산업표준(KS)·국가통합인증마크(KC), 유럽연합은 CE, 중국은 CCC 인증 마크를 사용합니다.'},
+
+  {type:'mc_hard',fmt:'그래프 해석형',q:'다음 제품 수명 주기 그래프(매출액 추이)에서 ㉠ 시기에 가장 적합한 마케팅 전략은?',
+  htmlContent:`<div class="hq-arrow-flow" style="justify-content:center;">
+    <div class="hq-flow-box">도입기</div><span class="hq-flow-arrow">→</span>
+    <div class="hq-flow-box">성장기</div><span class="hq-flow-arrow">→</span>
+    <div class="hq-flow-blank">( ㉠ )<br><span style="font-size:0.68rem;">매출 최고 수준 유지, 성장률 정체</span></div><span class="hq-flow-arrow">→</span>
+    <div class="hq-flow-box">쇠퇴기</div>
+  </div>`,
+  choices:['이익의 극대화와 시장 점유율 유지','시장 규모 확대와 제품 인지도 향상','시장 점유율 확대를 위한 공격적 마케팅','최저 이익 유지를 위한 비용 절감','신제품 출시를 위한 전면 철수'],
+  answer:0,exp:'㉠은 매출이 최고 수준을 유지하며 성장률이 정체되는 성숙기로, 이익의 극대화와 시장 점유율 유지가 핵심 전략입니다.'},
+
+  {type:'mc_hard',fmt:'순서 배열형',q:'다음 제시된 활동을 제품 개발 과정의 순서대로 바르게 나열한 것은?',
+  htmlContent:`<div class="hq-box">
+    ㄱ. 시제품 제작 및 시험<br>
+    ㄴ. 아이디어 창출<br>
+    ㄷ. 최종 제품 제조<br>
+    ㄹ. 제품 예비 설계<br>
+    ㅁ. 제품 아이디어 선정
+  </div>`,
+  choices:['ㄴ-ㅁ-ㄹ-ㄱ-ㄷ','ㄴ-ㄹ-ㅁ-ㄱ-ㄷ','ㅁ-ㄴ-ㄹ-ㄱ-ㄷ','ㄴ-ㅁ-ㄱ-ㄹ-ㄷ','ㄹ-ㄴ-ㅁ-ㄱ-ㄷ'],
+  answer:0,exp:'제품 개발 과정은 아이디어 창출(ㄴ) → 제품 아이디어 선정(ㅁ) → 제품 예비 설계(ㄹ) → 시제품 제작 및 시험(ㄱ) → 최종 제품 제조(ㄷ) 순입니다.'},
+
+  {type:'mc_hard',fmt:'설계 단계 판단형',q:'다음 업무 내용과 제품 설계 단계가 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>업무 내용</th><th>설계 단계</th></tr></thead><tbody>
+    <tr><td>제품이 의도한 기능을 수행하도록 하는 설계</td><td>(가)</td></tr>
+    <tr><td>제품의 외형, 색상, 스타일을 결정하는 설계</td><td>(나)</td></tr>
+    <tr><td>실제 제조 공정에 적합하도록 하는 설계</td><td>(다)</td></tr>
+  </tbody></table></div>`,
+  choices:['(가)기능 설계 (나)형태 설계 (다)생산 설계','(가)형태 설계 (나)기능 설계 (다)생산 설계','(가)생산 설계 (나)형태 설계 (다)기능 설계','(가)기능 설계 (나)생산 설계 (다)형태 설계','(가)예비 설계 (나)기능 설계 (다)형태 설계'],
+  answer:0,exp:'최종 설계는 기능 설계(가, 기능 수행), 형태 설계(나, 외형·색상·스타일), 생산 설계(다, 제조 공정 적합성)로 구성됩니다.'},
+
+  {type:'mc_hard',fmt:'사례 적용형',q:'다음 사례에서 강조하고 있는 생산 혁신 활동으로 가장 적절한 것은?',
+  htmlContent:`<div class="hq-box">
+    <div class="hq-box-title">사례</div>
+    ○○공장의 작업자들은 매일 작업 시작 전, 작업장에서 불필요한 물품을 제거(정리)하고 필요한 물품은 즉시 꺼낼 수 있도록 정해진 위치에 배치(정돈)하며, 작업이 끝난 후에는 먼지와 이물질을 제거(청소)한다. 이 활동을 꾸준히 반복하여 몸에 익히는 것을 목표로 한다.
+  </div>`,
+  choices:['3정 5S','6시그마','품질 분임조','TPS','LEAN 생산 시스템'],
+  answer:0,exp:'정리·정돈·청소를 반복하여 작업 환경을 개선하고 이를 습관화하는 활동은 3정 5S(정리-정돈-청소-청결-습관화)에 해당합니다.'},
+
+  {type:'mc_hard',fmt:'오류 찾기형',q:'다음 생산 혁신 활동에 대한 설명 중 옳지 않은 것은?',
+  htmlContent:`<div class="hq-box">
+    ① 품질 분임조는 같은 작업장 내 구성원들이 자발적으로 행하는 소그룹 활동이다.<br>
+    ② 6시그마의 성공을 위해서는 최고 경영자의 강력한 리더십이 필요하다.<br>
+    ③ 3정 5S에서 5S 활동을 지속하는 성공의 열쇠는 "습관화"에 있다.<br>
+    ④ 토요타 생산 시스템(TPS)은 필요한 양만큼 전 공정에 요구하는 후 공정 인수 방식(pull system)을 사용한다.<br>
+    ⑤ LEAN 생산 시스템의 7대 낭비 요소에는 표준화의 낭비, 호환성의 낭비가 포함된다.
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:4,noShuffle:true,
+  exp:'⑤가 틀렸습니다. LEAN 생산 시스템의 7대 낭비 요소는 과잉 생산, 불량, 공정, 운반, 재고, 동작, 대기의 낭비이며, 표준화·호환성의 낭비는 해당하지 않습니다.'},
+
+  {type:'mc_hard',fmt:'시스템 종합 매칭형',q:'다음 생산 정보 시스템과 그 핵심 기능이 모두 바르게 연결된 것은?',
+  htmlContent:`<div class="hq-table-wrap"><table class="hq-table"><thead><tr><th>시스템</th><th>핵심 기능</th></tr></thead><tbody>
+    <tr><td>A. MES</td><td>(가)</td></tr>
+    <tr><td>B. PDM</td><td>(나)</td></tr>
+    <tr><td>C. ERP</td><td>(다)</td></tr>
+  </tbody></table></div>
+  <div class="hq-box" style="margin-top:8px;">
+    ① 기업 전체 인적·물적 자원의 통합 관리(MRP-Ⅱ의 전사적 확장)<br>
+    ② 생산 현장의 작업 지시 및 실적 수집 등 제조 실행 관리<br>
+    ③ 제품 정보의 통합적 관리
+  </div>`,
+  choices:['A-②, B-③, C-①','A-①, B-②, C-③','A-③, B-①, C-②','A-②, B-①, C-③','A-③, B-②, C-①'],
+  answer:0,exp:'MES(A)=②생산 현장 제조 실행 관리, PDM(B)=③제품 정보 통합 관리, ERP(C)=①전사적 자원 통합 관리(MRP-Ⅱ의 확장).'},
+
+  {type:'mc_hard',fmt:'3D프린팅 비교형',q:'3D 프린팅의 적층형과 절삭형을 비교한 내용으로 옳은 것은?',
+  htmlContent:`<div class="hq-two-col">
+    <div class="hq-col-card"><div class="hq-col-label">적층형</div>
+      ?
+    </div>
+    <div class="hq-col-card"><div class="hq-col-label">절삭형</div>
+      재료를 깎아 만드는 방식
+    </div>
+  </div>`,
+  choices:['적층형은 층층이 재료를 쌓아 올리는 방식이며, 절삭형은 재료의 손실이 많다','적층형은 재료를 깎아 만드는 방식이다','절삭형은 층층이 재료를 쌓아 올리는 방식이다','적층형과 절삭형 모두 재료 손실이 거의 없다','절삭형은 적층형보다 재료 손실이 적다'],
+  answer:0,exp:'적층형은 층층이 재료를 쌓아 올리는 방식이고, 절삭형은 재료를 깎아 형상을 만드는 방식으로 재료의 손실이 많습니다.'},
+
+  {type:'mc_hard',fmt:'생산 시스템 유형 종합형',q:'다음 생산 시스템 유형 중 옳지 않은 설명은?',
+  htmlContent:`<div class="hq-box">
+    ① 제품별 배치 — 소품종 대량 생산에 적합하며 자동화 도입이 쉽다.<br>
+    ② 공정별 배치 — 다품종 소량 생산에 적합하며 물자·인력 이동이 복잡하다.<br>
+    ③ 위치 고정형 배치 — 선박·건물처럼 제품은 고정, 설비와 인력이 이동한다.<br>
+    ④ 그룹 배치 — 모든 제품을 컨베이어 한 줄로만 연결하여 생산한다.<br>
+    ⑤ 생산 시스템은 무엇을 어디서 어떻게 만들 것인지를 통합적으로 고려한 구조와 과정이다.
+  </div>`,
+  choices:['①','②','③','④','⑤'],
+  answer:3,noShuffle:true,
+  exp:'④가 틀렸습니다. 그룹 배치는 유사한 부품·제품군을 그룹화하여 배치하는 방식이며, 모든 제품을 한 줄의 컨베이어로만 연결하는 것은 제품별 배치의 극단적 형태를 잘못 설명한 것입니다.'},
+
+  {type:'mc_hard',fmt:'종합 사례 분석형',q:'다음 △△전자의 사례에서 나타난 개념을 모두 바르게 짝지은 것은?',
+  htmlContent:`<div class="hq-box">
+    <div class="hq-box-title">사례</div>
+    △△전자는 신제품 스마트워치를 개발하며, 먼저 다양한 아이디어를 모은 뒤 가장 시장성이 높은 아이디어를 선정하여 예비 설계를 진행했다(A). 이후 제품이 매출 최고치를 기록하며 정체기에 접어들자, 추가 이익 극대화 전략을 시행했다(B). 동시에 작업장에서는 불필요한 부품을 제거하고 필요한 도구를 정해진 위치에 두는 활동을 습관화했다(C).
+  </div>`,
+  choices:['A-제품 개발 과정, B-성숙기 전략, C-3정 5S','A-공정 설계, B-도입기 전략, C-6시그마','A-제품 수명주기, B-성숙기 전략, C-품질 분임조','A-제품 개발 과정, B-쇠퇴기 전략, C-3정 5S','A-설비 배치, B-성장기 전략, C-3정 5S'],
+  answer:0,exp:'A는 아이디어 창출~예비 설계로 이어지는 제품 개발 과정, B는 매출 최고치·정체기의 이익 극대화 전략이므로 성숙기 전략, C는 정리·정돈의 습관화이므로 3정 5S에 해당합니다.'},
+
+  {type:'mc_hard',fmt:'생산성 응용 계산형',q:'어느 공장에서 작업자 5명이 하루에 부품 250개를 생산했다. 작업자 1인당 표준 생산량이 60개일 때, 이 공장의 노동 생산성은? (소수점 첫째 자리에서 반올림)',
+  htmlContent:`<div class="hq-box">
+    노동 생산성(%) = (실제 생산량 ÷ 표준 생산량) × 100<br>
+    표준 생산량 = 작업자 수 × 1인당 표준 생산량 = 5명 × 60개 = 300개<br>
+    실제 생산량 = 250개
+  </div>`,
+  choices:['83%','75%','90%','60%','100%'],
+  answer:0,exp:'노동 생산성 = (250 ÷ 300) × 100 ≈ 83%.'},
+];
+
+let selectedQuestions=[],currentIdx=0,score=0,answered=false,currentMode='normal';
+
+function selectDiff(mode){
+  currentMode=mode;
+  ['normal','hard'].forEach(m=>{
+    document.getElementById('btn-diff-'+m).className='diff-btn'+(m===mode?' selected-'+m:'');
+  });
+  const btn=document.getElementById('btn-start-main');
+  const labels={normal:'📖 노말 시작하기 →',hard:'🔥 하드 시작하기 →'};
+  const cls={normal:'btn-start',hard:'btn-start hard-mode'};
+  btn.textContent=labels[mode];btn.className=cls[mode];
+}
+
+function startQuiz(forcedMode){
+  if(forcedMode)selectDiff(forcedMode);
+  let pool;
+  if(currentMode==='normal') pool=shuffle([...NORMAL_QUESTIONS]).slice(0,20);
+  else pool=shuffle([...HARD_QUESTIONS]).slice(0,20);
+  selectedQuestions=pool;
+  currentIdx=0;score=0;
+  document.getElementById('start-screen').style.display='none';
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('quiz-screen').style.display='block';
+  document.getElementById('live-score').textContent=0;
+  const fill=document.getElementById('progress-fill');
+  fill.className='progress-bar-fill'+(currentMode==='hard'?' hard-fill':'');
+  document.getElementById('quiz-screen').className=currentMode==='hard'?'hard-mode-active':'';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false;
+  const q=selectedQuestions[currentIdx];
+  const total=selectedQuestions.length;
+  document.getElementById('cur-q').textContent=currentIdx+1;
+  document.getElementById('progress-fill').style.width=((currentIdx+1)/total*100)+'%';
+  document.getElementById('explanation').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+
+  const qCard=document.getElementById('q-card');
+  const qType=document.getElementById('q-type');
+  const qText=document.getElementById('q-text');
+  const qHtml=document.getElementById('q-html-content');
+  const btnNext=document.getElementById('btn-next');
+
+  qCard.className='question-card'+(currentMode==='hard'?' hard-card':'');
+  btnNext.className='btn-next'+(currentMode==='hard'?' hard-next':'');
+
+  if(q.type==='mc') qType.innerHTML='✏️ 객관식';
+  else if(q.type==='sa') qType.innerHTML='📝 단답형';
+  else qType.innerHTML=`🔥 <span class="hard-badge-inline">HARD</span> &nbsp;<span class="fmt-tag">${q.fmt}</span>`;
+
+  qText.textContent=q.q;
+  qHtml.innerHTML=q.htmlContent||'';
+
+  const area=document.getElementById('choices-area');
+  area.innerHTML='';
+
+  if(q.type==='mc'||q.type==='mc_hard'){
+    const {shuffledChoices,newAnswerIdx}=pickMC(q.choices,q.answer,q.noShuffle||false);
+    const labels=shuffledChoices.length>=5?LABELS5:LABELS4;
+    const div=document.createElement('div');div.className='choices';
+    shuffledChoices.forEach((choiceText,i)=>{
+      const btn=document.createElement('button');btn.className='choice-btn';
+      btn.innerHTML=`<span class="choice-num">${labels[i]}</span><span>${choiceText}</span>`;
+      btn.onclick=()=>handleMC(i,btn,div,newAnswerIdx,q);
+      div.appendChild(btn);
+    });
+    area.appendChild(div);
+  } else {
+    const wrap=document.createElement('div');wrap.className='short-answer-wrap';
+    const row=document.createElement('div');row.className='short-input-row';
+    const inp=document.createElement('input');inp.className='short-input';inp.type='text';inp.placeholder='정답을 입력하세요';
+    const submitBtn=document.createElement('button');submitBtn.className='btn-submit';submitBtn.textContent='제출';
+    const hint=document.createElement('div');hint.className='sa-hint';
+    const doSubmit=()=>submitSA(inp,submitBtn,hint,q);
+    inp.onkeydown=e=>{if(e.key==='Enter')doSubmit();};submitBtn.onclick=doSubmit;
+    row.appendChild(inp);row.appendChild(submitBtn);wrap.appendChild(row);wrap.appendChild(hint);area.appendChild(wrap);
+    setTimeout(()=>inp.focus(),100);
+  }
+}
+
+function handleMC(idx,btn,div,correctIdx,q){
+  if(answered)return;answered=true;
+  const btns=div.querySelectorAll('.choice-btn');btns.forEach(b=>b.disabled=true);
+  const isCorrect=idx===correctIdx;
+  btns[correctIdx].classList.add('correct');
+  if(!isCorrect)btn.classList.add('wrong');
+  if(isCorrect)score++;
+  document.getElementById('live-score').textContent=score;
+  showExp(q.exp);
+}
+
+function submitSA(inp,submitBtn,hint,q){
+  if(answered)return;const val=inp.value.trim();if(!val)return;
+  answered=true;inp.disabled=true;submitBtn.disabled=true;
+  const isCorrect=checkSA(val,q.answers);
+  if(isCorrect){inp.classList.add('correct');hint.className='sa-hint correct-hint';hint.textContent='✅ 정답입니다!';score++;}
+  else{inp.classList.add('wrong');hint.className='sa-hint wrong-hint';hint.textContent=`❌ 오답 — 정답: ${q.answers[0]}`;}
+  document.getElementById('live-score').textContent=score;showExp(q.exp);
+}
+
+function showExp(text){
+  const el=document.getElementById('explanation');
+  document.getElementById('exp-text').textContent=text;el.style.display='block';
+  const nextBtn=document.getElementById('btn-next');nextBtn.style.display='block';
+  nextBtn.textContent=currentIdx<selectedQuestions.length-1?'다음 문제 →':'결과 보기 🏁';
+  nextBtn.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function nextQuestion(){
+  currentIdx++;
+  if(currentIdx>=selectedQuestions.length)showResult();
+  else{renderQuestion();window.scrollTo({top:0,behavior:'smooth'});}
+}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  const rs=document.getElementById('result-screen');rs.style.display='flex';
+  const total=selectedQuestions.length;const pct=Math.round(score/total*100);
+  document.getElementById('result-score-num').textContent=score;
+  document.getElementById('result-score-num').className='score-num'+(currentMode==='hard'?' hard-score':'');
+  document.getElementById('cnt-correct').textContent=score;
+  document.getElementById('cnt-wrong').textContent=total-score;
+  const db=document.getElementById('result-diff-badge');
+  db.className='result-diff-badge '+currentMode;
+  db.textContent=currentMode==='normal'?'📖 노말 모드':'🔥 하드 모드';
+  setTimeout(()=>{
+    document.getElementById('bar-correct').style.width=(score/total*100)+'%';
+    document.getElementById('bar-wrong').style.width=((total-score)/total*100)+'%';
+  },200);
+  let emoji,title,detail;
+  if(pct>=90){emoji='🏆';title='완벽해요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n생산 관리 단원 완전 정복!`;}
+  else if(pct>=70){emoji='😊';title='잘했어요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n조금만 더 보강하면 만점!`;}
+  else if(pct>=50){emoji='📖';title='더 공부해요!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n오답 노트를 꼭 만들어보세요.`;}
+  else{emoji='💪';title='다시 도전!';detail=`${total}문제 중 ${score}문제 정답 (${pct}%)\n핵심 개념을 다시 복습해요.`;}
+  document.getElementById('result-emoji').textContent=emoji;
+  document.getElementById('result-title').textContent=title;
+  document.getElementById('result-detail').textContent=detail;
+}
+
+function goHome(){
+  document.getElementById('result-screen').style.display='none';
+  document.getElementById('start-screen').style.display='flex';
+}
+
+selectDiff('normal');
+</script>
+</body>
+</html>
