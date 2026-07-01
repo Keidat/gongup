@@ -66,7 +66,7 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 720px;
+    max-width: 1100px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -113,7 +113,7 @@
   /* 카드 그리드 */
   .card-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.2rem;
     width: 100%;
     margin-bottom: 2.5rem;
@@ -146,6 +146,7 @@
 
   .quiz-card.card-a::before { background: linear-gradient(90deg, #58a6ff, #56d364); }
   .quiz-card.card-b::before { background: linear-gradient(90deg, #c678dd, #f78166); }
+  .quiz-card.card-c::before { background: linear-gradient(90deg, #56d364, #e3b341); }
 
   .quiz-card:hover {
     transform: translateY(-4px);
@@ -153,6 +154,10 @@
   .quiz-card.card-a:hover {
     border-color: var(--accent);
     box-shadow: 0 8px 32px rgba(88,166,255,0.18);
+  }
+  .quiz-card.card-c:hover {
+    border-color: var(--accent3);
+    box-shadow: 0 8px 32px rgba(86,211,100,0.18);
   }
   .quiz-card.card-b:hover {
     border-color: var(--hard);
@@ -171,6 +176,7 @@
   }
   .card-a .card-icon-wrap { background: rgba(88,166,255,0.12); }
   .card-b .card-icon-wrap { background: rgba(198,120,221,0.12); }
+  .card-c .card-icon-wrap { background: rgba(86,211,100,0.12); }
 
   /* 카드 번호 배지 */
   .card-num {
@@ -186,6 +192,11 @@
     background: rgba(88,166,255,0.12);
     border: 1px solid rgba(88,166,255,0.25);
     color: var(--accent);
+  }
+  .card-c .card-num {
+    background: rgba(86,211,100,0.12);
+    border: 1px solid rgba(86,211,100,0.25);
+    color: var(--accent3);
   }
   .card-b .card-num {
     background: rgba(198,120,221,0.12);
@@ -208,6 +219,7 @@
   }
   .card-a .card-title { color: #ddeeff; }
   .card-b .card-title { color: #f0d9ff; }
+  .card-c .card-title { color: #d4f5dd; }
 
   .card-desc {
     font-size: 0.82rem;
@@ -250,6 +262,7 @@
   }
   .card-a .card-cta { color: var(--accent); }
   .card-b .card-cta { color: var(--hard); }
+  .card-c .card-cta { color: var(--accent3); }
 
   .cta-arrow {
     font-size: 1.1rem;
@@ -269,8 +282,8 @@
   /* ── 모바일 ── */
   @media (max-width: 540px) {
     .card-grid { grid-template-columns: 1fr; }
+    .hub-title { font-size: 1.8rem; }
     .stats-row { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
-    .hub-title { font-size: 2rem; }
     .quiz-card { padding: 1.4rem 1.2rem 1.2rem; }
   }
 </style>
@@ -309,12 +322,12 @@
       </div>
     </a>
 
-    <!-- 카드 2: 공업 일반 -->
+    <!-- 카드 2: 공업 일반 (구버전) -->
     <a class="quiz-card card-b" href="2026_2nd/index.html">
       <span class="card-num">2nd</span>
       <div class="card-icon-wrap">⚙️</div>
       <div>
-        <div class="card-label">두 번째 단원</div>
+        <div class="card-label">두 번째 단원 · 구버전</div>
         <div class="card-title">공업 일반<br>생산 관리</div>
       </div>
       <div class="card-desc">
@@ -323,6 +336,27 @@
       <div class="card-tags">
         <span class="tag tag-blue">노말 40문항</span>
         <span class="tag tag-purple">하드 35문항</span>
+      </div>
+      <div class="card-cta">
+        <span>퀴즈 시작하기</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- 카드 3: 공업 일반 (신버전, 교과서 포함) -->
+    <a class="quiz-card card-c" href="2026_2nd/index_1.html">
+      <span class="card-num">2nd+</span>
+      <div class="card-icon-wrap">📗</div>
+      <div>
+        <div class="card-label">두 번째 단원 · 교과서 포함</div>
+        <div class="card-title">공업 일반<br>전 범위 확장판</div>
+      </div>
+      <div class="card-desc">
+        제품과 제조 과정 · 표준화 · 생산 공정 개발 · 생산 관리·혁신 · 생산 정보 시스템 · 공장 자동화까지 교과서 전 범위를 총정리합니다.
+      </div>
+      <div class="card-tags">
+        <span class="tag tag-green">노말 70문항</span>
+        <span class="tag tag-purple">하드 45문항</span>
       </div>
       <div class="card-cta">
         <span>퀴즈 시작하기</span>
